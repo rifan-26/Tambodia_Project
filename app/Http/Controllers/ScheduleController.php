@@ -7,8 +7,9 @@ use App\Models\Schedule;
 use App\Models\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller as RoutingController;
 
-class ScheduleController extends Controller
+class ScheduleController extends RoutingController
 {
     public function __construct()
     {
@@ -40,8 +41,8 @@ class ScheduleController extends Controller
 
         // Verify media belongs to user
         $media = Media::where('id', $request->media_id)
-                     ->where('user_id', Auth::id())
-                     ->firstOrFail();
+                    ->where('user_id', Auth::id())
+                    ->firstOrFail();
 
         $schedule = Schedule::create($request->all());
 

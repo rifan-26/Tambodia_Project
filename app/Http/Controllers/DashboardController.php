@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -6,11 +7,13 @@ use App\Models\Media;
 use App\Models\User;
 use App\Models\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Routing\Controller; // Make sure to import the base Controller
 
-class DashboardController extends Controller
+class DashboardController extends Controller // This is the crucial part
 {
     public function __construct()
     {
+        // The middleware method is available because this class now extends the base Controller
         $this->middleware('auth');
     }
 
