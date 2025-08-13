@@ -8,6 +8,10 @@ use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\LandingController;
 
+Route::get('/test', function () {
+    return 'Middleware works!';
+})->middleware('role:superadmin');
+
 // ===== PUBLIC ROUTES =====
 Route::get('/', [LandingController::class, 'index'])->name('landing');
 Route::get('/landing', [LandingController::class, 'index']);
