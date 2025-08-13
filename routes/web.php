@@ -41,7 +41,9 @@ Route::middleware(['auth'])->group(function () {
     
     // ===== SUPER ADMIN ROUTES =====
     Route::middleware(['role:superadmin'])->group(function () {
-        Route::get('/superadmin', [DashboardController::class, 'superadmin'])->name('dashboard.superadmin');
+        Route::get('/superadmin', [DashboardController::class, 'superadmin'])
+        ->middleware('auth') // pastikan hanya login user bisa akses
+        ->name('dashboard.superadmin');
         Route::get('/superakun', [SuperAdminController::class, 'adminManagement'])->name('admin.management');
         Route::post('/admin/store', [SuperAdminController::class, 'storeAdmin'])->name('admin.store');
         Route::put('/admin/{id}', [SuperAdminController::class, 'updateAdmin'])->name('admin.update');

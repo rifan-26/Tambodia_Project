@@ -341,14 +341,13 @@
 <body>
   <nav class="sidebar d-flex flex-column justify-content-between">
     <div>
-      <div class="sidebar-header d-flex align-items-center gap-2">
+      <div class="sidebar-header d-flex align-items-center gap-2 mb-4">
         <img src="{{ asset('img/Desain tanpa judul.svg') }}" alt="Logo-Tambodia">
-        <h1 class="sidebar-title">
+        <h1 class="sidebar-title mb-0 fs-4">
             <span class="title-text">
                 <span class="tam">Tam</span><span class="bo">bo</span><span class="dia">dia</span>
             </span>
         </h1>
-
       </div>
       <ul class="nav flex-column px-1">
         <li class="nav-item mb-1">
@@ -367,39 +366,39 @@
           </a>
         </li>
         <li class="nav-item mt-1">
-          <a class="nav-link" href="{{ url('/login') }}">
-            <i class="bi bi-box-arrow-left"></i> Log Out  </a>
+          <a class="nav-link" href="{{ url('/logout') }}">
+            <i class="bi bi-box-arrow-left"></i> Log Out  
+          </a>
         </li>
       </ul>
     </div>
     <div class="sidebar-footer-img-container">
         <div class="sidebar-footer-gradient"></div>
     </div>
+  </nav>
 
-  </nav><main class="content-area">
-  <div class="header-top">
-      <h2>Media Yang Telah Di Input</h2>
-      <div class="user-badge" title="Logged in as Admin">
-        <span class="status-indicator" aria-label="online status"></span>
-        <span>Username Admin</span>
-      </div>
-  </div>
-  
-      <form>
-        <div class="mb-3">
-          <label for="jenisMedia" class="form-label">Jenis Media</label>
-          <select class="form-select" id="jenisMedia" required>
-              <option value="" disabled selected>Pilih Jenis Media</option>
-              <option value="audio">Audio</option>
-              <option value="image">Gambar</option>
-              <option value="video">Video</option>
-          </select>
-          
-
+  <main class="content-area">
+    <div class="header-top">
+        <h2>Media Yang Telah Di Input</h2>
+        <div class="user-badge" title="Logged in as Admin">
+            <span class="status-indicator" aria-label="online status"></span>
+            <span>{{ Auth::user()->name ?? 'Username Admin' }}</span>
         </div>
-      </form>
+    </div>
     
-    <div class="card">
+    <form id="filterForm" onsubmit="return false;">
+      <div class="mb-3">
+        <label for="jenisMedia" class="form-label">Jenis Media</label>
+        <select class="form-select" id="jenisMedia">
+            <option value="" selected>Semua Jenis</option>
+            <option value="audio">Audio</option>
+            <option value="gambar">Gambar</option>
+            <option value="video">Video</option>
+        </select>
+      </div>
+    </form>
+    
+    <div class="card p-3">
       <table>
         <thead>
           <tr>
@@ -411,19 +410,21 @@
         </thead>
         <tbody>
           <tr>
-            <td>
-              <input type="checkbox" name="select_row" value="admin1">
-            </td>
+            <td><input type="checkbox" name="select_row" value="admin1"></td>
             <td>Foto1</td>
             <td>Gambar</td>
             <td>2024-06-01</td>
           </tr>
           <tr>
-            <td>
-              <input type="checkbox" name="select_row" value="admin2">
-            </td>
-            <td>Video1</td>
+            <td><input type="checkbox" name="select_row" value="admin2"></td>
+            <td>Video2</td>
             <td>Video</td>
+            <td>2024-06-01</td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" name="select_row" value="admin3"></td>
+            <td>Audio3</td>
+            <td>Audio</td>
             <td>2024-06-01</td>
           </tr>
         </tbody>
@@ -431,36 +432,22 @@
     </div>
 
     <div class="button-section">
-      <button type="submit" class="btn btn-success">Tampilkan</button>
+      <button type="button" id="btnTampilkan" class="btn btn-success">Tampilkan</button>
     </div>
-
   </main>
 
   <script>
-document.getElementById("jenisMedia").addEventListener("change", function () {
-    let selectedMedia = this.value.toLowerCase();
+document.getElementById("btnTampilkan").addEventListener("click", function () {
+    let selectedMedia = document.getElementById("jenisMedia").value.toLowerCase();
     let rows = document.querySelectorAll("tbody tr");
 
     rows.forEach(row => {
-        let fileName = row.cells[2].textContent.trim().toLowerCase(); // pastikan sesuai kolom nama file
-        let match = false;
-
-        if (selectedMedia === "image") {
-            match = fileName.match(/\.(jpg|jpeg|png|gif|bmp|webp)$/);
-        } else if (selectedMedia === "video") {
-            match = fileName.match(/\.(mp4|mkv|avi|mov|wmv|flv)$/);
-        } else if (selectedMedia === "audio") {
-            match = fileName.match(/\.(mp3|wav|ogg|flac|aac)$/);
-        }
-
-        row.style.display = (selectedMedia === "" || match) ? "" : "none";
+        let fileType = row.cells[2].textContent.trim().toLowerCase();
+        let show = (selectedMedia === "" || fileType.includes(selectedMedia));
+        row.style.display = show ? "" : "none";
     });
 });
-
-</script>
-
-
-
+  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

@@ -1,20 +1,27 @@
 <?php
 
-namespace App\Http\Middleware;
+namespace App\Http\Controllers;
 
-use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use App\Models\User; // model default laravel
 
-class SuperadminMiddleware
+class SuperAdminController extends Controller
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
-    public function handle(Request $request, Closure $next): Response
+    public function index(Request $request)
     {
-        return $next($request);
+        $keyword = $request->input('keyword');
+
+        $query = User::query()->where('role', 'admin');
+
+        if ($keyword) {
+            $query->where('name', 'like', '%' . $keyword . '%');
+        }
+
+        $admins = $query->orderBy('created_at', 'desc')->get();
+
+        return view('superadmin.dashboard', [
+            'admins' => $admins,
+            'keyword' => $keyword
+        ]);
     }
 }
