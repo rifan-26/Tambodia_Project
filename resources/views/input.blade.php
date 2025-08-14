@@ -345,7 +345,7 @@
   </div>
   <div class="upload-area" id="uploadArea">
     <p>Klik untuk menambahkan File atau drag and drop file di sini</p>
-    <input type="file" id="fileInput" name="file_upload" style="display:none;" required />
+   <input type="file" id="fileInput" name="file_upload" style="display:none;" required />
     <button type="button" class="btn btn-outline-success" id="uploadBtn">Upload File</button>
   </div>
   <div class="mb-3">
@@ -361,7 +361,7 @@
 
 
   <script>
-    document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function() {
     const uploadBtn = document.getElementById("uploadBtn");
     const fileInput = document.getElementById("fileInput");
     const uploadArea = document.getElementById("uploadArea");
@@ -383,14 +383,43 @@
         uploadArea.style.background = "#f0f9f0";
     });
 
-    // Drop file
+    // Drop file (pakai DataTransfer supaya terbaca Laravel)
     uploadArea.addEventListener("drop", (e) => {
         e.preventDefault();
-        fileInput.files = e.dataTransfer.files;
+        const dt = new DataTransfer();
+        for (let i = 0; i < e.dataTransfer.files.length; i++) {
+            dt.items.add(e.dataTransfer.files[i]);
+        }
+        fileInput.files = dt.files;
         uploadArea.style.background = "#f0f9f0";
+        showFileName(fileInput.files[0]);
     });
+
+    // Event saat file dipilih lewat file picker
+    fileInput.addEventListener("change", () => {
+        if (fileInput.files.length > 0) {
+            showFileName(fileInput.files[0]);
+        }
+    });
+
+    // Fungsi untuk menampilkan nama file di area upload + validasi ukuran
+    function showFileName(file) {
+        if (!file) return;
+
+        // Validasi ukuran file (20MB)
+        if (file.size > 20 * 1024 * 1024) {
+            alert("Ukuran file maksimal 20MB");
+            fileInput.value = "";
+            uploadArea.querySelector("p").textContent = 
+                "Klik untuk menambahkan File atau drag and drop file di sini";
+            return;
+        }
+
+        uploadArea.querySelector("p").textContent = `File dipilih: ${file.name}`;
+    }
 });
 </script>
+
 
 
 
