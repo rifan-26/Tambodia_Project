@@ -382,7 +382,7 @@
         <h2>Media Yang Telah Di Input</h2>
         <div class="user-badge" title="Logged in as Admin">
             <span class="status-indicator" aria-label="online status"></span>
-            <span>{{ Auth::user()->name ?? 'Username Admin' }}</span>
+            <span>{{ Auth::user()->name ?? 'Pegawai' }}</span>
         </div>
     </div>
     

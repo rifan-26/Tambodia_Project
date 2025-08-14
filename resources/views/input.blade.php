@@ -331,40 +331,67 @@
     </div>
   </nav>
 
+<main class="content-area">
+  <form action="{{ route('media.store') }}" method="POST" enctype="multipart/form-data">
+  @csrf
+  <div class="mb-3">
+    <label for="jenisMedia" class="form-label">Jenis Media</label>
+    <select class="form-select" id="jenisMedia" name="jenis_media" required>
+        <option value="" disabled selected>Pilih Jenis Media</option>
+        <option value="audio">Audio</option>
+        <option value="image">Gambar</option>
+        <option value="video">Video</option>
+    </select>
+  </div>
+  <div class="upload-area" id="uploadArea">
+    <p>Klik untuk menambahkan File atau drag and drop file di sini</p>
+    <input type="file" id="fileInput" name="file_upload" style="display:none;" required />
+    <button type="button" class="btn btn-outline-success" id="uploadBtn">Upload File</button>
+  </div>
+  <div class="mb-3">
+    <label for="namaFile" class="form-label">Nama File</label>
+    <input type="text" class="form-control" id="namaFile" name="nama_file" placeholder="Masukkan Nama File" required>
+  </div>
+  <div class="button-section">
+    <button type="reset" class="btn btn-danger">Hapus</button>
+    <button type="submit" class="btn btn-success">Simpan</button>
+  </div>
+</form>
+</main>
 
-  <main class="content-area">
-    <div class="header-top">
-      <h2>Input Media</h2>
-      <div class="user-badge" title="Logged in as Admin">
-        <span class="status-indicator" aria-label="online status"></span>
-        <span>Username Admin</span>
-      </div>
-    </div>
-    <form>
-      <div class="mb-3">
-        <label for="jenisMedia" class="form-label">Jenis Media</label>
-        <select class="form-select" id="jenisMedia" required>
-            <option value="" disabled selected>Pilih Jenis Media</option>
-            <option value="audio">Audio</option>
-            <option value="image">Gambar</option>
-            <option value="video">Video</option>
-        </select>
-      </div>
-      <div class="upload-area">
-        <p>Klik untuk menambahkan File atau drag and drop file di sini</p>
-        <input type="file" name="file-upload" style="display:none;" />
-        <button type="button" class="btn btn-outline-success">Upload File</button>
-      </div>
-      <div class="mb-3">
-        <label for="namaFile" class="form-label">Nama File</label>
-        <input type="text" class="form-control" id="namaFile" placeholder="Masukkan Nama File" required>
-      </div>
-      <div class="button-section">
-        <button type="reset" class="btn btn-danger">Hapus</button>
-        <button type="submit" class="btn btn-success">Simpan</button>
-      </div>
-    </form>
-  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+    const uploadBtn = document.getElementById("uploadBtn");
+    const fileInput = document.getElementById("fileInput");
+    const uploadArea = document.getElementById("uploadArea");
+
+    // Klik tombol → buka file dialog
+    uploadBtn.addEventListener("click", () => fileInput.click());
+
+    // Klik area → buka file dialog
+    uploadArea.addEventListener("click", () => fileInput.click());
+
+    // Drag over area
+    uploadArea.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        uploadArea.style.background = "#e9f7e9";
+    });
+
+    // Drag leave
+    uploadArea.addEventListener("dragleave", () => {
+        uploadArea.style.background = "#f0f9f0";
+    });
+
+    // Drop file
+    uploadArea.addEventListener("drop", (e) => {
+        e.preventDefault();
+        fileInput.files = e.dataTransfer.files;
+        uploadArea.style.background = "#f0f9f0";
+    });
+});
+</script>
+
 
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
