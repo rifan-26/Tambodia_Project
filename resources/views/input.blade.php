@@ -407,7 +407,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (!file) return;
 
         // Validasi ukuran file (20MB)
-        if (file.size > 20 * 1024 * 1024) {
+        if (file.size > 800 * 1024 * 1024) {
             alert("Ukuran file maksimal 20MB");
             fileInput.value = "";
             uploadArea.querySelector("p").textContent = 
