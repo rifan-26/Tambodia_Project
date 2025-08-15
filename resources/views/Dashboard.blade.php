@@ -366,7 +366,7 @@
           </a>
         </li>
         <li class="nav-item mt-1">
-          <a class="nav-link" href="{{ url('/logout') }}">
+          <a class="nav-link" href="{{ url('/login') }}">
             <i class="bi bi-box-arrow-left"></i> Log Out  
           </a>
         </li>
