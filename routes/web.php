@@ -21,6 +21,10 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// ===== INPUT FILE ROUTES =====
+Route::post('/media/store', [MediaController::class, 'store'])->name('media.store');
+
+
 // ===== PROTECTED ROUTES =====
 Route::middleware(['auth'])->group(function () {
     
