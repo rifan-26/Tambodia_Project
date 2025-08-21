@@ -434,10 +434,23 @@
     <div class="button-section">
       <button type="button" id="btnTampilkan" class="btn btn-success">Tampilkan</button>
     </div>
+
+    <div class="modal fade" id="mediaModal" tabindex="-1" aria-labelledby="mediaModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="mediaModalLabel">Preview Media</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center" id="mediaContent">
+      </div>
+    </div>
+  </div>
+</div>
   </main>
 
   <script>
-document.getElementById("btnTampilkan").addEventListener("click", function () {
+function filterMedia() {
     let selectedMedia = document.getElementById("jenisMedia").value.toLowerCase();
     let rows = document.querySelectorAll("tbody tr");
 
@@ -446,8 +459,49 @@ document.getElementById("btnTampilkan").addEventListener("click", function () {
         let show = (selectedMedia === "" || fileType.includes(selectedMedia));
         row.style.display = show ? "" : "none";
     });
+}
+
+document.getElementById("jenisMedia").addEventListener("change", filterMedia);
+
+window.addEventListener("DOMContentLoaded", filterMedia);
+
+document.getElementById("btnTampilkan").addEventListener("click", function () {
+    let checked = document.querySelector("input[name='select_row']:checked");
+
+    if (!checked) {
+        alert("Silakan pilih salah satu file terlebih dahulu.");
+        return;
+    }
+
+    let row = checked.closest("tr");
+    let mediaName = row.cells[1].textContent.trim();
+    let fileType = row.cells[2].textContent.trim().toLowerCase();
+
+    let content = "";
+
+    if (fileType === "gambar") {
+        // contoh: gunakan nama file sebagai path (disesuaikan dengan lokasi file kamu)
+        content = `<img src="/path/to/${mediaName}.jpg" alt="${mediaName}" class="img-fluid rounded">`;
+    } else if (fileType === "video") {
+        content = `<video controls class="w-100 rounded">
+                     <source src="/path/to/${mediaName}.mp4" type="video/mp4">
+                     Browser Anda tidak mendukung video.
+                   </video>`;
+    } else if (fileType === "audio") {
+        content = `<audio controls class="w-100">
+                     <source src="/path/to/${mediaName}.mp3" type="audio/mpeg">
+                     Browser Anda tidak mendukung audio.
+                   </audio>`;
+    }
+
+    document.getElementById("mediaContent").innerHTML = content;
+
+    let modal = new bootstrap.Modal(document.getElementById("mediaModal"));
+    modal.show();
 });
-  </script>
+</script>
+
+
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
