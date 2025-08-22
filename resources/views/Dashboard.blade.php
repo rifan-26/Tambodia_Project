@@ -335,20 +335,73 @@
   }
 }
 
+/* ====== POPUP DESIGN ====== */
+    .modal-lg {
+      max-width: 90%;
+    }
+    .landing-sketch {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 10px;
+    }
+    .left-block {
+      background: #f0faf0;
+      min-height: 400px;
+      position: relative;
+      padding: 20px;
+      border: 2px dashed #ccc;
+    }
+    .title-text {
+      font-size: 28px;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 20px;
+    }
+    .desc-box {
+      width: 100%;
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-top: 15px;
+      min-height: 50px;
+      cursor: text;
+    }
+    .right-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .img-block {
+      background: #fff;
+      border: 2px dashed #aaa;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .img-block img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+    /* Hover effect */
+    .img-block:hover, .desc-box:hover {
+      border-color: #28a745;
+      background: #f8fff8;
+    }
+
 </style>
 <!-- css dari dashboard bwangg -->
 
 <body>
   <nav class="sidebar d-flex flex-column justify-content-between">
     <div>
-      <div class="sidebar-header d-flex align-items-center gap-2">
+      <div class="sidebar-header d-flex align-items-center gap-2 mb-4">
         <img src="{{ asset('img/Desain tanpa judul.svg') }}" alt="Logo-Tambodia">
-        <h1 class="sidebar-title">
+        <h1 class="sidebar-title mb-0 fs-4">
             <span class="title-text">
                 <span class="tam">Tam</span><span class="bo">bo</span><span class="dia">dia</span>
             </span>
         </h1>
-
       </div>
       <ul class="nav flex-column px-1">
         <li class="nav-item mb-1">
@@ -368,38 +421,38 @@
         </li>
         <li class="nav-item mt-1">
           <a class="nav-link" href="{{ url('/login') }}">
-            <i class="bi bi-box-arrow-left"></i> Log Out  </a>
+            <i class="bi bi-box-arrow-left"></i> Log Out  
+          </a>
         </li>
       </ul>
     </div>
     <div class="sidebar-footer-img-container">
         <div class="sidebar-footer-gradient"></div>
     </div>
+  </nav>
 
-  </nav><main class="content-area">
-  <div class="header-top">
-      <h2>Media Yang Telah Di Input</h2>
-      <div class="user-badge" title="Logged in as Admin">
-        <span class="status-indicator" aria-label="online status"></span>
-        <span>Username Admin</span>
-      </div>
-  </div>
-  
-      <form>
-        <div class="mb-3">
-          <label for="jenisMedia" class="form-label">Jenis Media</label>
-          <select class="form-select" id="jenisMedia" required>
-              <option value="" disabled selected>Pilih Jenis Media</option>
-              <option value="audio">Audio</option>
-              <option value="image">Gambar</option>
-              <option value="video">Video</option>
-          </select>
-          
-
+  <main class="content-area">
+    <div class="header-top">
+        <h2>Media Yang Telah Di Input</h2>
+        <div class="user-badge" title="Logged in as Admin">
+            <span class="status-indicator" aria-label="online status"></span>
+            <span>{{ Auth::user()->name ?? 'Pegawai' }}</span>
         </div>
-      </form>
+    </div>
     
-    <div class="card">
+    <form id="filterForm" onsubmit="return false;">
+      <div class="mb-3">
+        <label for="jenisMedia" class="form-label">Jenis Media</label>
+        <select class="form-select" id="jenisMedia">
+            <option value="" selected>Semua Jenis</option>
+            <option value="audio">Audio</option>
+            <option value="gambar">Gambar</option>
+            <option value="video">Video</option>
+        </select>
+      </div>
+    </form>
+    
+    <div class="card p-3">
       <table>
         <thead>
           <tr>
@@ -411,56 +464,134 @@
         </thead>
         <tbody>
           <tr>
-            <td>
-              <input type="checkbox" name="select_row" value="admin1">
-            </td>
+            <td><input type="checkbox" name="select_row" value="admin1"></td>
             <td>Foto1</td>
             <td>Gambar</td>
             <td>2024-06-01</td>
           </tr>
           <tr>
-            <td>
-              <input type="checkbox" name="select_row" value="admin2">
-            </td>
-            <td>Video1</td>
+            <td><input type="checkbox" name="select_row" value="admin2"></td>
+            <td>Video2</td>
             <td>Video</td>
+            <td>2024-06-01</td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" name="select_row" value="admin3"></td>
+            <td>Audio3</td>
+            <td>Audio</td>
             <td>2024-06-01</td>
           </tr>
         </tbody>
       </table>
     </div>
+<!-- Tombol untuk buka popup -->
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#landingModal">
+    Atur Landing Page
+  </button>
 
-    <div class="button-section">
-      <button type="submit" class="btn btn-success">Tampilkan</button>
+  <!-- ===== POPUP ===== -->
+  <div class="modal fade" id="landingModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Editor Landing Page</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+
+          <!-- SKETSA LANDING PAGE -->
+          <div class="landing-sketch">
+            
+            <!-- Kiri: Judul + gambar utama + deskripsi -->
+            <div class="left-block">
+              <div class="title-text">Selamat Datang di <br>BPS Provinsi <br>Sumatera Utara</div>
+              
+              <!-- Gambar Utama -->
+              <div class="img-block mt-3" onclick="selectImage(this)">
+                <span>Pilih Gambar Utama</span>
+              </div>
+
+              <!-- Deskripsi -->
+              <div class="desc-box" contenteditable="true">
+                Klik di sini untuk isi deskripsi...
+              </div>
+            </div>
+
+            <!-- Kanan: Grid Gambar -->
+            <div class="right-grid">
+              <div class="img-block" onclick="selectImage(this)"><span>Pilih</span></div>
+              <div class="img-block" onclick="selectImage(this)"><span>Pilih</span></div>
+              <div class="img-block" onclick="selectImage(this)"><span>Pilih</span></div>
+              <div class="img-block" onclick="selectImage(this)"><span>Pilih</span></div>
+              <div class="img-block" onclick="selectImage(this)"><span>Pilih</span></div>
+              <div class="img-block" onclick="selectImage(this)"><span>Pilih</span></div>
+            </div>
+
+          </div>
+          <!-- /SKETSA -->
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-success">Simpan & Tampilkan</button>
+        </div>
+      </div>
     </div>
+  </div>
 
+  <!-- Search Modal untuk pilih gambar -->
+  <div class="modal fade" id="searchModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Cari Gambar</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" id="searchInput" class="form-control mb-3" placeholder="Cari nama gambar...">
+
+          <div id="searchResults" class="d-grid gap-2">
+            <!-- hasil pencarian simulasi -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   </main>
 
   <script>
-document.getElementById("jenisMedia").addEventListener("change", function () {
-    let selectedMedia = this.value.toLowerCase();
+document.getElementById("btnTampilkan").addEventListener("click", function () {
+    let selectedMedia = document.getElementById("jenisMedia").value.toLowerCase();
     let rows = document.querySelectorAll("tbody tr");
 
     rows.forEach(row => {
-        let fileName = row.cells[2].textContent.trim().toLowerCase(); // pastikan sesuai kolom nama file
-        let match = false;
-
-        if (selectedMedia === "image") {
-            match = fileName.match(/\.(jpg|jpeg|png|gif|bmp|webp)$/);
-        } else if (selectedMedia === "video") {
-            match = fileName.match(/\.(mp4|mkv|avi|mov|wmv|flv)$/);
-        } else if (selectedMedia === "audio") {
-            match = fileName.match(/\.(mp3|wav|ogg|flac|aac)$/);
-        }
-
-        row.style.display = (selectedMedia === "" || match) ? "" : "none";
+        let fileType = row.cells[2].textContent.trim().toLowerCase();
+        let show = (selectedMedia === "" || fileType.includes(selectedMedia));
+        row.style.display = show ? "" : "none";
     });
 });
 
-</script>
+let selectedBlock = null;
 
+    function selectImage(block) {
+      selectedBlock = block;
+      // buka modal search
+      let modal = new bootstrap.Modal(document.getElementById('searchModal'));
+      modal.show();
 
-
+      // tampilkan hasil dummy
+      let results = document.getElementById("searchResults");
+      results.innerHTML = "";
+      ["gambar1.jpg", "gambar2.jpg", "gambar3.jpg"].forEach(img => {
+        let btn = document.createElement("button");
+        btn.className = "btn btn-outline-primary";
+        btn.innerText = img;
+        btn.onclick = () => {
+          selectedBlock.innerHTML = `<img src="https://via.placeholder.com/150?text=${img}">`;
+          bootstrap.Modal.getInstance(document.getElementById('searchModal')).hide();
+        };
+        results.appendChild(btn);
+      });
+    }
+  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

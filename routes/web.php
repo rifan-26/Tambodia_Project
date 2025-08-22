@@ -8,6 +8,10 @@ use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\LandingController;
 
+Route::get('/test', function () {
+    return 'Middleware works!';
+})->middleware('role:superadmin');
+
 // ===== PUBLIC ROUTES =====
 Route::get('/', [LandingController::class, 'index'])->name('landing');
 Route::get('/landing', [LandingController::class, 'index']);
@@ -16,6 +20,10 @@ Route::get('/landing', [LandingController::class, 'index']);
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// ===== INPUT FILE ROUTES =====
+Route::post('/media/store', [MediaController::class, 'store'])->name('media.store');
+
 
 // ===== PROTECTED ROUTES =====
 Route::middleware(['auth'])->group(function () {
@@ -37,7 +45,9 @@ Route::middleware(['auth'])->group(function () {
     
     // ===== SUPER ADMIN ROUTES =====
     Route::middleware(['role:superadmin'])->group(function () {
-        Route::get('/superadmin', [DashboardController::class, 'superadmin'])->name('dashboard.superadmin');
+        Route::get('/superadmin', [DashboardController::class, 'superadmin'])
+        ->middleware('auth') // pastikan hanya login user bisa akses
+        ->name('dashboard.superadmin');
         Route::get('/superakun', [SuperAdminController::class, 'adminManagement'])->name('admin.management');
         Route::post('/admin/store', [SuperAdminController::class, 'storeAdmin'])->name('admin.store');
         Route::put('/admin/{id}', [SuperAdminController::class, 'updateAdmin'])->name('admin.update');

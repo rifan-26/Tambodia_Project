@@ -2,218 +2,348 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Selamat Datang di BPS Sumatera Utara</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Marcellus+SC&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Marcellus&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BPS Sumatera Utara</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display&family=Open+Sans&display=swap');
+
     * {
-      margin: 0;
-      padding: 0;
       box-sizing: border-box;
     }
 
     body, html {
-      height: 100%;
-      font-family: "Marcellus SC", serif;
+      margin: 0;
+      padding: 0;
+      font-family: 'Open Sans', sans-serif;
+      background-color: #0b0b0b;
       color: white;
+      height: 100vh;
+      overflow-x: hidden;
     }
 
-    .hero {
-      position: relative;
+    .container-left {
+      display: relative;
       height: 100vh;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      padding: 2rem;
-    }
-
-    .hero-container {
-      width: 100%;
-      height: 100vh;
+      width: 100vw;
       overflow: hidden;
-      position: relative;
+      background: #0b0b0b;
     }
 
-    /* Gambar kiri */
-    .left-bg {
+    /* Left section with background image and text */
+    .left-section {
       position: absolute;
       top: 0;
       left: 0;
-      width: 90%;
+      width: 100%;
       height: 100%;
-      background: url('img/danau_toba.svg') no-repeat center center;
+      background-image: 
+        linear-gradient(to bottom, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 0.8) 100%),
+        url('img/danau toba img1.svg');
       background-size: cover;
-      z-index: 1;
+      background-position: center;
+      padding: 60px 80px;
+      color: white;
+      z-index: 1; /* biar di bawah gallery */
     }
 
-    /* Gambar kanan yang di-blur */
-    .right-bg {
+    .left-section h1 {
+      font-family: 'Playfair Display', serif;
+      font-weight: 450px;
+      font-size: 70px; /* sedikit lebih besar */
+      line-height: 1.2;
+      letter-spacing: 1px; /* spasi antar huruf */
+      margin-top: 220px; /* sedikit lebih rapat ke atas */
+      margin-bottom: 20px;
+      max-width: 650px;
+      color: #fff;
+      text-shadow:
+        0 4px 10px rgba(0, 0, 0, 0.6), /* shadow lembut */
+        0 0 25px rgba(0, 0, 0, 0.4);    /* glow tambahan */
+    }
+
+    .left-section p {
+      max-width: 620px;
+      font-size: 1.25rem;
+      line-height: 1.7;
+      letter-spacing: 0.3px;
+      color: #f5f5f5;
+      text-shadow:
+      0 4px 8px rgba(0, 0, 0, 0.7),   /* shadow utama lebih tebal */
+      0 0 12px rgba(0, 0, 0, 0.5),    /* glow sedang */
+      0 0 30px rgba(0, 0, 0, 0.4);    /* glow lebar */
+    }
+
+
+    /* Highlight for BPS letters */
+    .bps {
+      font-weight: 700;
+      font-family: 'Playfair Display', serif;
+      font-size: 3.5rem;
+      line-height: 1.2;
+    }
+    .bps .b {
+      color: #0c77d2; /* Blue shade */
+    }
+    .bps .p {
+      color: #1cd03d; /* Mustard/Gold shade */
+    }
+    .bps .s {
+      color: #f8bc08; /* Orange shade */
+    }
+
+    /* Right section with images grid */
+    .right-section {
       position: absolute;
       top: 0;
       right: 0;
-      width: 20%;
+      width: 30%;   /* sesuaikan lebar gallery */
       height: 100%;
-      background: url('img/danau_toba.svg') no-repeat center center;
-      background-size: cover;
-      filter: blur(15px);
-      z-index: 1;
-    }
-
-    /* Gradasi pembatas kanan */
-    .gradient-overlay-right {
-      position: absolute;
-      top: 0;
-      left: 80%;
-      width: 20%;
-      height: 100%;
-      background: linear-gradient(
-        to right,
-        rgba(20, 20, 20, 0.8) 0%,
-        rgba(20, 20, 20, 0.4) 40%,
-        rgba(20, 20, 20, 0) 100%
-      );
-      filter: blur(12px);
-      mix-blend-mode: multiply;
+      flex: 1.5;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
       z-index: 2;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.3); /* semi transparan */
+      backdrop-filter: blur(12px);    /* blur area di belakang */
+      -webkit-backdrop-filter: blur(12px); /* untuk Safari */
+      border-left: 1px solid rgba(255,255,255,0.1);
     }
 
-    /* Gradasi pembatas kiri */
-    .gradient-overlay-left {
-      position: absolute;
-      top: 0;
-      left: 75%;
-      width: 20%;
-      height: 100%;
-      background: linear-gradient(
-        to left,
-        rgba(20, 20, 20, 0.8) 0%,
-        rgba(20, 20, 20, 0.4) 40%,
-        rgba(20, 20, 20, 0) 100%
-      );
-      filter: blur(12px);
-      mix-blend-mode: multiply;
-      z-index: 2;
+    .right-section::before {
+      display: none;
     }
 
-    /* Konten teks */
-    .text-content {
+
+
+    .row {
+      margin-top: 5px;
+      margin-bottom: 20px;
+    }
+
+    .img-potrait-1 {
       position: relative;
-      z-index: 3;
-      color: white;
-      padding: 3rem;
-      max-width: 45%;
-      margin-top: 15rem;
-    }
-
-    .text-content h1 {
-      font-size: 2.8rem;
-      font-weight: bold;
-      margin-bottom: 0.1rem;
-      text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.8);
-    }
-
-    .bps-word {
-      font-size: 3.8rem;
-      margin-right: 0.1px;
-      text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.8);
-    }
-
-    .provinsi-word {
-      font-size: 3.1rem;
-      font-weight: 500;
-      color: white;
-      text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.8);
-    }
-
-    .text-content h3 {
-      font-size: 3rem;
-      font-weight: 700;
-      margin-bottom: 0.4rem;
-      text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.8);
-    }
-
-    .text-content p {
-      font-size: 1.4rem;
-      line-height: 1.6;
-      font-family: "Marcellus", serif;
-      text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.8);
-    }
-
-    .photo-column {
-      position: relative;
-      z-index: 2;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1rem;
-      max-width: 50%;
-    }
-
-    .photo-column img {
+      border: 4px solid #ffffff;
+      border-radius: 4px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      cursor: default;
       width: 100%;
-      border-radius: 12px;
+      height: 0;
+      padding-bottom: 177.78%; /* 16/9 * 100 = 177.78% → portrait 9:16 */
+    }
+
+    .img-potrait-1 img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       object-fit: cover;
     }
 
-    @media (max-width: 768px) {
-      .hero {
+    .img-1-1 {
+      position: relative;
+      border: 4px solid #ffffff;
+      border-radius: 4px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      cursor: default;
+      width: 100%;
+      height: 50%; 
+      padding-bottom: 100%;
+    }
+
+    .img-1-1 img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .img-potrait-2 {
+      position: relative;
+      border: 4px solid #ffffff;
+      border-radius: 4px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      cursor: default;
+      width: 100%;
+      height: 0;
+      padding-bottom: 177.78%; /* 16/9 * 100 = 177.78% → portrait 9:16 */
+      margin-top: -140px; /* naik ke atas biar nyelip */
+      z-index: 2;        /* pastikan tampil di atas */
+    }
+
+    .img-potrait-2 img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .img-1-1-2 {
+      position: relative;
+      border: 4px solid #ffffff;
+      border-radius: 4px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      cursor: default;
+      width: 100%;
+      height: 50%; 
+      padding-bottom: 100%;
+    }
+
+    .img-1-1-2 img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .img-1-1-3 {
+      position: relative;
+      border: 4px solid #ffffff;
+      border-radius: 4px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      cursor: default;
+      width: 100%;
+      height: 0;
+      padding-bottom: 56.25%; /* 9/16 = 0.5625 */
+    }
+
+
+    .img-1-1-3 img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .right-section img {
+      transition: transform 0.4s ease, box-shadow 0.4s ease, filter 0.4s ease;
+    }
+
+    .right-section img:hover {
+      transform: scale(1.05); /* zoom sedikit */
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* shadow lebih tebal saat hover */
+      filter: brightness(1.05) contrast(1.05); /* sedikit lebih terang & kontras */
+    }
+
+    @media (max-width: 900px) {
+      .container {
         flex-direction: column;
-        justify-content: flex-start;
-        padding-top: 5rem;
+      }
+      .left-section, .right-section {
+        flex: none;
+        width: 100%;
         height: auto;
+        padding: 30px 20px;
       }
-
-      .text-content, .photo-column {
-        max-width: 100%;
-      }
-
-      .text-content h1 {
+      .left-section h1 {
         font-size: 2.5rem;
       }
-
-      .text-content h2 {
-        font-size: 1.5rem;
+      .right-section {
+        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-gap: 12px;
+        padding: 20px;
+        max-height: none;
       }
-
-      .text-content h3 {
-        font-size: 2rem;
+      .img-large-blue {
+        grid-column: span 3;
+        height: 250px;
+      }
+      .img-large-blue img {
+        height: 100%;
+      }
+      .right-column-small, .small-image-row, .bottom-row {
+        grid-column: span 3;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+      .right-column-small img,
+      .small-image-row img,
+      .bottom-row img {
+        height: 150px;
+        border: none;
+        box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        border-radius: 6px;
       }
     }
   </style>
 </head>
 <body>
-  <div class="hero">
-    <div class="hero-container">
-      <div class="left-bg"></div>
-      <div class="right-bg"></div>
-      <div class="gradient-overlay-left"></div>
-      <div class="gradient-overlay-right"></div>
-      <div class="text-content">
-        <h1>Selamat Datang Di</h1>
-        <h2>
-          <span class="bps-word">
-            <span style="color:#0071BC;">B</span><span style="color:#8CC63F;">P</span><span style="color:#F7931E;">S</span>
-          </span>
-          <span class="provinsi-word">Provinsi</span>
-        </h2>
-        <h3>Sumatera Utara</h3>
-        <p>
-          Kami adalah lembaga resmi pemerintah yang bertugas <br>
-          menyelenggarakan kegiatan statistik di wilayah <br>
-          Sumatera Utara. BPS hadir untuk memberikan data akurat, <br>
-          terpercaya, dan terkini.
+  <div class="container-left" role="main" aria-label="Welcome page for BPS Sumatera Utara">
+
+    <section class="left-section" aria-labelledby="welcome-title" aria-describedby="welcome-description">
+        <h1 id="welcome-title">Selamat Datang Di <span class="bps"><span class="b">B</span><span class="p">P</span><span class="s">S</span></span> Provinsi Sumatera Utara</h1>
+        <p id="welcome-description">
+          Kami adalah lembaga resmi pemerintah yang bertugas menyelenggarakan kegiatan statistik di wilayah Sumatera Utara. BPS hadir untuk memberikan data akurat, terpercaya, dan terkini.
         </p>
+    </section>
+
+    <aside class="right-section" aria-label="Gallery of images representing Sumatera Utara and cultural elements">
+      <div class="container">
+        <div class="row">
+          <div class="col">
+            <div class="img-1-1">
+              <img src="{{ asset('img/img 1.1.svg') }}" alt="Gambar2">
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="img-potrait-1">
+              <img src="{{ asset('img/img potrait.svg') }}" alt="Gambar1">
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <div class="img-potrait-2">
+              <img src="{{ asset('img/img potrait 2.svg') }}" alt="Gambar2">
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="img-1-1-2">
+              <img src="{{ asset('img/img 1.1 2.svg') }}" alt="Gambar1">
+            </div>
+          </div>
+        </div>
+
+         <div class="row">
+          <div class="col">
+            <div class="img-1-1-3">
+              <img src="{{ asset('img/img 1.1 3.svg') }}" alt="Gambar2">
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="img-1-1-3">
+              <img src="{{ asset('img/img 1.1 4.svg') }}" alt="Gambar1">
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="photo-column">
-      <img src="IMAGE1_URL" alt="Foto 1" />
-      <img src="IMAGE2_URL" alt="Foto 2" />
-      <img src="IMAGE3_URL" alt="Foto 3" />
-      <img src="IMAGE4_URL" alt="Foto 4" />
-    </div>
+    </aside>
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </body>
 </html>
+
