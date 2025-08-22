@@ -335,6 +335,60 @@
   }
 }
 
+/* ====== POPUP DESIGN ====== */
+    .modal-lg {
+      max-width: 90%;
+    }
+    .landing-sketch {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 10px;
+    }
+    .left-block {
+      background: #f0faf0;
+      min-height: 400px;
+      position: relative;
+      padding: 20px;
+      border: 2px dashed #ccc;
+    }
+    .title-text {
+      font-size: 28px;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 20px;
+    }
+    .desc-box {
+      width: 100%;
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-top: 15px;
+      min-height: 50px;
+      cursor: text;
+    }
+    .right-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .img-block {
+      background: #fff;
+      border: 2px dashed #aaa;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .img-block img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+    /* Hover effect */
+    .img-block:hover, .desc-box:hover {
+      border-color: #28a745;
+      background: #f8fff8;
+    }
+
 </style>
 <!-- css dari dashboard bwangg -->
 
@@ -430,23 +484,77 @@
         </tbody>
       </table>
     </div>
+<!-- Tombol untuk buka popup -->
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#landingModal">
+    Atur Landing Page
+  </button>
 
-    <div class="button-section">
-      <button type="button" id="btnTampilkan" class="btn btn-success">Tampilkan</button>
-    </div>
+  <!-- ===== POPUP ===== -->
+  <div class="modal fade" id="landingModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Editor Landing Page</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
 
-    <div class="modal fade" id="mediaModal" tabindex="-1" aria-labelledby="mediaModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="mediaModalLabel">Preview Media</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body text-center" id="mediaContent">
+          <!-- SKETSA LANDING PAGE -->
+          <div class="landing-sketch">
+            
+            <!-- Kiri: Judul + gambar utama + deskripsi -->
+            <div class="left-block">
+              <div class="title-text">Selamat Datang di <br>BPS Provinsi <br>Sumatera Utara</div>
+              
+              <!-- Gambar Utama -->
+              <div class="img-block mt-3" onclick="selectImage(this)">
+                <span>Pilih Gambar Utama</span>
+              </div>
+
+              <!-- Deskripsi -->
+              <div class="desc-box" contenteditable="true">
+                Klik di sini untuk isi deskripsi...
+              </div>
+            </div>
+
+            <!-- Kanan: Grid Gambar -->
+            <div class="right-grid">
+              <div class="img-block" onclick="selectImage(this)"><span>Pilih</span></div>
+              <div class="img-block" onclick="selectImage(this)"><span>Pilih</span></div>
+              <div class="img-block" onclick="selectImage(this)"><span>Pilih</span></div>
+              <div class="img-block" onclick="selectImage(this)"><span>Pilih</span></div>
+              <div class="img-block" onclick="selectImage(this)"><span>Pilih</span></div>
+              <div class="img-block" onclick="selectImage(this)"><span>Pilih</span></div>
+            </div>
+
+          </div>
+          <!-- /SKETSA -->
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-success">Simpan & Tampilkan</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
+
+  <!-- Search Modal untuk pilih gambar -->
+  <div class="modal fade" id="searchModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Cari Gambar</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" id="searchInput" class="form-control mb-3" placeholder="Cari nama gambar...">
+
+          <div id="searchResults" class="d-grid gap-2">
+            <!-- hasil pencarian simulasi -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   </main>
 
   <script>
@@ -499,9 +607,30 @@ document.getElementById("btnTampilkan").addEventListener("click", function () {
     let modal = new bootstrap.Modal(document.getElementById("mediaModal"));
     modal.show();
 });
-</script>
 
+let selectedBlock = null;
 
+    function selectImage(block) {
+      selectedBlock = block;
+      // buka modal search
+      let modal = new bootstrap.Modal(document.getElementById('searchModal'));
+      modal.show();
+
+      // tampilkan hasil dummy
+      let results = document.getElementById("searchResults");
+      results.innerHTML = "";
+      ["gambar1.jpg", "gambar2.jpg", "gambar3.jpg"].forEach(img => {
+        let btn = document.createElement("button");
+        btn.className = "btn btn-outline-primary";
+        btn.innerText = img;
+        btn.onclick = () => {
+          selectedBlock.innerHTML = `<img src="https://via.placeholder.com/150?text=${img}">`;
+          bootstrap.Modal.getInstance(document.getElementById('searchModal')).hide();
+        };
+        results.appendChild(btn);
+      });
+    }
+  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

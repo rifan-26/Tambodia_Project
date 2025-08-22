@@ -23,28 +23,28 @@
     }
 
     .container-left {
-      display: flex;
+      display: relative;
       height: 100vh;
       width: 100vw;
+      overflow: hidden;
       background: #0b0b0b;
     }
 
     /* Left section with background image and text */
     .left-section {
-      flex: 3;
-      position: relative;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background-image: 
         linear-gradient(to bottom, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 0.8) 100%),
         url('img/danau toba img1.svg');
       background-size: cover;
       background-position: center;
-      padding: 60px 60px 60px 80px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
+      padding: 60px 80px;
       color: white;
-      text-shadow:
-        1px 1px 3px rgba(0,0,0,0.9);
+      z-index: 1; /* biar di bawah gallery */
     }
 
     .left-section h1 {
@@ -94,34 +94,31 @@
 
     /* Right section with images grid */
     .right-section {
-      position: relative; /* penting supaya ::before bisa absolute di dalamnya */
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 30%;   /* sesuaikan lebar gallery */
+      height: 100%;
       flex: 1.5;
       padding: 20px;
       display: flex;
       flex-direction: column;
-      z-index: 1;
+      z-index: 2;
       overflow: hidden;
+      background: rgba(0, 0, 0, 0.3); /* semi transparan */
+      backdrop-filter: blur(12px);    /* blur area di belakang */
+      -webkit-backdrop-filter: blur(12px); /* untuk Safari */
+      border-left: 1px solid rgba(255,255,255,0.1);
     }
 
     .right-section::before {
-      content: "";
-      position: absolute;
-      top: -10px; /* tambah ruang */
-      left: -10px;
-      right: -10px;
-      bottom: -10px;
-      background-image: 
-        linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.8) 100%),
-        url('img/danau toba img1.svg');
-      background-size: cover;
-      background-position: center;
-      filter: blur(8px);
-      z-index: -1;
+      display: none;
     }
 
 
 
     .row {
+      margin-top: 5px;
       margin-bottom: 20px;
     }
 
@@ -134,7 +131,7 @@
       cursor: default;
       width: 100%;
       height: 0;
-      padding-bottom: 335px;
+      padding-bottom: 177.78%; /* 16/9 * 100 = 177.78% → portrait 9:16 */
     }
 
     .img-potrait-1 img {
@@ -154,7 +151,8 @@
       overflow: hidden;
       cursor: default;
       width: 100%;
-      height: 50%; /* setengah tinggi col kanan */
+      height: 50%; 
+      padding-bottom: 100%;
     }
 
     .img-1-1 img {
@@ -175,8 +173,8 @@
       cursor: default;
       width: 100%;
       height: 0;
-      padding-bottom: 335px;
-      margin-top: -170px; /* naik ke atas biar nyelip */
+      padding-bottom: 177.78%; /* 16/9 * 100 = 177.78% → portrait 9:16 */
+      margin-top: -140px; /* naik ke atas biar nyelip */
       z-index: 2;        /* pastikan tampil di atas */
     }
 
@@ -197,7 +195,8 @@
       overflow: hidden;
       cursor: default;
       width: 100%;
-      height: 100%
+      height: 50%; 
+      padding-bottom: 100%;
     }
 
     .img-1-1-2 img {
@@ -218,7 +217,7 @@
       cursor: default;
       width: 100%;
       height: 0;
-      padding-bottom: 100%; /* 1:1 ratio */
+      padding-bottom: 56.25%; /* 9/16 = 0.5625 */
     }
 
 
@@ -337,12 +336,6 @@
           <div class="col">
             <div class="img-1-1-3">
               <img src="{{ asset('img/img 1.1 4.svg') }}" alt="Gambar1">
-            </div>
-          </div>
-
-          <div class="col">
-            <div class="img-1-1-3">
-              <img src="{{ asset('img/img 1.1 5.svg') }}" alt="Gambar1">
             </div>
           </div>
         </div>
