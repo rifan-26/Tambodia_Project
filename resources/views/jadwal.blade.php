@@ -401,7 +401,7 @@
       <h2 class="section-header">Atur Jadwal Media </h2>
       <div class="user-badge" title="Logged in as Admin">
         <span class="status-indicator" aria-label="online status"></span>
-        <span>Username Admin</span>
+        <span>Pegawai</span>
       </div>
     </div>
       <div class="container">

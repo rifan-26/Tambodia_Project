@@ -366,24 +366,19 @@ document.addEventListener("DOMContentLoaded", function() {
     const fileInput = document.getElementById("fileInput");
     const uploadArea = document.getElementById("uploadArea");
 
-    // Klik tombol → buka file dialog
     uploadBtn.addEventListener("click", () => fileInput.click());
 
-    // Klik area → buka file dialog
     uploadArea.addEventListener("click", () => fileInput.click());
 
-    // Drag over area
     uploadArea.addEventListener("dragover", (e) => {
         e.preventDefault();
         uploadArea.style.background = "#e9f7e9";
     });
 
-    // Drag leave
     uploadArea.addEventListener("dragleave", () => {
         uploadArea.style.background = "#f0f9f0";
     });
 
-    // Drop file (pakai DataTransfer supaya terbaca Laravel)
     uploadArea.addEventListener("drop", (e) => {
         e.preventDefault();
         const dt = new DataTransfer();
@@ -395,18 +390,15 @@ document.addEventListener("DOMContentLoaded", function() {
         showFileName(fileInput.files[0]);
     });
 
-    // Event saat file dipilih lewat file picker
     fileInput.addEventListener("change", () => {
         if (fileInput.files.length > 0) {
             showFileName(fileInput.files[0]);
         }
     });
 
-    // Fungsi untuk menampilkan nama file di area upload + validasi ukuran
     function showFileName(file) {
         if (!file) return;
 
-        // Validasi ukuran file (20MB)
         if (file.size > 800 * 1024 * 1024) {
             alert("Ukuran file maksimal 20MB");
             fileInput.value = "";
