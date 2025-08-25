@@ -52,6 +52,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/admin/store', [SuperAdminController::class, 'storeAdmin'])->name('admin.store');
         Route::put('/admin/{id}', [SuperAdminController::class, 'updateAdmin'])->name('admin.update');
         Route::delete('/admin/{id}', [SuperAdminController::class, 'destroyAdmin'])->name('admin.destroy');
+        Route::get('/logs', [SuperAdminController::class, 'viewLogs'])->name('admin.logs');
     });
 });
 

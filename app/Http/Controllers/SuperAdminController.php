@@ -85,5 +85,34 @@ class SuperAdminController extends Controller
             'message' => 'Admin berhasil dihapus!'
         ]);
     }
+    
+    public function viewLogs(Request $request)
+    {
+        $query = Log::with('user')->orderBy('created_at', 'desc');
+        
+        // Filter by user
+        if ($request->has('user_id') && $request->user_id != '') {
+            $query->where('user_id', $request->user_id);
+        }
+        
+        // Filter by action
+        if ($request->has('action') && $request->action != '') {
+            $query->where('action', 'like', '%' . $request->action . '%');
+        }
+        
+        // Filter by date range
+        if ($request->has('date_from') && $request->date_from != '') {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        
+        if ($request->has('date_to') && $request->date_to != '') {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+        
+        $logs = $query->paginate(50);
+        $users = User::select('id', 'name')->get();
+        
+        return view('superadmin.logs', compact('logs', 'users'));
+    }
 }
 

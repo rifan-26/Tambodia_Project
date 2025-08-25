@@ -7,6 +7,7 @@ use App\Models\Log;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class MediaController extends Controller
 {
@@ -17,15 +18,32 @@ class MediaController extends Controller
 
     public function index(Request $request)
     {
-        $query = Media::where('user_id', Auth::id());
+        $query = Auth::user()->isSuperAdmin() 
+            ? Media::with('user') 
+            : Media::where('user_id', Auth::id());
         
+        // Filter by type
         if ($request->has('type') && $request->type != '') {
             $query->where('type', $request->type);
         }
         
-        $media = $query->orderBy('created_at', 'desc')->get();
+        // Search functionality
+        if ($request->has('search') && $request->search != '') {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
         
-        return view('input', compact('media'));
+        // Date filter
+        if ($request->has('date_from') && $request->date_from != '') {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        
+        if ($request->has('date_to') && $request->date_to != '') {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+        
+        $media = $query->orderBy('created_at', 'desc')->paginate(12);
+        
+        return view('media.index', compact('media'));
     }
 
     public function store(Request $request)
