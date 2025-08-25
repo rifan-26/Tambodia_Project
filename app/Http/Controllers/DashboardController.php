@@ -34,7 +34,7 @@ class DashboardController extends Controller
         
         $media = $query->orderBy('created_at', 'desc')->get();
         
-        return view('dashboard', compact('media'));
+        return view('Dashboard', compact('media'));
     }
 
     public function superadmin()

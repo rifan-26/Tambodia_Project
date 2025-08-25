@@ -21,6 +21,10 @@ class MediaController extends Controller
     public function index(Request $request)
     {
         try {
+            // Temporary: extend execution limits to avoid 30s timeout on heavy pages
+            @ini_set('max_execution_time', '300');
+            @ini_set('max_input_time', '300');
+            if (function_exists('set_time_limit')) { @set_time_limit(300); }
             // Start with a base query and eager load any relationships if needed
             $query = Media::where('user_id', Auth::id());
             
@@ -79,6 +83,43 @@ class MediaController extends Controller
     public function store(Request $request)
     {
         try {
+            // Extend time limits to accommodate large uploads (temporary safeguard; prefer php.ini changes)
+            @ini_set('max_execution_time', '300'); // 5 minutes
+            @ini_set('max_input_time', '300');
+            if (function_exists('set_time_limit')) { @set_time_limit(300); }
+            
+            // Early detection: if Content-Length exceeds PHP's post_max_size, Laravel won't populate files
+            $contentLength = (int) ($request->server('CONTENT_LENGTH') ?? 0);
+            $postMax = ini_get('post_max_size');
+            $toBytes = function($val){
+                $val = trim((string)$val);
+                if ($val === '' || !is_string($val)) return 0;
+                $unit = strtolower(substr($val, -1));
+                $num = (float) $val;
+                return match($unit) {
+                    'g' => (int)($num * 1024 * 1024 * 1024),
+                    'm' => (int)($num * 1024 * 1024),
+                    'k' => (int)($num * 1024),
+                    default => (int)$num,
+                };
+            };
+            $postMaxBytes = $toBytes($postMax);
+            if ($postMaxBytes > 0 && $contentLength > $postMaxBytes) {
+                // Return 413 so frontend can show proper message
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ukuran request melebihi batas server (post_max_size).',
+                    'errors'  => [ 'file' => ['Ukuran request melebihi batas server (post_max_size).'] ],
+                    'details' => [
+                        'content_length' => $contentLength,
+                        'post_max_size' => $postMax,
+                    ],
+                    'hints' => [
+                        'Naikkan post_max_size dan upload_max_filesize di php.ini',
+                        'Contoh: post_max_size=256M, upload_max_filesize=256M'
+                    ]
+                ], 413);
+            }
             // Enhanced validation with custom messages
             $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
                 'jenisMedia' => 'required|in:audio,image,video',
@@ -111,10 +152,40 @@ class MediaController extends Controller
             // Get the file and validate mime type based on media type
             $file = $request->file('file');
             $mediaType = $request->jenisMedia;
+
+            // Early check: ensure PHP upload is valid (helps diagnose php.ini limits/temp dir issues)
+            if (!$file || !$file->isValid()) {
+                $phpError = $file ? $file->getError() : UPLOAD_ERR_NO_FILE;
+                $phpErrorMsg = match($phpError) {
+                    UPLOAD_ERR_INI_SIZE => 'File melebihi upload_max_filesize pada php.ini',
+                    UPLOAD_ERR_FORM_SIZE => 'File melebihi batas MAX_FILE_SIZE pada form',
+                    UPLOAD_ERR_PARTIAL => 'File hanya terupload sebagian',
+                    UPLOAD_ERR_NO_FILE => 'Tidak ada file yang diupload',
+                    UPLOAD_ERR_NO_TMP_DIR => 'Folder temporer hilang (upload_tmp_dir)',
+                    UPLOAD_ERR_CANT_WRITE => 'Gagal menulis file ke disk',
+                    UPLOAD_ERR_EXTENSION => 'Upload dibatalkan oleh ekstensi PHP',
+                    default => 'Gagal mengunggah file'
+                };
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'The file failed to upload.',
+                        'errors' => [ 'file' => ['The file failed to upload.'] ],
+                        'php_upload_error_code' => $phpError,
+                        'php_upload_error_message' => $phpErrorMsg,
+                        'hints' => [
+                            'Periksa upload_max_filesize dan post_max_size pada php.ini',
+                            'Pastikan upload_tmp_dir tersedia dan writable',
+                        ]
+                    ], 422);
+                }
+                return redirect()->back()->withErrors(['file' => 'The file failed to upload.'])->withInput();
+            }
             
             // Validate file type matches selected media type
             $mimeType = $file->getMimeType();
             $clientMime = $file->getClientMimeType();
+            $extension = strtolower($file->getClientOriginalExtension());
             $validMimeTypes = [
                 'audio' => [
                     'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg',
@@ -127,7 +198,8 @@ class MediaController extends Controller
                 ],
                 'video' => [
                     'video/mp4', 'video/mpeg', 'video/quicktime', 'video/webm',
-                    'video/3gpp', 'video/3gpp2', 'video/x-msvideo', 'video/x-matroska', 'video/ogg'
+                    'video/3gpp', 'video/3gpp2', 'video/x-msvideo', 'video/x-matroska', 'video/ogg',
+                    'video/x-m4v', 'video/x-ms-wmv', 'video/avi', 'application/octet-stream'
                 ]
             ];
             
@@ -141,6 +213,16 @@ class MediaController extends Controller
                 || ($mimeType && str_starts_with($mimeType, $allowedPrefix))
                 || ($clientMime && str_starts_with($clientMime, $allowedPrefix));
 
+            // Fallback by extension for cases where browsers report generic MIME types (e.g., application/octet-stream)
+            $validExtensions = [
+                'audio' => ['mp3','wav','ogg','aac','flac','m4a','3gp','3g2'],
+                'image' => ['jpg','jpeg','png','gif','webp','bmp'],
+                'video' => ['mp4','mpeg','mpg','mov','webm','3gp','3g2','avi','mkv','ogv','m4v','wmv']
+            ];
+            if (!$mimeOk && isset($validExtensions[$mediaType]) && in_array($extension, $validExtensions[$mediaType])) {
+                $mimeOk = true;
+            }
+
             if (!$mimeOk) {
                 if ($request->ajax()) {
                     return response()->json([
@@ -149,7 +231,9 @@ class MediaController extends Controller
                         'errors'  => ['file' => ['Tipe file tidak sesuai dengan jenis media yang dipilih']],
                         'detected_mime' => $mimeType,
                         'client_mime' => $clientMime,
+                        'extension' => $extension,
                         'allowed' => $validMimeTypes[$mediaType],
+                        'allowed_extensions' => $validExtensions[$mediaType] ?? [],
                         'allowed_prefix' => $allowedPrefix,
                     ], 422);
                 }
@@ -345,6 +429,11 @@ class MediaController extends Controller
         try {
             $query = Media::where('user_id', Auth::id());
             
+            // Optional type filter (ensure same formatting as other endpoints)
+            if ($request->filled('type') && $request->type !== 'all') {
+                $query->where('type', ucfirst(strtolower($request->type)));
+            }
+
             if ($request->filled('search')) {
                 $query->where('name', 'like', '%' . $request->search . '%');
             }
@@ -395,5 +484,24 @@ class MediaController extends Controller
         }
     }
 
+    /**
+     * Serve files from the public storage disk without relying on the public/storage symlink.
+     * Example: GET /media/media/filename.mp3 will map to storage/app/public/media/filename.mp3
+     */
+    public function servePublic(Request $request, $path)
+    {
+        try {
+            // Normalize any accidental leading slashes
+            $path = ltrim($path, '/');
+            if (!Storage::disk('public')->exists($path)) {
+                return response()->json(['message' => 'File not found'], 404);
+            }
+            // Let Laravel generate proper streamed response with headers
+            return Storage::disk('public')->response($path);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error serving public file: ' . $e->getMessage());
+            return response()->json(['message' => 'Gagal memuat file'], 500);
+        }
+    }
 
 }

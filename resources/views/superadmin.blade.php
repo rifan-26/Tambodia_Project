@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SuperAdmin Dashboard Tambodia</title>
+  <title>Tambodia - Super Admin</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+  <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
   <style>
     body {
       background-color: #405672;
@@ -129,6 +130,13 @@
       top: 0;
     }
 
+    .sidebar-header {
+      padding: 0;
+      margin-top: 20px;
+      user-select: none;
+      margin-bottom: 20px;
+    }
+
     .content-area {
       margin-left: 240px;
       padding: 1.75rem 2rem 2rem 2rem;
@@ -184,6 +192,7 @@
     @media (max-width: 768px) {
       .sidebar {
         width: 60px;
+        padding-top: 1rem;
       }
       
       .content-area {
@@ -222,7 +231,7 @@
   <nav class="sidebar d-flex flex-column justify-content-between">
     <div>
       <div class="sidebar-header d-flex align-items-center gap-2">
-        <img src="{{ asset('img/Desain tanpa judul.svg') }}" alt="Logo-Tambodia" style="width: 70px; margin-left: 20px;">
+        <img src="{{ asset('img/Desain tanpa judul.svg') }}" alt="Logo Tambodia" style="width:70px; height:70px; margin-left:20px; object-fit:contain;"/>
         <h1 class="sidebar-title" style="font-weight: 700; font-size: 1.25rem; margin: 0; display: flex; align-items: center;">
             <span class="title-text">
                 <span style="color: #0084d6;">Tam</span><span style="color: #a0d5d2;">bo</span><span style="color: #1f9e76;">dia</span>
@@ -249,9 +258,6 @@
           </a>
         </li>
       </ul>
-    </div>
-    <div class="sidebar-footer-img-container">
-        <div class="sidebar-footer-gradient"></div>
     </div>
   </nav>
 

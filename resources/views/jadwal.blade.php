@@ -240,8 +240,8 @@
         font-size: 0;
       }
     main.content-area {
-      margin-left: 240px;
-      padding: 1.75rem 2rem 2rem 2rem;
+      margin-left: 60px;
+      padding: 1rem;
       min-height: 100vh;
       background: linear-gradient(90deg, #ffffff, #e9edfa);
       box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
@@ -360,7 +360,7 @@
   <nav class="sidebar d-flex flex-column justify-content-between">
     <div>
       <div class="sidebar-header d-flex align-items-center gap-2">
-        <img src="{{ asset('img/Desain tanpa judul.svg') }}" alt="Logo-Tambodia">
+        <img src="{{ asset('img/Desain tanpa judul.svg') }}" alt="Logo Tambodia" style="width:70px; height:70px; margin-left:20px; object-fit:contain;"/>
         <h1 class="sidebar-title">
             <span class="title-text">
                 <span class="tam">Tam</span><span class="bo">bo</span><span class="dia">dia</span>
@@ -370,17 +370,17 @@
       </div>
       <ul class="nav flex-column px-1">
         <li class="nav-item mb-1">
-          <a class="nav-link" href="{{ url('/dashboard') }}">
+          <a class="nav-link" href="{{ route('dashboard.pegawai') }}">
             <i class="bi bi-speedometer2"></i> Dashboard
           </a>
         </li>
         <li class="nav-item mb-1">
-          <a class="nav-link" href="{{ url('/input') }}">
+          <a class="nav-link" href="{{ route('media.input') }}">
             <i class="bi bi-pencil-square"></i> Input Media
           </a>
         </li>
         <li class="nav-item mb-1">
-          <a class="nav-link active" href="{{ url('/jadwal') }}">
+          <a class="nav-link active" href="{{ route('schedule.index') }}">
             <i class="bi bi-calendar3"></i> Penjadwalan
           </a>
         </li>
@@ -393,9 +393,6 @@
           </a>
         </li>
       </ul>
-    </div>
-    <div class="sidebar-footer-img-container">
-        <div class="sidebar-footer-gradient"></div>
     </div>
 
   </nav>

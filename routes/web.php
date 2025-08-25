@@ -55,3 +55,8 @@ Route::middleware(['auth'])->prefix('api')->group(function () {
     Route::get('/media/search', [MediaController::class, 'search'])->name('api.media.search');
     Route::get('/media/filter', [MediaController::class, 'filter'])->name('api.media.filter');
 });
+
+// ===== MEDIA STREAM ROUTE (avoid symlink issues) =====
+Route::middleware(['auth'])->get('/media/{path}', [MediaController::class, 'servePublic'])
+    ->where('path', '.*')
+    ->name('media.serve');

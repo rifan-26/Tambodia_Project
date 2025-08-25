@@ -4,9 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="csrf-token" content="{{ csrf_token() }}">
-  <title>Admin Tambodia</title>
+  <title>Tambodia - Super Akun</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+  <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
 
   <style>
     body {
@@ -483,7 +484,7 @@
   <nav class="sidebar d-flex flex-column justify-content-between">
     <div>
       <div class="sidebar-header d-flex align-items-center gap-2">
-        <img src="{{ asset('img/Desain tanpa judul.svg') }}" alt="Logo-Tambodia">
+        <img src="{{ asset('img/Desain tanpa judul.svg') }}" alt="Logo Tambodia" style="width:70px; height:70px; margin-left:20px; object-fit:contain;"/>
         <h1 class="sidebar-title">
           <span class="title-text">
             <span class="tam">Tam</span><span class="bo">bo</span><span class="dia">dia</span>
@@ -511,9 +512,6 @@
           </a>
         </li>
       </ul>
-    </div>
-    <div class="sidebar-footer-img-container">
-      <div class="sidebar-footer-gradient"></div>
     </div>
   </nav>
 
