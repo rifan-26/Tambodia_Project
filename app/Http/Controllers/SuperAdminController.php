@@ -16,8 +16,8 @@ class SuperAdminController extends Controller
 
     public function adminManagement()
     {
-        // Get all users to manage (both roles)
-        $admins = User::orderBy('created_at', 'desc')->get();
+        // Get all users to manage (both roles) - oldest first
+        $admins = User::orderBy('created_at', 'asc')->get();
         
         // Get current authenticated user
         $currentUser = auth()->user();

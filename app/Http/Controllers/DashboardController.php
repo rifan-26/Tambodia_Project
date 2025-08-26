@@ -41,6 +41,7 @@ class DashboardController extends Controller
     {
         $totalMedia = Media::count();
         $totalPegawai = User::where('role', 'pegawai')->count();
+        $totalSuperadmin = User::where('role', 'superadmin')->count();
         $recentLogs = Log::with('user')->latest()->take(10)->get();
         $mediaByType = [
             'Gambar' => Media::where('type', 'Gambar')->count(),
@@ -48,9 +49,9 @@ class DashboardController extends Controller
             'Audio' => Media::where('type', 'Audio')->count(),
         ];
         
-        // Get admin users for the management table
-        $admins = User::where('role', 'pegawai')->orderBy('created_at', 'desc')->get();
+        // Get all users for the admin table (both superadmin and pegawai) - oldest first
+        $admins = User::orderBy('created_at', 'asc')->get();
         
-        return view('superadmin', compact('totalMedia', 'totalPegawai', 'recentLogs', 'mediaByType', 'admins'));
+        return view('superadmin', compact('totalMedia', 'totalPegawai', 'totalSuperadmin', 'recentLogs', 'mediaByType', 'admins'));
     }
 }
