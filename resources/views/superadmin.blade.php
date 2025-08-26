@@ -446,27 +446,28 @@
       </div>
       <div class="col-md-3 mb-3">
         <div class="card h-100">
-          <div class="card-body text-center">
+          <div class="card-body">
             <h5 class="card-title">Media by Type</h5>
-            <?php
-              $cntGambar = $mediaByType['Gambar'] ?? 0;
-              $cntVideo  = $mediaByType['Video'] ?? 0;
-              $cntAudio  = $mediaByType['Audio'] ?? 0;
-              $cntTotal  = max(1, ($cntGambar + $cntVideo + $cntAudio));
-              $pGambar = round(($cntGambar / $cntTotal) * 100);
-              $pVideo  = round(($cntVideo  / $cntTotal) * 100);
-              $pAudio  = round(($cntAudio  / $cntTotal) * 100);
-            ?>
-            <div class="media-compact">
-              <div class="stacked-bar" aria-label="Komposisi Media" role="group">
+            @php
+              $cntGambar = (int)($mediaByType['Gambar'] ?? 0);
+              $cntVideo  = (int)($mediaByType['Video']  ?? 0);
+              $cntAudio  = (int)($mediaByType['Audio']  ?? 0);
+              $cntTotal  = max(1, $cntGambar + $cntVideo + $cntAudio);
+              $pGambar   = round(($cntGambar / $cntTotal) * 100);
+              $pVideo    = round(($cntVideo  / $cntTotal) * 100);
+              $pAudio    = round(($cntAudio  / $cntTotal) * 100);
+            @endphp
+
+            <div class="media-compact" aria-describedby="media-type-legend">
+              <div class="stacked-bar" role="img" aria-label="Komposisi media: Gambar {{ $pGambar }} persen, Video {{ $pVideo }} persen, Audio {{ $pAudio }} persen">
                 <div class="stacked-segment seg-gambar" style="width: {{ $pGambar }}%" title="Gambar {{ $cntGambar }} ({{ $pGambar }}%)"></div>
-                <div class="stacked-segment seg-video" style="width: {{ $pVideo }}%" title="Video {{ $cntVideo }} ({{ $pVideo }}%)"></div>
-                <div class="stacked-segment seg-audio" style="width: {{ $pAudio }}%" title="Audio {{ $cntAudio }} ({{ $pAudio }}%)"></div>
+                <div class="stacked-segment seg-video"  style="width: {{ $pVideo }}%"  title="Video {{ $cntVideo }} ({{ $pVideo }}%)"></div>
+                <div class="stacked-segment seg-audio"  style="width: {{ $pAudio }}%"  title="Audio {{ $cntAudio }} ({{ $pAudio }}%)"></div>
               </div>
-              <div class="legend-inline">
-                <span class="legend-chip"><span class="chip-dot dot-gambar"></span> Gambar {{ $cntGambar }}</span>
-                <span class="legend-chip"><span class="chip-dot dot-video"></span> Video {{ $cntVideo }}</span>
-                <span class="legend-chip legend-audio"><span class="chip-dot dot-audio"></span> Audio {{ $cntAudio }}</span>
+              <div id="media-type-legend" class="legend-inline">
+                <span class="legend-chip"><span class="chip-dot dot-gambar"></span> Gambar {{ $cntGambar }} ({{ $pGambar }}%)</span>
+                <span class="legend-chip"><span class="chip-dot dot-video"></span> Video {{ $cntVideo }} ({{ $pVideo }}%)</span>
+                <span class="legend-chip legend-audio"><span class="chip-dot dot-audio"></span> Audio {{ $cntAudio }} ({{ $pAudio }}%)</span>
               </div>
             </div>
           </div>
