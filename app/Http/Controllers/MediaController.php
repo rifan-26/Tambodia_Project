@@ -288,6 +288,8 @@ class MediaController extends Controller
                 ]);
             }
 
+            dd($media);
+
             return redirect()
                 ->route('dashboard.pegawai')
                 ->with('success', 'Media berhasil diupload!');
