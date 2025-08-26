@@ -121,19 +121,29 @@ class MediaController extends Controller
                 ], 413);
             }
             // Enhanced validation with custom messages
-            $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            // For video: accept URL instead of file. For image/audio: require file.
+            $rules = [
                 'jenisMedia' => 'required|in:audio,image,video',
                 'namaFile'   => 'required|string|max:255',
-                // Increase max size to 250MB to accommodate videos
-                'file'       => 'required|file|max:256000' // ~250MB
-            ], [
+            ];
+            if (strtolower($request->input('jenisMedia')) === 'video') {
+                $rules['video_url'] = 'required|url|max:2048';
+            } else {
+                // Increase max size to 250MB to accommodate videos (and large audio/images)
+                $rules['file'] = 'required|file|max:256000'; // ~250MB
+            }
+
+            $validator = \Illuminate\Support\Facades\Validator::make($request->all(), $rules, [
                 'jenisMedia.required' => 'Jenis media harus dipilih',
                 'jenisMedia.in' => 'Jenis media tidak valid',
                 'namaFile.required' => 'Nama file harus diisi',
                 'namaFile.max' => 'Nama file maksimal 255 karakter',
                 'file.required' => 'File harus diunggah',
                 'file.file' => 'Unggahan harus berupa file',
-                'file.max' => 'Ukuran file maksimal 250MB'
+                'file.max' => 'Ukuran file maksimal 250MB',
+                'video_url.required' => 'Link video harus diisi',
+                'video_url.url' => 'Format link video tidak valid',
+                'video_url.max' => 'Panjang link terlalu panjang',
             ]);
             
             if ($validator->fails()) {
@@ -149,43 +159,49 @@ class MediaController extends Controller
                     ->withInput();
             }
             
-            // Get the file and validate mime type based on media type
-            $file = $request->file('file');
             $mediaType = $request->jenisMedia;
+            $file = null;
+            $isVideoLink = strtolower($mediaType) === 'video';
+            if (!$isVideoLink) {
+                // Get the file and validate mime type based on media type
+                $file = $request->file('file');
+            }
 
-            // Early check: ensure PHP upload is valid (helps diagnose php.ini limits/temp dir issues)
-            if (!$file || !$file->isValid()) {
-                $phpError = $file ? $file->getError() : UPLOAD_ERR_NO_FILE;
-                $phpErrorMsg = match($phpError) {
-                    UPLOAD_ERR_INI_SIZE => 'File melebihi upload_max_filesize pada php.ini',
-                    UPLOAD_ERR_FORM_SIZE => 'File melebihi batas MAX_FILE_SIZE pada form',
-                    UPLOAD_ERR_PARTIAL => 'File hanya terupload sebagian',
-                    UPLOAD_ERR_NO_FILE => 'Tidak ada file yang diupload',
-                    UPLOAD_ERR_NO_TMP_DIR => 'Folder temporer hilang (upload_tmp_dir)',
-                    UPLOAD_ERR_CANT_WRITE => 'Gagal menulis file ke disk',
-                    UPLOAD_ERR_EXTENSION => 'Upload dibatalkan oleh ekstensi PHP',
-                    default => 'Gagal mengunggah file'
-                };
-                if ($request->ajax()) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'The file failed to upload.',
-                        'errors' => [ 'file' => ['The file failed to upload.'] ],
-                        'php_upload_error_code' => $phpError,
-                        'php_upload_error_message' => $phpErrorMsg,
-                        'hints' => [
-                            'Periksa upload_max_filesize dan post_max_size pada php.ini',
-                            'Pastikan upload_tmp_dir tersedia dan writable',
-                        ]
-                    ], 422);
+            if (!$isVideoLink) {
+                // Early check: ensure PHP upload is valid (helps diagnose php.ini limits/temp dir issues)
+                if (!$file || !$file->isValid()) {
+                    $phpError = $file ? $file->getError() : UPLOAD_ERR_NO_FILE;
+                    $phpErrorMsg = match($phpError) {
+                        UPLOAD_ERR_INI_SIZE => 'File melebihi upload_max_filesize pada php.ini',
+                        UPLOAD_ERR_FORM_SIZE => 'File melebihi batas MAX_FILE_SIZE pada form',
+                        UPLOAD_ERR_PARTIAL => 'File hanya terupload sebagian',
+                        UPLOAD_ERR_NO_FILE => 'Tidak ada file yang diupload',
+                        UPLOAD_ERR_NO_TMP_DIR => 'Folder temporer hilang (upload_tmp_dir)',
+                        UPLOAD_ERR_CANT_WRITE => 'Gagal menulis file ke disk',
+                        UPLOAD_ERR_EXTENSION => 'Upload dibatalkan oleh ekstensi PHP',
+                        default => 'Gagal mengunggah file'
+                    };
+                    if ($request->ajax()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'The file failed to upload.',
+                            'errors' => [ 'file' => ['The file failed to upload.'] ],
+                            'php_upload_error_code' => $phpError,
+                            'php_upload_error_message' => $phpErrorMsg,
+                            'hints' => [
+                                'Periksa upload_max_filesize dan post_max_size pada php.ini',
+                                'Pastikan upload_tmp_dir tersedia dan writable',
+                            ]
+                        ], 422);
+                    }
+                    return redirect()->back()->withErrors(['file' => 'The file failed to upload.'])->withInput();
                 }
-                return redirect()->back()->withErrors(['file' => 'The file failed to upload.'])->withInput();
             }
             
-            // Validate file type matches selected media type
-            $mimeType = $file->getMimeType();
-            $clientMime = $file->getClientMimeType();
-            $extension = strtolower($file->getClientOriginalExtension());
+            // Validate file type matches selected media type (skip for video link)
+            $mimeType = $isVideoLink ? null : $file->getMimeType();
+            $clientMime = $isVideoLink ? null : $file->getClientMimeType();
+            $extension = $isVideoLink ? null : strtolower($file->getClientOriginalExtension());
             $validMimeTypes = [
                 'audio' => [
                     'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg',
@@ -203,24 +219,29 @@ class MediaController extends Controller
                 ]
             ];
             
-            // Also allow by broad prefix match (e.g., image/*)
-            $allowedPrefix = [
-                'audio' => 'audio/',
-                'image' => 'image/',
-                'video' => 'video/',
-            ][$mediaType] ?? '';
-            $mimeOk = in_array($mimeType, $validMimeTypes[$mediaType])
-                || ($mimeType && str_starts_with($mimeType, $allowedPrefix))
-                || ($clientMime && str_starts_with($clientMime, $allowedPrefix));
+            $mimeOk = true;
+            if (!$isVideoLink) {
+                // Also allow by broad prefix match (e.g., image/*)
+                $allowedPrefix = [
+                    'audio' => 'audio/',
+                    'image' => 'image/',
+                    'video' => 'video/',
+                ][$mediaType] ?? '';
+                $mimeOk = in_array($mimeType, $validMimeTypes[$mediaType])
+                    || ($mimeType && str_starts_with($mimeType, $allowedPrefix))
+                    || ($clientMime && str_starts_with($clientMime, $allowedPrefix));
+            }
 
-            // Fallback by extension for cases where browsers report generic MIME types (e.g., application/octet-stream)
-            $validExtensions = [
-                'audio' => ['mp3','wav','ogg','aac','flac','m4a','3gp','3g2'],
-                'image' => ['jpg','jpeg','png','gif','webp','bmp'],
-                'video' => ['mp4','mpeg','mpg','mov','webm','3gp','3g2','avi','mkv','ogv','m4v','wmv']
-            ];
-            if (!$mimeOk && isset($validExtensions[$mediaType]) && in_array($extension, $validExtensions[$mediaType])) {
-                $mimeOk = true;
+            if (!$isVideoLink) {
+                // Fallback by extension for cases where browsers report generic MIME types (e.g., application/octet-stream)
+                $validExtensions = [
+                    'audio' => ['mp3','wav','ogg','aac','flac','m4a','3gp','3g2'],
+                    'image' => ['jpg','jpeg','png','gif','webp','bmp'],
+                    'video' => ['mp4','mpeg','mpg','mov','webm','3gp','3g2','avi','mkv','ogv','m4v','wmv']
+                ];
+                if (!$mimeOk && isset($validExtensions[$mediaType]) && in_array($extension, $validExtensions[$mediaType])) {
+                    $mimeOk = true;
+                }
             }
 
             if (!$mimeOk) {
@@ -232,9 +253,9 @@ class MediaController extends Controller
                         'detected_mime' => $mimeType,
                         'client_mime' => $clientMime,
                         'extension' => $extension,
-                        'allowed' => $validMimeTypes[$mediaType],
+                        'allowed' => $validMimeTypes[$mediaType] ?? [],
                         'allowed_extensions' => $validExtensions[$mediaType] ?? [],
-                        'allowed_prefix' => $allowedPrefix,
+                        'allowed_prefix' => $allowedPrefix ?? null,
                     ], 422);
                 }
                 return redirect()->back()
@@ -242,13 +263,17 @@ class MediaController extends Controller
                     ->withInput();
             }
             
-            // Process the file
-            $original = $file->getClientOriginalName();
-            $fileName = time() . '_' . $original;
-            $filePath = $file->storeAs('media', $fileName, 'public');
-            
-            if (!$filePath) {
-                throw new \Exception('Gagal menyimpan file');
+            // Process the file or link
+            $original = null;
+            if ($isVideoLink) {
+                $filePath = trim($request->input('video_url'));
+            } else {
+                $original = $file->getClientOriginalName();
+                $fileName = time() . '_' . $original;
+                $filePath = $file->storeAs('media', $fileName, 'public');
+                if (!$filePath) {
+                    throw new \Exception('Gagal menyimpan file');
+                }
             }
             
             $typeMap = [
@@ -288,7 +313,6 @@ class MediaController extends Controller
                 ]);
             }
 
-            dd($media);
 
             return redirect()
                 ->route('dashboard.pegawai')

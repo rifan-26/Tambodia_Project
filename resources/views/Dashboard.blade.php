@@ -32,6 +32,66 @@
       min-height: 100vh;
       margin: 0;
       padding: 0;
+      opacity: 0;
+      animation: pageLoad 0.6s ease-out forwards;
+    }
+
+    @keyframes pageLoad {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Smooth transitions for all interactive elements */
+    * {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Page transition overlay */
+    .page-transition {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, #1f9e76, #58cbaa);
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.4s ease;
+    }
+
+    .page-transition.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .transition-content {
+      text-align: center;
+      color: white;
+    }
+
+    .transition-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     .sidebar {
@@ -92,14 +152,17 @@
       gap: 0.5rem;
       font-size: 1rem;
       border-radius: 0.375rem;
-      transition: background-color 0.3s ease, color 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       user-select: none;
+      transform: translateX(0);
     }
     
     .nav-link:hover:not(.active) {
       background-color: #bcddc9;
       color: #1f9e76;
       cursor: pointer;
+      transform: translateX(5px);
+      box-shadow: 0 4px 12px rgba(31, 158, 118, 0.2);
     }
 
     main.content-area {
@@ -602,6 +665,14 @@
 </style>
 
 <body>
+  <!-- Page Transition Overlay -->
+  <div class="page-transition" id="pageTransition">
+    <div class="transition-content">
+      <div class="transition-spinner"></div>
+      <div>Memuat halaman...</div>
+    </div>
+  </div>
+
   <!-- Loading Overlay -->
   <div class="loading-overlay" id="loadingOverlay">
     <div class="spinner-container">
@@ -631,6 +702,11 @@
         <li class="nav-item mb-1">
           <a class="nav-link" href="{{ route('media.input') }}">
             <i class="bi bi-pencil-square"></i> Input Media
+          </a>
+        </li>
+        <li class="nav-item mb-1">
+          <a class="nav-link" href="{{ route('layout.index') }}">
+            <i class="bi bi-grid-3x3-gap"></i> Layout Manager
           </a>
         </li>
         <li class="nav-item mb-1">
@@ -713,6 +789,9 @@
           <button class="btn btn-outline-primary btn-sm" onclick="refreshMedia()">
             <i class="bi bi-arrow-clockwise"></i> Refresh
           </button>
+          <a href="{{ route('layout.index') }}" class="btn btn-outline-success btn-sm" data-bs-toggle="tooltip" title="Atur tata letak gambar pada landing page">
+            <i class="bi bi-grid-3x3-gap"></i> Layout Manager
+          </a>
           <a href="{{ url('/input') }}" class="btn btn-primary btn-sm">
             <i class="bi bi-plus-circle"></i> Tambah Media
           </a>
@@ -814,14 +893,11 @@
     }
 
     function fileUrl(path) {
-      // Normalize path coming from backend:
-      // - remove any leading '/'
-      // - strip optional 'public/' prefix if present
-      // - avoid duplicate 'storage/public/...'
+      // Normalize path coming from backend. If absolute URL, keep as-is.
       let p = String(path || '');
+      if (/^(?:https?:)?\/\//i.test(p)) return p; // external URL (e.g., YouTube, CDN)
       p = p.replace(/^\/+/, '');
       p = p.replace(/^public\//, '');
-      // Route through Laravel streaming endpoint to avoid symlink 403
       return `${window.location.origin}/media/${p}`;
     }
 
@@ -846,11 +922,22 @@
       try {
         showLoading(true);
         const jenisSelect = document.getElementById('jenisMedia');
-        const typeVal = (params.type ?? (jenisSelect ? jenisSelect.value : '')).trim();
+        const rawVal = (params.type ?? (jenisSelect ? jenisSelect.value : '')).trim();
+        const isAll = !rawVal || rawVal === 'Semua Jenis' || rawVal.toLowerCase() === 'all';
         const q = new URLSearchParams();
-        if (typeVal && typeVal !== 'Semua Jenis') q.set('type', typeVal);
+        if (!isAll) {
+          q.set('type', rawVal);
+        } else {
+          // Be explicit to match controller logic that skips when type === 'all'
+          q.set('type', 'all');
+        }
         const url = `${API.filter}?${q.toString()}`;
         const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        // Gracefully handle non-JSON (e.g., login redirect)
+        const contentType = res.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+          throw new Error('Unexpected response');
+        }
         const json = await res.json();
         if (!json.success) throw new Error(json.message || 'Gagal memuat media');
         state.media = Array.isArray(json.data) ? json.data : [];
@@ -947,11 +1034,18 @@
         preview = `<img src="${fileUrl(m.file_path)}" alt="${escapeHtml(m.name)}" class="img-fluid rounded"/>`;
       } else if (m.type === 'Video') {
         const src = fileUrl(m.file_path);
-        const mime = guessMimeFromPath(m.file_path, 'video/mp4');
-        preview = `<video class="w-100 rounded" controls preload="metadata" playsinline>
-          <source src="${src}" type="${mime}">
-          Browser Anda tidak mendukung pemutar video.
-        </video>`;
+        // If YouTube URL, render iframe embed instead of <video>
+        const yt = String(src).match(/^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/i);
+        if (yt) {
+          const vid = yt[1];
+          preview = `<div class="ratio ratio-16x9"><iframe src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&playsinline=1" title="${escapeHtml(m.name)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="rounded"></iframe></div>`;
+        } else {
+          const mime = guessMimeFromPath(m.file_path, 'video/mp4');
+          preview = `<video class="w-100 rounded" controls preload="metadata" autoplay muted playsinline>
+            <source src="${src}" type="${mime}">
+            Browser Anda tidak mendukung pemutar video.
+          </video>`;
+        }
       } else if (m.type === 'Audio') {
         const src = fileUrl(m.file_path);
         const mime = guessMimeFromPath(m.file_path, 'audio/mpeg');
@@ -1199,4 +1293,90 @@
       const name = btn.getAttribute('data-name') || 'Audio';
       if (src) showPlayModal(src, name);
     });
+
+    // Page transition functionality
+    function showPageTransition() {
+      const transition = document.getElementById('pageTransition');
+      if (transition) {
+        transition.classList.add('active');
+      }
+    }
+
+    function hidePageTransition() {
+      const transition = document.getElementById('pageTransition');
+      if (transition) {
+        transition.classList.remove('active');
+      }
+    }
+
+    // Add smooth page transitions to navigation links
+    document.addEventListener('DOMContentLoaded', function() {
+      const navLinks = document.querySelectorAll('.nav-link[href]');
+      
+      navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          const href = this.getAttribute('href');
+          
+          // Skip if it's the current page or a form submission
+          if (href === '#' || this.closest('form')) return;
+          
+          e.preventDefault();
+          showPageTransition();
+          
+          // Navigate after transition starts
+          setTimeout(() => {
+            window.location.href = href;
+          }, 200);
+        });
+      });
+
+      // Hide transition on page load
+      setTimeout(hidePageTransition, 100);
+    });
+
+    // Add staggered animation to cards
+    function animateCards() {
+      const cards = document.querySelectorAll('.stats-card, .media-card');
+      cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.style.animation = 'slideInUp 0.6s ease-out forwards';
+      });
+    }
+
+    // Call animation when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(animateCards, 300);
+    });
+
+    // Add CSS for card animations
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      .stats-card, .media-card {
+        opacity: 0;
+      }
+      
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      }
+      
+      .media-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      }
+    `;
+    document.head.appendChild(style);
   </script>
+</body>
+</html>

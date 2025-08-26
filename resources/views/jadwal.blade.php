@@ -380,6 +380,11 @@
           </a>
         </li>
         <li class="nav-item mb-1">
+          <a class="nav-link" href="{{ route('layout.index') }}">
+            <i class="bi bi-grid-3x3-gap"></i> Layout Manager
+          </a>
+        </li>
+        <li class="nav-item mb-1">
           <a class="nav-link active" href="{{ route('schedule.index') }}">
             <i class="bi bi-calendar3"></i> Penjadwalan
           </a>

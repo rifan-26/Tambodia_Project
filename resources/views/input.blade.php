@@ -18,6 +18,66 @@
       min-height: 100vh;
       margin: 0;
       padding: 0;
+      opacity: 0;
+      animation: pageLoad 0.6s ease-out forwards;
+    }
+
+    @keyframes pageLoad {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Smooth transitions for all interactive elements */
+    * {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Page transition overlay */
+    .page-transition {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, #1f9e76, #58cbaa);
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.4s ease;
+    }
+
+    .page-transition.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .transition-content {
+      text-align: center;
+      color: white;
+    }
+
+    .transition-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     .sidebar {
@@ -78,14 +138,17 @@
       gap: 0.5rem;
       font-size: 1rem;
       border-radius: 0.375rem;
-      transition: background-color 0.3s ease, color 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       user-select: none;
+      transform: translateX(0);
     }
     
     .nav-link:hover:not(.active) {
       background-color: #bcddc9;
       color: #1f9e76;
       cursor: pointer;
+      transform: translateX(5px);
+      box-shadow: 0 4px 12px rgba(31, 158, 118, 0.2);
     }
 
     main.content-area {
@@ -584,6 +647,14 @@
     </div>
   </div>
   
+  <!-- Page Transition Overlay -->
+  <div class="page-transition" id="pageTransition">
+    <div class="transition-content">
+      <div class="transition-spinner"></div>
+      <div>Memuat halaman...</div>
+    </div>
+  </div>
+
   <nav class="sidebar d-flex flex-column justify-content-between">
     <div>
       <div class="sidebar-header d-flex align-items-center gap-2">
@@ -603,6 +674,11 @@
         <li class="nav-item mb-1">
           <a class="nav-link active" href="{{ route('media.input') }}">
             <i class="bi bi-pencil-square"></i> Input Media
+          </a>
+        </li>
+        <li class="nav-item mb-1">
+          <a class="nav-link" href="{{ route('layout.index') }}">
+            <i class="bi bi-grid-3x3-gap"></i> Layout Manager
           </a>
         </li>
         <li class="nav-item mb-1">
@@ -695,8 +771,8 @@
 
           <!-- Step 2: File Upload -->
           <div class="step-content" id="step2">
-            <h4 class="mb-4">Upload File</h4>
-            <p class="text-muted mb-4">Pilih file dari komputer Anda atau drag & drop ke area di bawah</p>
+            <h4 class="mb-4" id="step2Title">Upload File</h4>
+            <p class="text-muted mb-4" id="step2Sub">Pilih file dari komputer Anda atau drag & drop ke area di bawah</p>
             
             <div class="enhanced-upload-area" id="uploadArea">
               <div class="upload-icon">
@@ -708,6 +784,15 @@
               <button type="button" class="upload-btn" id="uploadButton">
                 <i class="bi bi-folder2-open me-2"></i>Pilih File
               </button>
+            </div>
+            <!-- Video URL input (shown when jenisMedia = video) -->
+            <div id="videoLinkGroup" class="mt-3 d-none">
+              <label class="form-label-enhanced" for="videoUrl">
+                <i class="bi bi-link-45deg"></i>
+                Link Video (YouTube atau URL video lain)
+              </label>
+              <input type="url" id="videoUrl" name="video_url" class="form-control form-control-enhanced" placeholder="https://www.youtube.com/watch?v=... atau https://example.com/video.mp4">
+              <div class="form-text">Masukkan URL video. Untuk YouTube, tempelkan link video (kami akan menampilkan embed).</div>
             </div>
             <div id="uploadInlineError" class="alert alert-danger mt-3 d-none" role="alert"></div>
 
@@ -873,6 +958,7 @@
       function setInlineError(msg){ if(!inlineErrorEl) return; inlineErrorEl.textContent = msg || ''; inlineErrorEl.classList.toggle('d-none', !msg); }
       function clearInlineError(){ setInlineError(''); }
       function formatBytes(bytes){ if(bytes===0) return '0 B'; const k=1024, s=['B','KB','MB','GB']; const i=Math.floor(Math.log(bytes)/Math.log(k)); return (bytes/Math.pow(k,i)).toFixed(2)+' '+s[i]; }
+      function isValidUrl(str){ try{ const u=new URL(str); return !!u.protocol && !!u.host; } catch(e){ return false; } }
 
       // Wizard state
       const steps = qsa('.wizard-step');
@@ -897,7 +983,14 @@
 
       function canProceed(){
         if(currentStep===1){ return !!jenisMediaInput.value; }
-        if(currentStep===2){ return (qs('#fileUpload').files||[]).length>0; }
+        if(currentStep===2){
+          const jm = (jenisMediaInput.value||'').toLowerCase();
+          if(jm==='video'){
+            const url = (qs('#videoUrl')?.value||'').trim();
+            return isValidUrl(url);
+          }
+          return (qs('#fileUpload').files||[]).length>0;
+        }
         if(currentStep===3){ return (qs('#namaFile').value||'').trim().length>0; }
         return true;
       }
@@ -907,16 +1000,33 @@
         if(currentStep<3){ setStep(currentStep+1); return; }
         if(currentStep===3){
           // Submit via AJAX
+          const jm = (jenisMediaInput.value||'').toLowerCase();
           const fileInput = qs('#fileUpload');
-          if(!fileInput.files.length){ toast('Pilih file terlebih dahulu', 'error'); return; }
-          // Client-side size validation (<= 250MB)
-          const maxBytes = 256000 * 1024; // ~250MB matching server rule
-          if (fileInput.files[0].size > maxBytes) {
-            const m='Ukuran file melebihi 250MB';
-            toast(m, 'error'); setInlineError(m);
-            return;
+          const videoUrlVal = (qs('#videoUrl')?.value||'').trim();
+          if(jm!=='video'){
+            if(!fileInput.files.length){ toast('Pilih file terlebih dahulu', 'error'); return; }
+            // Client-side size validation (<= 250MB)
+            const maxBytes = 256000 * 1024; // ~250MB matching server rule
+            if (fileInput.files[0].size > maxBytes) {
+              const m='Ukuran file melebihi 250MB';
+              toast(m, 'error'); setInlineError(m);
+              return;
+            }
+          } else {
+            if(!isValidUrl(videoUrlVal)){
+              const m='Link video tidak valid';
+              toast(m, 'error'); setInlineError(m);
+              setStep(2);
+              return;
+            }
           }
           const fd = new FormData(form);
+          // Ensure only relevant fields are sent
+          if(jm==='video'){
+            // Make sure no file is sent if accidentally selected
+            fd.delete('file');
+            fd.set('video_url', videoUrlVal);
+          }
           showLoading('Mengunggah media...');
           clearInlineError();
           // progress UI
@@ -988,6 +1098,32 @@
           // adjust accept
           const accept = card.dataset.type==='image' ? 'image/*' : card.dataset.type==='video' ? 'video/*' : 'audio/*';
           qs('#fileUpload').setAttribute('accept', accept);
+          // Toggle UI for video link mode
+          const uploadArea = qs('#uploadArea');
+          const filePreview = qs('#filePreview');
+          const videoGroup = qs('#videoLinkGroup');
+          const videoUrlInput = qs('#videoUrl');
+          const step2Title = qs('#step2Title');
+          const step2Sub = qs('#step2Sub');
+          if(card.dataset.type==='video'){
+            // Switch to URL mode for videos
+            uploadArea.classList.add('d-none');
+            filePreview.classList.add('d-none');
+            if(videoGroup) videoGroup.classList.remove('d-none');
+            // clear file input
+            const fi = qs('#fileUpload'); if(fi){ fi.value=''; }
+            if(step2Title) step2Title.textContent='Masukkan Link Video';
+            if(step2Sub) step2Sub.textContent='Tempelkan URL YouTube atau tautan langsung ke file video.';
+            if(videoUrlInput){
+              videoUrlInput.addEventListener('input', ()=>{ nextBtn.disabled = !canProceed(); clearInlineError(); });
+            }
+          } else {
+            // Back to file upload mode
+            uploadArea.classList.remove('d-none');
+            if(videoGroup) videoGroup.classList.add('d-none');
+            if(step2Title) step2Title.textContent='Upload File';
+            if(step2Sub) step2Sub.textContent='Pilih file dari komputer Anda atau drag & drop ke area di bawah';
+          }
           nextBtn.disabled = !canProceed();
         });
       });
@@ -1048,15 +1184,41 @@
       removeFileBtn.addEventListener('click', ()=>{ fileInput.value=''; filePreview.classList.add('d-none'); previewContainer.innerHTML=''; nextBtn.disabled = !canProceed(); });
 
       function openPreviewModal(){
-        if(!fileInput.files.length) return;
+        const jm = (jenisMediaInput.value||'').toLowerCase();
         const modalEl = document.getElementById('mediaPreviewModal');
         const modalBody = document.getElementById('modalPreviewContent');
         const modalTitle = document.getElementById('modalPreviewTitle');
         modalBody.innerHTML='';
-        const f = fileInput.files[0]; const url = URL.createObjectURL(f); const type = jenisMediaInput.value;
-        if(type==='image'){ const img=document.createElement('img'); img.src=url; img.className='img-fluid rounded shadow'; modalBody.appendChild(img); modalTitle.textContent='Preview Gambar'; }
-        else if(type==='video'){ const v=document.createElement('video'); v.src=url; v.controls=true; v.autoplay=true; v.style.width='100%'; v.className='rounded shadow'; modalBody.appendChild(v); modalTitle.textContent='Preview Video'; }
-        else { const a=document.createElement('audio'); a.src=url; a.controls=true; a.style.width='100%'; modalBody.appendChild(a); modalTitle.textContent='Preview Audio'; }
+        if(jm==='video'){
+          const urlInput = (qs('#videoUrl')?.value||'').trim();
+          if(urlInput){
+            // YouTube embed handling
+            const ytMatch = urlInput.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
+            if(ytMatch){
+              const iframe = document.createElement('iframe');
+              iframe.width='100%'; iframe.height='320';
+              iframe.src = `https://www.youtube.com/embed/${ytMatch[1]}`;
+              iframe.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+              iframe.allowFullscreen = true;
+              iframe.className='rounded shadow';
+              modalBody.appendChild(iframe);
+            } else {
+              const v=document.createElement('video'); v.src=urlInput; v.controls=true; v.autoplay=true; v.style.width='100%'; v.className='rounded shadow'; modalBody.appendChild(v);
+            }
+            modalTitle.textContent='Preview Video';
+          } else if(fileInput.files.length){
+            const url = URL.createObjectURL(fileInput.files[0]);
+            const v=document.createElement('video'); v.src=url; v.controls=true; v.autoplay=true; v.style.width='100%'; v.className='rounded shadow'; modalBody.appendChild(v);
+            modalTitle.textContent='Preview Video';
+          } else {
+            return;
+          }
+        } else {
+          if(!fileInput.files.length) return;
+          const f = fileInput.files[0]; const url = URL.createObjectURL(f); const type = jenisMediaInput.value;
+          if(type==='image'){ const img=document.createElement('img'); img.src=url; img.className='img-fluid rounded shadow'; modalBody.appendChild(img); modalTitle.textContent='Preview Gambar'; }
+          else if(type==='audio'){ const a=document.createElement('audio'); a.src=url; a.controls=true; a.style.width='100%'; modalBody.appendChild(a); modalTitle.textContent='Preview Audio'; }
+        }
         const modal = bootstrap.Modal.getOrCreateInstance(modalEl); modal.show();
       }
 
@@ -1111,9 +1273,45 @@
       // Extra buttons handlers
       const uploadAnother = document.getElementById('uploadAnotherBtn');
       const viewMediaBtn = document.getElementById('viewMediaBtn');
-      if(uploadAnother){ uploadAnother.addEventListener('click', ()=>{ form.reset(); qs('#filePreview').classList.add('d-none'); qs('#previewContainer').innerHTML=''; jenisMediaInput.value=''; qsa('.media-type-card').forEach(c=> c.classList.remove('selected')); setStep(1); }); }
+      if(uploadAnother){ uploadAnother.addEventListener('click', ()=>{ form.reset(); qs('#filePreview').classList.add('d-none'); qs('#previewContainer').innerHTML=''; jenisMediaInput.value=''; qsa('.media-type-card').forEach(c=> c.classList.remove('selected')); const vg=qs('#videoLinkGroup'); if(vg) vg.classList.add('d-none'); const ua=qs('#uploadArea'); if(ua) ua.classList.remove('d-none'); const t=qs('#step2Title'); if(t) t.textContent='Upload File'; const s=qs('#step2Sub'); if(s) s.textContent='Pilih file dari komputer Anda atau drag & drop ke area di bawah'; setStep(1); }); }
       if(viewMediaBtn){ viewMediaBtn.addEventListener('click', ()=>{ document.querySelector('#mediaGrid')?.scrollIntoView({ behavior: 'smooth' }); }); }
     })();
+    // Page transition functionality
+    function showPageTransition() {
+      const transition = document.getElementById('pageTransition');
+      if (transition) {
+        transition.classList.add('active');
+      }
+    }
+
+    function hidePageTransition() {
+      const transition = document.getElementById('pageTransition');
+      if (transition) {
+        transition.classList.remove('active');
+      }
+    }
+
+    // Add smooth page transitions to navigation links
+    document.addEventListener('DOMContentLoaded', function() {
+      const navLinks = document.querySelectorAll('.nav-link[href]');
+      
+      navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          const href = this.getAttribute('href');
+          
+          if (href === '#' || this.closest('form')) return;
+          
+          e.preventDefault();
+          showPageTransition();
+          
+          setTimeout(() => {
+            window.location.href = href;
+          }, 200);
+        });
+      });
+
+      setTimeout(hidePageTransition, 100);
+    });
   </script>
-  </body>
-  </html>
+</body>
+</html>
