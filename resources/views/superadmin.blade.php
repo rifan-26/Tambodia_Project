@@ -468,12 +468,6 @@
         <div class="card h-100">
           <div class="card-body">
             <h5 class="card-title">Media by Type</h5>
-<<<<<<< HEAD
-            <div class="d-flex justify-content-around">
-              <span class="text-bps-info">Gambar: {{ $mediaByType['Gambar'] ?? 0 }}</span>
-              <span class="text-bps-success">Video: {{ $mediaByType['Video'] ?? 0 }}</span>
-              <span class="text-bps-danger">Audio: {{ $mediaByType['Audio'] ?? 0 }}</span>
-=======
             @php
               $cntGambar = (int)($mediaByType['Gambar'] ?? 0);
               $cntVideo  = (int)($mediaByType['Video']  ?? 0);
@@ -495,7 +489,6 @@
                 <span class="legend-chip"><span class="chip-dot dot-video"></span> Video {{ $cntVideo }} ({{ $pVideo }}%)</span>
                 <span class="legend-chip legend-audio"><span class="chip-dot dot-audio"></span> Audio {{ $cntAudio }} ({{ $pAudio }}%)</span>
               </div>
->>>>>>> 658c58783070c247ddd9f11153e75b8912f81b10
             </div>
           </div>
         </div>
