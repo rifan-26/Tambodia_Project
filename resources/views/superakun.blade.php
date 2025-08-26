@@ -365,22 +365,24 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 14px;
-      color: #3b82f6;
+      background-color: #ffffff;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
     }
 
     thead tr {
-      background-color: #e9eef9;
+      background-color: #E0E7FF; /* match dashboard */
     }
 
     thead th {
       text-align: left;
-      padding: 14px 12px;
+      padding: 12px 15px;
       font-weight: 600;
-      border-bottom: 2px solid #d2d9f1;
+      color: #3B82F6; /* match dashboard */
+      border-bottom: 1px solid #C7D2FE; /* match dashboard */
     }
 
     tbody tr {
-      border-bottom: 1px solid #e5e9f6;
+      border-bottom: 1px solid #E0E7FF; /* match dashboard */
     }
 
     th.action-header, td.action-icons {
@@ -392,8 +394,12 @@
 
     tbody td {
       vertical-align: middle;
-      color: #5d6b9f;
-      padding: 10px 12px;
+      color: #475569; /* match dashboard */
+      padding: 12px 15px;
+    }
+
+    tbody tr:hover {
+      background-color: #F1F5F9; /* match dashboard */
     }
 
     .status {
@@ -524,7 +530,7 @@
     </div>
 
     <div class="card">
-      <h5>Admin Account Management</h5>
+      <h5>Daftar Admin</h5>
       <header class="d-flex justify-content-end mb-3">
         <button type="button" class="add-admin">Add Admin +</button>
       </header>
@@ -535,20 +541,20 @@
         </caption>
         <thead>
           <tr>
-            <th>Id</th>
-            <th>Username</th>
+            <th>No</th>
+            <th>Nama</th>
             <th>Email</th>
             <th>Role</th>
             <th>Password</th>
             <th class="status">Status</th>
-            <th class="action-header">Action</th>
+            <th class="action-header">Aksi</th>
           </tr>
         </thead>
         <tbody>
           @if(isset($admins) && $admins->count() > 0)
             @foreach($admins as $admin)
             <tr data-id="{{ $admin->id }}">
-              <td>{{ str_pad($admin->id, 4, '0', STR_PAD_LEFT) }}</td>
+              <td>{{ $loop->iteration }}</td>
               <td>{{ $admin->name }}</td>
               <td>{{ $admin->email }}</td>
               <td>{{ ucfirst($admin->role) }}</td>
@@ -741,8 +747,10 @@
 
         const newRow = document.createElement('tr');
         newRow.dataset.id = data.admin.id;
+        // Determine next sequence number based on current rows
+        const nextNo = (document.querySelectorAll('table tbody tr').length || 0) + 1;
         newRow.innerHTML = `
-          <td>${String(data.admin.id).padStart(4, '0')}</td>
+          <td>${nextNo}</td>
           <td>${data.admin.name}</td>
           <td>${data.admin.email}</td>
           <td>${(data.admin.role || '').charAt(0).toUpperCase() + (data.admin.role || '').slice(1)}</td>
@@ -906,43 +914,44 @@
     
     const konfirmasi = confirm("Apakah Anda yakin ingin menghapus admin ini?");
     if (konfirmasi) {
-      // Buat form untuk delete
-      const deleteForm = document.createElement('form');
-      deleteForm.method = 'POST';
-      deleteForm.action = `{{ url('/admin') }}/${adminId}`;
-      deleteForm.style.display = 'none';
-      
-      const tokenInput = document.createElement('input');
-      tokenInput.type = 'hidden';
-      tokenInput.name = '_token';
-      tokenInput.value = csrfToken;
-      
-      const methodInput = document.createElement('input');
-      methodInput.type = 'hidden';
-      methodInput.name = '_method';
-      methodInput.value = 'DELETE';
-      
-      deleteForm.appendChild(tokenInput);
-      deleteForm.appendChild(methodInput);
-      document.body.appendChild(deleteForm);
-      
-      // Kirim form
-      deleteForm.submit();
-      
-      // Hapus baris dari tabel setelah submit
-      const row = document.querySelector(`tr[data-id="${adminId}"]`);
-      if (row) {
-        row.remove();
-        
-        // Cek apakah tabel kosong
-        const tableBody = document.querySelector("table tbody");
-        if (tableBody.children.length === 0) {
-          tableBody.innerHTML = '<tr><td colspan="7" class="text-center">Tidak ada data admin</td></tr>';
+      // Hapus via AJAX agar tidak redirect ke JSON
+      fetch(`{{ url('/admin') }}/${adminId}`, {
+        method: 'DELETE',
+        headers: {
+          'X-CSRF-TOKEN': csrfToken,
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'application/json'
         }
-      }
-      
-      // Tampilkan notifikasi
-      showNotification('Admin berhasil dihapus!');
+      })
+      .then(async (response) => {
+        let data = {};
+        try { data = await response.json(); } catch (_) {}
+        if (!response.ok || data.success === false) {
+          throw new Error(data.message || 'Gagal menghapus admin');
+        }
+        // Hapus baris dari tabel
+        const row = document.querySelector(`tr[data-id="${adminId}"]`);
+        if (row) {
+          row.remove();
+          // Re-index sequence numbers
+          const tableBody = document.querySelector('table tbody');
+          const rows = tableBody.querySelectorAll('tr');
+          if (rows.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="7" class="text-center">Tidak ada data admin</td></tr>';
+          } else {
+            let idx = 1;
+            rows.forEach(tr => {
+              const firstCell = tr.querySelector('td');
+              if (firstCell) firstCell.textContent = idx++;
+            });
+          }
+        }
+        showNotification('Admin berhasil dihapus!');
+      })
+      .catch((err) => {
+        console.error(err);
+        showNotification(err.message || 'Terjadi kesalahan saat menghapus admin.', 'error');
+      });
     }
   }
 
