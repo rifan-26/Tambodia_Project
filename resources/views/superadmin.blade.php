@@ -73,8 +73,8 @@
     }
 
     .nav-link {
-      color: #4B596A;
-      padding: 0.5rem 1rem;
+      color: #4b596a;
+      padding: 11px 1rem;
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -84,13 +84,13 @@
     }
 
     .nav-link:hover:not(.active) {
-      background-color: #BCDDC9;
-      color: #1F9E76;
+      background-color: #bcddc9;
+      color: #1f9e76;
     }
 
     .nav-link.active {
-      background-color: #1F9E76 !important;
-      color: #FFFFFF !important;
+      background-color: #1f9e76 !important;
+      color: #fffff1 !important;
       font-weight: 600;
     }
 
@@ -172,11 +172,15 @@
     }
 
     .table thead th {
-      color: #3B82F6;
+      color: #1150b6;
       font-weight: 600;
       padding: 12px 15px;
       text-align: left;
       border-bottom: 1px solid #C7D2FE;
+    }
+
+    .text-color {
+      color : #1150b6;
     }
 
     .table tbody td {
@@ -224,6 +228,22 @@
         gap: 1rem;
       }
     }
+
+    .text-bps-info {
+      color: #005b96;
+      font-weight: 500;
+    }
+
+    .text-bps-success {
+      color: #028e36; 
+      font-weight: 500;
+    }
+
+    .text-bps-danger {
+      color: #8b0000; 
+      font-weight: 500;
+    }
+
   </style>
 </head>
 
@@ -249,7 +269,7 @@
             <i class="bi bi-person"></i> Admin
           </a>
         </li>
-        <li class="nav-item mt-1">
+        <li class="nav-item mb-1">
           <form action="{{ route('logout') }}" method="POST" id="logout-form" style="display: none;">
             @csrf
           </form>
@@ -276,7 +296,7 @@
         <div class="card h-100">
           <div class="card-body text-center">
             <h5 class="card-title">Total Media</h5>
-            <h2 class="text-primary">{{ $totalMedia ?? 0 }}</h2>
+            <h2 class="text-color">{{ $totalMedia ?? 0 }}</h2>
           </div>
         </div>
       </div>
@@ -293,9 +313,9 @@
           <div class="card-body text-center">
             <h5 class="card-title">Media by Type</h5>
             <div class="d-flex justify-content-around">
-              <span class="text-info">Gambar: {{ $mediaByType['Gambar'] ?? 0 }}</span>
-              <span class="text-warning">Video: {{ $mediaByType['Video'] ?? 0 }}</span>
-              <span class="text-danger">Audio: {{ $mediaByType['Audio'] ?? 0 }}</span>
+              <span class="text-bps-info">Gambar: {{ $mediaByType['Gambar'] ?? 0 }}</span>
+              <span class="text-bps-success">Video: {{ $mediaByType['Video'] ?? 0 }}</span>
+              <span class="text-bps-danger">Audio: {{ $mediaByType['Audio'] ?? 0 }}</span>
             </div>
           </div>
         </div>

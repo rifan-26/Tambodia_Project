@@ -85,7 +85,7 @@
 .form-group i {
   position: absolute;
   left: 12px;
-  top: 36px;
+  top: 38px;
   color: #8896b8;
 }
 
@@ -485,13 +485,12 @@
     <div>
       <div class="sidebar-header d-flex align-items-center gap-2">
         <img src="{{ asset('img/Desain tanpa judul.svg') }}" alt="Logo Tambodia" style="width:70px; height:70px; margin-left:20px; object-fit:contain;"/>
-        <h1 class="sidebar-title">
-          <span class="title-text">
-            <span class="tam">Tam</span><span class="bo">bo</span><span class="dia">dia</span>
-          </span>
+        <h1 class="sidebar-title" style="font-weight: 700; font-size: 1.25rem; margin: 0; display: flex; align-items: center;">
+            <span class="title-text">
+                <span style="color: #0084d6;">Tam</span><span style="color: #a0d5d2;">bo</span><span style="color: #1f9e76;">dia</span>
+            </span>
         </h1>
       </div>
-
       <ul class="nav flex-column px-1">
         <li class="nav-item mb-1">
           <a class="nav-link" href="{{ url('/superadmin') }}">
@@ -503,7 +502,7 @@
             <i class="bi bi-person"></i> Admin
           </a>
         </li>
-        <li class="nav-item mt-1">
+        <li class="nav-item mb-1">
           <form action="{{ route('logout') }}" method="POST" id="logout-form" style="display: none;">
             @csrf
           </form>
@@ -635,14 +634,24 @@
         <small class="text-muted d-block mt-1">Format: nama@tambodia.com</small>
       </div>
 
-      <div class="form-group">
-        <label for="role">Role:</label>
-        <i class="bi bi-person-gear"></i>
-        <select id="role" name="role" class="form-select" required>
-          <option value="pegawai" selected>Pegawai</option>
+      <div class="form-group" style="position: relative">
+        <label for="editRole">Role:</label>
+        
+        <i class="bi bi-person-gear" 
+          style="position: absolute; 
+                  left: 10px; 
+                  top: 32px; 
+                  pointer-events: none; 
+                  color: gray;">
+        </i>
+        
+        <select id="editRole" name="role" class="form-select" required
+                style="padding-left: 35px;">
+          <option value="pegawai">Pegawai</option>
           <option value="superadmin">Super Admin</option>
         </select>
       </div>
+
 
       <div class="form-group">
         <label for="password">Password:</label>
