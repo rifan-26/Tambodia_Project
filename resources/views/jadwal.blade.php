@@ -21,38 +21,37 @@
 
 
     .sidebar {
-      background: linear-gradient( 180deg,#E7FFEA 0%,#ffffff 50%,#dcedff 100%);
+      background: linear-gradient(180deg, #E7FFEA 0%, #ffffff 50%, #dcedff 100%);
       border-right: none;
       min-height: 100vh;
-      width: 240px;
+      width: 250px;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      padding-top: 0.1rem;
-      box-sizing: border-box;
       position: fixed;
       left: 0;
       top: 0;
+      bottom: 0;
+      z-index: 1000;
+      overflow: hidden;
     }
     .sidebar-header {
-      padding: 0;
-      margin-top: 20px;
-      user-select: none;
-      margin-bottom: 20px;
+      padding: 1.5rem 1.5rem 1rem;
+      border-bottom: 1px solid #f1f3f4;
+      flex-shrink: 0;
     }
 
     .sidebar-header img {
-      width: 70px;
-      margin-left: 20px;
-      
+      width: 50px;
+      height: 50px;
     }
 
     .sidebar-title {
-      font-weight: 700;
+      font-weight: 600;
       font-size: 1.25rem;
       margin: 0;
       display: flex;
       align-items: center;
+      gap: 0.75rem;
     }
 
 
@@ -72,27 +71,36 @@
         color: #1f9e76;
     }
 
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 0;
+    }
+
     .nav-link.active {
-      background-color: #1f9e76 !important;
-      color: #fffff1 !important;
-      font-weight: 600;
+      background-color: #1f9e76;
+      color: white;
+      font-weight: 500;
       border-radius: 0.375rem;
     }
+    
     .nav-link {
       color: #4b596a;
       padding: 0.5rem 1rem;
+      margin: 0.25rem 0.75rem;
       display: flex;
       align-items: center;
       gap: 0.5rem;
       font-size: 1rem;
       border-radius: 0.375rem;
-      transition: background-color 0.3s ease, color 0.3s ease;
-      user-select: none;
+      transition: all 0.2s ease;
+      text-decoration: none;
     }
+    
     .nav-link:hover:not(.active) {
-      background-color: #bcddc9;
+      background-color: #f8f9fa;
       color: #1f9e76;
-      cursor: pointer;
+      text-decoration: none;
     }
     .sidebar-footer-img-container {
         position: relative;
@@ -228,34 +236,42 @@
       background-color: #a8bee3;
       border-radius: 0.3rem;
     }
-    /* Responsive adjustments */
+    /* Responsive */
     @media (max-width: 768px) {
       .sidebar {
-        width: 60px;
-        border-right: 3px solid #1f9e76;
-        padding-top: 1rem;
+        width: 70px;
       }
-    .sidebar-header h1 {
-        font-size: 0;
+      .sidebar-header {
+        padding: 1rem 0.5rem 0;
+        margin-bottom: 1rem;
       }
-    main.content-area {
-      margin-left: 60px;
-      padding: 1rem;
-      min-height: 100vh;
-      background: linear-gradient(90deg, #ffffff, #e9edfa);
-      box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
-      position: relative;
-    }
-    .nav-link {
-        font-size: 0;
+      .sidebar-header img {
+        width: 40px;
+        height: 40px;
+      }
+      .sidebar-title {
+        display: none;
+      }
+      .sidebar-content {
+        padding: 0;
+      }
+      main.content-area {
+        margin-left: 70px;
+        padding: 1rem;
+      }
+      .nav-link {
         justify-content: center;
-        padding: 0.5rem 0;
+        padding: 0.75rem 0.5rem;
+        margin: 0 0.25rem;
+        flex-direction: column;
+        gap: 0.25rem;
+        font-size: 0.7rem;
       }
-    .nav-link .bi {
-        font-size: 1.6rem;
+      .nav-link i {
+        font-size: 1.2rem;
       }
-    .nav-link.active {
-        border-radius: 0;
+      .nav-link span {
+        display: none;
       }
     }
 
@@ -595,44 +611,48 @@
 </style>
 
 <body>
-  <nav class="sidebar d-flex flex-column justify-content-between">
-    <div>
-      <div class="sidebar-header d-flex align-items-center gap-2">
-        <img src="{{ asset('img/Desain tanpa judul.svg') }}" alt="Logo Tambodia" style="width:70px; height:70px; margin-left:20px; object-fit:contain;"/>
-        <h1 class="sidebar-title">
-            <span class="title-text">
-                <span class="tam">Tam</span><span class="bo">bo</span><span class="dia">dia</span>
-            </span>
-        </h1>
-
-      </div>
-      <ul class="nav flex-column px-1">
-        <li class="nav-item mb-1">
+  <nav class="sidebar">
+    <div class="sidebar-header d-flex align-items-center gap-2">
+      <img src="{{ asset('img/Desain tanpa judul.svg') }}" alt="Logo Tambodia" />
+      <h1 class="sidebar-title">
+        <span class="title-text">
+          <span class="tam">Tam</span><span class="bo">bo</span><span class="dia">dia</span>
+        </span>
+      </h1>
+    </div>
+    
+    <div class="sidebar-content">
+      <ul class="nav flex-column">
+        <li class="nav-item">
           <a class="nav-link" href="{{ route('dashboard.pegawai') }}">
-            <i class="bi bi-speedometer2"></i> Dashboard
+            <i class="bi bi-speedometer2"></i> <span>Dashboard</span>
           </a>
         </li>
-        <li class="nav-item mb-1">
+        <li class="nav-item">
           <a class="nav-link" href="{{ route('media.input') }}">
-            <i class="bi bi-pencil-square"></i> Input Media
+            <i class="bi bi-pencil-square"></i> <span>Input Media</span>
           </a>
         </li>
-        <li class="nav-item mb-1">
+        <li class="nav-item">
+          <a class="nav-link" href="{{ route('layout.index') }}">
+            <i class="bi bi-grid-3x3-gap"></i> <span>Layout Manager</span>
+          </a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link active" href="{{ route('schedule.index') }}">
-            <i class="bi bi-calendar3"></i> Penjadwalan
+            <i class="bi bi-calendar3"></i> <span>Penjadwalan</span>
           </a>
         </li>
-        <li class="nav-item mt-1">
+        <li class="nav-item">
           <form action="{{ route('logout') }}" method="POST" id="logout-form" style="display: none;">
             @csrf
           </form>
           <a class="nav-link" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <i class="bi bi-box-arrow-left"></i> Log Out
+            <i class="bi bi-box-arrow-left"></i> <span>Log Out</span>
           </a>
         </li>
       </ul>
     </div>
-
   </nav>
 
     <main class="content-area">
