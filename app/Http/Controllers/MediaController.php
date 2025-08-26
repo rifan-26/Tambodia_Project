@@ -31,7 +31,15 @@ class MediaController extends Controller
             // Apply filters
             // Filter by type if provided
             if ($request->filled('type')) {
-                $query->where('type', ucfirst(strtolower($request->type)));
+                // Map frontend filter values to database values
+                $typeMap = [
+                    'image' => 'Gambar',
+                    'video' => 'Video', 
+                    'audio' => 'Audio'
+                ];
+                
+                $dbType = $typeMap[strtolower($request->type)] ?? ucfirst(strtolower($request->type));
+                $query->where('type', $dbType);
             }
             
             // Search by name if provided
@@ -433,7 +441,15 @@ class MediaController extends Controller
             
             // Optional type filter (ensure same formatting as other endpoints)
             if ($request->filled('type') && $request->type !== 'all') {
-                $query->where('type', ucfirst(strtolower($request->type)));
+                // Map frontend filter values to database values
+                $typeMap = [
+                    'image' => 'Gambar',
+                    'video' => 'Video', 
+                    'audio' => 'Audio'
+                ];
+                
+                $dbType = $typeMap[strtolower($request->type)] ?? ucfirst(strtolower($request->type));
+                $query->where('type', $dbType);
             }
 
             if ($request->filled('search')) {
@@ -466,7 +482,15 @@ class MediaController extends Controller
             $query = Media::where('user_id', Auth::id());
             
             if ($request->filled('type') && $request->type !== 'all') {
-                $query->where('type', ucfirst(strtolower($request->type)));
+                // Map frontend filter values to database values
+                $typeMap = [
+                    'image' => 'Gambar',
+                    'video' => 'Video', 
+                    'audio' => 'Audio'
+                ];
+                
+                $dbType = $typeMap[strtolower($request->type)] ?? ucfirst(strtolower($request->type));
+                $query->where('type', $dbType);
             }
             
             $media = $query->latest()->get();

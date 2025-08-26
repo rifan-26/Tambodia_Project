@@ -3,112 +3,99 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dashboard Tambodia - Redesigned</title>
+  <title>Dashboard Tambodia</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/plyr/3.7.8/plyr.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/plyr/3.7.8/plyr.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <style>
     :root {
-      --brand-blue: #2c3a67;        /* headings, strong text */
-      --primary: #1f9e76;           /* primary green */
-      --primary-2: #58cbaa;         /* lighter green */
-      --accent-blue: #0071BC;       /* B of BPS */
-      --accent-lime: #8CC63F;       /* P of BPS */
-      --accent-orange: #F7931E;     /* S of BPS */
-      --bg-soft: #f8f9fa;           /* soft surfaces */
-      --border-soft: #e9ecef;       /* soft borders */
+      --primary: #1f9e76;
+      --primary-light: #58cbaa;
+      --text-dark: #2c3a67;
+      --text-muted: #6c757d;
+      --bg-light: #f8f9fa;
+      --border-light: #e9ecef;
     }
+    
     body {
-      background-color: #405672;
+      background-color: #f5f5f5;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: #2f3a55;
+      color: #333;
       min-height: 100vh;
       margin: 0;
       padding: 0;
     }
 
     .sidebar {
-      background: linear-gradient( 180deg,#E7FFEA 0%,#ffffff 50%,#dcedff 100%);
-      border-right: none;
+      background: white;
+      border-right: 1px solid var(--border-light);
       min-height: 100vh;
       width: 240px;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      padding-top: 0.1rem;
+      padding: 1rem 0;
       box-sizing: border-box;
       position: fixed;
       left: 0;
       top: 0;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
 
     .sidebar-header {
-      padding: 0;
-      margin-top: 20px;
+      padding: 0 1rem;
+      margin-bottom: 2rem;
       user-select: none;
-      margin-bottom: 20px;
     }
 
     .sidebar-header img {
-      width: 70px;
-      margin-left: 20px;
+      width: 50px;
+      height: 50px;
     }
 
     .sidebar-title {
-      font-weight: 700;
-      font-size: 1.25rem;
+      font-weight: 600;
+      font-size: 1.2rem;
       margin: 0;
-      display: flex;
-      align-items: center;
-    }
-
-    .title-text {
-        display: inline-block;
+      color: var(--text-dark);
     }
 
     .tam { color: #0084d6; }
     .bo { color: #a0d5d2; }
-    .dia { color: #1f9e76; }
+    .dia { color: var(--primary); }
 
     .nav-link.active {
-      background-color: #1f9e76 !important;
-      color: #fffff1 !important;
-      font-weight: 600;
+      background-color: var(--primary);
+      color: white;
+      font-weight: 500;
       border-radius: 0.375rem;
     }
     
     .nav-link {
-      color: #4b596a;
-      padding: 0.5rem 1rem;
+      color: var(--text-muted);
+      padding: 0.75rem 1rem;
+      margin: 0 0.5rem;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      font-size: 1rem;
+      gap: 0.75rem;
+      font-size: 0.95rem;
       border-radius: 0.375rem;
-      transition: background-color 0.3s ease, color 0.3s ease;
-      user-select: none;
+      transition: all 0.2s ease;
+      text-decoration: none;
     }
     
     .nav-link:hover:not(.active) {
-      background-color: #bcddc9;
-      color: #1f9e76;
-      cursor: pointer;
+      background-color: var(--bg-light);
+      color: var(--primary);
     }
 
     main.content-area {
       margin-left: 240px;
-      padding: 1.75rem 2rem 2rem 2rem;
+      padding: 2rem;
       min-height: 100vh;
-      background: linear-gradient(90deg, #ffffff, #e9edfa);
-      box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
-      position: relative;
+      background: white;
     }
     
     .header-top {
@@ -116,135 +103,96 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 2rem;
-      user-select: none;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-light);
     }
     
     .header-top h2 {
       margin: 0;
       font-weight: 600;
-      font-size: 1.5rem;
-      color: #2c3a67;
+      font-size: 1.75rem;
+      color: var(--text-dark);
     }
     
     .user-badge {
-      background: linear-gradient(90deg, #58cbaa, #7cb8f4);
-      padding: 0.35rem 1rem;
-      border-radius: 2rem;
+      background: var(--primary);
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
       color: white;
-      font-weight: 600;
+      font-weight: 500;
       font-size: 0.9rem;
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      box-shadow: 0 2px 8px rgb(0 0 0 / 0.15);
-      user-select: none;
     }
     
     .user-badge .status-indicator {
-      width: 16px;
-      height: 16px;
-      background-color: #44d69e;
+      width: 8px;
+      height: 8px;
+      background-color: #4ade80;
       border-radius: 50%;
-      box-shadow: 0 0 6px #44d69eaa;
     }
 
-    /* Enhanced Stats Cards */
+    /* Stats Cards */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.25rem;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
     }
 
     .stats-card {
       background: white;
-      border-radius: 12px;
-      padding: 1rem 1.25rem;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-      border: none;
-      position: relative;
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .stats-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--card-color), var(--card-color-light));
-    }
-
-    .stats-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-    }
-
-    /* Theme-aligned stats colors */
-    .stats-card.total { --card-color: var(--brand-blue); --card-color-light: var(--accent-blue); }
-    .stats-card.audio { --card-color: #1976d2; --card-color-light: #63a4ff; }
-    .stats-card.video { --card-color: #c2185b; --card-color-light: #f48fb1; }
-    .stats-card.image { --card-color: #388e3c; --card-color-light: #66bb6a; }
-
-    .stats-card-header {
-      display: flex;
-      justify-content: between;
-      align-items: center;
-      margin-bottom: 0.5rem;
+      border-radius: 8px;
+      padding: 1.5rem;
+      border: 1px solid var(--border-light);
+      text-align: center;
     }
 
     .stats-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.4rem;
+      font-size: 1.5rem;
+      margin: 0 auto 1rem;
       color: white;
-      background: linear-gradient(135deg, var(--card-color), var(--card-color-light));
-      margin-bottom: 0.5rem;
     }
 
+    .stats-card.total .stats-icon { background: var(--text-dark); }
+    .stats-card.audio .stats-icon { background: #3b82f6; }
+    .stats-card.video .stats-icon { background: #ef4444; }
+    .stats-card.image .stats-icon { background: #10b981; }
+
     .stats-number {
-      font-size: 1.75rem;
+      font-size: 2rem;
       font-weight: 700;
-      color: var(--card-color);
+      color: var(--text-dark);
       margin: 0;
       line-height: 1;
     }
 
     .stats-label {
-      color: #6c757d;
+      color: var(--text-muted);
       font-size: 0.9rem;
       font-weight: 500;
-      margin-top: 0.25rem;
+      margin-top: 0.5rem;
     }
 
-    .stats-change {
-      font-size: 0.8rem;
-      font-weight: 600;
-      margin-top: 0.25rem;
-    }
-
-    .stats-change.positive { color: #28a745; }
-    .stats-change.negative { color: #dc3545; }
-
-    /* Enhanced Media Section */
+    /* Media Section */
     .dashboard-section {
       background: white;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      overflow: hidden;
+      border-radius: 8px;
+      border: 1px solid var(--border-light);
       margin-bottom: 2rem;
     }
 
     .section-header {
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      padding: 1.5rem 2rem;
-      border-bottom: 1px solid #e9ecef;
+      background: var(--bg-light);
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border-light);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -253,7 +201,7 @@
     .section-title {
       font-size: 1.25rem;
       font-weight: 600;
-      color: #2c3a67;
+      color: var(--text-dark);
       margin: 0;
       display: flex;
       align-items: center;
@@ -264,66 +212,60 @@
       padding: 0;
     }
 
-    /* Filter removed */
-
-    /* Enhanced Media Grid */
+    /* Media Grid */
     .media-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 1rem;
-      padding: 1rem 1.25rem;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      padding: 1.5rem;
     }
 
     .media-card {
       background: white;
-      border: 1px solid #e9ecef;
-      border-radius: 12px;
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
       overflow: hidden;
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      transition: all 0.2s ease;
       display: flex;
       flex-direction: column;
       height: 100%;
     }
 
     .media-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-      border-color: #1f9e76;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-color: var(--primary);
     }
 
     .media-card-header {
-      padding: 0.75rem 1rem;
-      background: #f8f9fa;
-      border-bottom: 1px solid #e9ecef;
+      padding: 1rem;
+      background: var(--bg-light);
+      border-bottom: 1px solid var(--border-light);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
     .media-title {
-      font-weight: 600;
-      color: #2c3a67;
+      font-weight: 500;
+      color: var(--text-dark);
       margin: 0;
       font-size: 1rem;
     }
 
     .media-badge {
-      padding: 0.25rem 0.75rem;
-      border-radius: 20px;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
       font-size: 0.75rem;
-      font-weight: 600;
+      font-weight: 500;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
 
-    /* Match landing page chips */
-    .media-badge.image { background-color: #e3f2fd; color: #1976d2; }
-    .media-badge.video { background-color: #fce4ec; color: #c2185b; }
-    .media-badge.audio { background-color: #e8f5e9; color: #388e3c; }
+    .media-badge.image { background-color: #dbeafe; color: #1d4ed8; }
+    .media-badge.video { background-color: #fecaca; color: #dc2626; }
+    .media-badge.audio { background-color: #dcfce7; color: #16a34a; }
 
     .media-card-body {
-      padding: 0.75rem 1rem;
+      padding: 1rem;
       display: flex;
       flex-direction: column;
       flex: 1 1 auto;
@@ -331,13 +273,13 @@
 
     .media-date {
       font-size: 0.85rem;
-      color: #6c757d;
+      color: var(--text-muted);
       margin-bottom: 1rem;
     }
 
     .media-preview {
       margin-bottom: 1rem;
-      border-radius: 8px;
+      border-radius: 4px;
       overflow: hidden;
     }
 
@@ -345,7 +287,7 @@
     .media-preview video,
     .media-preview audio {
       width: 100%;
-      max-height: 160px;
+      max-height: 200px;
       object-fit: cover;
       display: block;
     }
@@ -358,39 +300,46 @@
     }
 
     .btn-enhanced {
-      border-radius: 6px;
+      border-radius: 4px;
       font-weight: 500;
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
       border: none;
-      padding: 0.5rem 1rem;
-      font-size: 0.85rem;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
     }
 
     .btn-toggle {
-      background: linear-gradient(135deg, #1f9e76, #58cbaa);
+      background: var(--primary);
       color: white;
     }
 
     .btn-toggle:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(31, 158, 118, 0.3);
+      background: var(--primary-light);
     }
 
     .btn-delete {
-      background: linear-gradient(135deg, #dc3545, #c82333);
+      background: #dc3545;
       color: white;
     }
 
     .btn-delete:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+      background: #c82333;
+    }
+
+    .btn-play {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .btn-play:hover {
+      background: #2563eb;
     }
 
     /* Bulk Actions */
     .bulk-actions {
-      padding: 1.5rem 2rem;
-      background: #f8f9fa;
-      border-bottom: 1px solid #e9ecef;
+      padding: 1rem 1.5rem;
+      background: var(--bg-light);
+      border-bottom: 1px solid var(--border-light);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -409,15 +358,15 @@
 
     .btn-bulk {
       padding: 0.5rem 1rem;
-      border-radius: 6px;
+      border-radius: 4px;
       font-size: 0.85rem;
       font-weight: 500;
       border: none;
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
     }
 
     .btn-bulk-toggle {
-      background: var(--brand-blue);
+      background: var(--text-dark);
       color: white;
     }
 
@@ -432,70 +381,22 @@
     }
 
     .btn-bulk-info {
-      background: var(--accent-blue);
+      background: #6b7280;
       color: white;
     }
 
-    .btn-bulk:hover {
-      transform: translateY(-1px);
-    }
-
-    /* Audio Player Enhanced */
+    /* Audio Player */
     .audio-player-container {
-      background: #f8f9fa;
-      border-radius: 8px;
+      background: var(--bg-light);
+      border-radius: 4px;
       padding: 1rem;
       margin-bottom: 1rem;
     }
 
-    .plyr--audio .plyr__control.plyr__tab-focus,
-    .plyr--audio .plyr__control:hover,
-    .plyr--audio .plyr__control[aria-expanded=true] {
-      background: #1f9e76;
-    }
-
-    .plyr--full-ui input[type=range] {
-      color: #1f9e76;
-    }
-
-    .plyr__control--overlaid {
-      background: #1f9e76;
-    }
-
-    /* Table removed */
-
     .checkbox-enhanced {
-      width: 18px;
-      height: 18px;
-      accent-color: #1f9e76;
-    }
-
-    /* Button Actions */
-    .action-buttons {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 1.5rem;
-      gap: 1rem;
-    }
-
-    .btn-action {
-      padding: 0.75rem 2rem;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 1rem;
-      border: none;
-      transition: all 0.3s ease;
-      cursor: pointer;
-    }
-
-    .btn-action.primary {
-      background: linear-gradient(135deg, #1f9e76, #58cbaa);
-      color: white;
-    }
-
-    .btn-action:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary);
     }
 
     /* Loading States */
@@ -526,25 +427,25 @@
       align-items: center;
       background-color: white;
       padding: 2rem;
-      border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
     
     .spinner-text {
       margin-top: 1rem;
-      color: #1f9e76;
-      font-weight: 600;
+      color: var(--primary);
+      font-weight: 500;
     }
 
     /* Empty State */
     .empty-state {
       text-align: center;
       padding: 3rem 2rem;
-      color: #6c757d;
+      color: var(--text-muted);
     }
 
     .empty-state i {
-      font-size: 4rem;
+      font-size: 3rem;
       margin-bottom: 1rem;
       opacity: 0.5;
     }
@@ -553,50 +454,61 @@
     @media (max-width: 768px) {
       .sidebar {
         width: 60px;
-        border-right: 3px solid #1f9e76;
-        padding-top: 1rem;
+        padding: 1rem 0;
       }
-      .sidebar-header h1 {
-          font-size: 0;
-        }
+      .sidebar-header {
+        padding: 0 0.5rem;
+      }
+      .sidebar-header img {
+        width: 40px;
+        height: 40px;
+      }
+      .sidebar-title {
+        display: none;
+      }
       main.content-area {
-          margin-left: 60px;
-          padding: 1rem;
+        margin-left: 60px;
+        padding: 1rem;
       }
       .nav-link {
-          font-size: 0;
-          justify-content: center;
-          padding: 0.5rem 0;
+        justify-content: center;
+        padding: 0.75rem 0.5rem;
+        margin: 0 0.25rem;
       }
-      .nav-link .bi {
-          font-size: 1.6rem;
+      .nav-link span {
+        display: none;
       }
       .stats-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
       }
       .media-grid {
         grid-template-columns: 1fr;
         padding: 1rem;
-      }
-      .filter-row {
-        flex-direction: column;
-        align-items: stretch;
       }
       .bulk-actions {
         flex-direction: column;
         gap: 1rem;
         align-items: stretch;
       }
+      .header-top {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+      }
     }
 
     @media (max-width: 576px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
       .media-card-header {
         flex-direction: column;
         gap: 0.5rem;
         text-align: center;
       }
       .media-actions {
-        flex-direction: column;
+        justify-content: center;
       }
     }
 </style>
@@ -608,58 +520,58 @@
       <div class="spinner-border text-success" style="width: 3rem; height: 3rem;" role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
-      <div class="spinner-text">Memproses...</div>
+      <div class="spinner-text">Loading...</div>
     </div>
   </div>
 
-  <nav class="sidebar d-flex flex-column justify-content-between">
-    <div>
-      <div class="sidebar-header d-flex align-items-center gap-2 mb-4">
-        <img src="{{ asset('img/Desain tanpa judul.svg') }}" alt="Logo Tambodia" style="width:70px; height:70px; margin-left:20px; object-fit:contain;"/>
-        <h1 class="sidebar-title">
-            <span class="title-text">
-                <span class="tam">Tam</span><span class="bo">bo</span><span class="dia">dia</span>
-            </span>
-        </h1>
-      </div>
-      <ul class="nav flex-column px-1">
-        <li class="nav-item mb-1">
-          <a class="nav-link active" href="{{ route('dashboard.pegawai') }}">
-            <i class="bi bi-speedometer2"></i> Dashboard
-          </a>
-        </li>
-        <li class="nav-item mb-1">
-          <a class="nav-link" href="{{ route('media.input') }}">
-            <i class="bi bi-pencil-square"></i> Input Media
-          </a>
-        </li>
-        <li class="nav-item mb-1">
-          <a class="nav-link" href="{{ route('schedule.index') }}">
-            <i class="bi bi-calendar3"></i> Penjadwalan
-          </a>
-        </li>
-        <li class="nav-item mt-1">
-          <form action="{{ route('logout') }}" method="POST" id="logout-form" style="display:none;">
-            @csrf
-          </form>
-          <a class="nav-link" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <i class="bi bi-box-arrow-left"></i> Log Out
-          </a>
-        </li>
-      </ul>
+  <nav class="sidebar">
+    <div class="sidebar-header d-flex align-items-center gap-2">
+      <img src="{{ asset('img/Desain tanpa judul.svg') }}" alt="Logo Tambodia"/>
+      <h1 class="sidebar-title">
+        <span class="tam">Tam</span><span class="bo">bo</span><span class="dia">dia</span>
+      </h1>
     </div>
+    <ul class="nav flex-column">
+      <li class="nav-item">
+        <a class="nav-link active" href="{{ route('dashboard.pegawai') }}">
+          <i class="bi bi-speedometer2"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ route('media.input') }}">
+          <i class="bi bi-pencil-square"></i>
+          <span>Input Media</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ route('schedule.index') }}">
+          <i class="bi bi-calendar3"></i>
+          <span>Penjadwalan</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <form action="{{ route('logout') }}" method="POST" id="logout-form" style="display:none;">
+          @csrf
+        </form>
+        <a class="nav-link" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+          <i class="bi bi-box-arrow-left"></i>
+          <span>Log Out</span>
+        </a>
+      </li>
+    </ul>
   </nav>
 
   <main class="content-area">
     <div class="header-top">
-        <h2><i class="bi bi-speedometer2 me-2"></i>Dashboard Overview</h2>
-        <div class="user-badge" title="Logged in as Admin">
-            <span class="status-indicator" aria-label="online status"></span>
-            <span>{{ Auth::user()->name ?? 'Username Admin' }}</span>
+        <h2>Dashboard</h2>
+        <div class="user-badge">
+            <span class="status-indicator"></span>
+            <span>{{ Auth::user()->name ?? 'Admin' }}</span>
         </div>
     </div>
     
-    <!-- Enhanced Stats Cards -->
+    <!-- Stats Cards -->
     <div class="stats-grid">
       <div class="stats-card total">
         <div class="stats-icon">
@@ -667,8 +579,6 @@
         </div>
         <div class="stats-number" id="totalMedia">0</div>
         <div class="stats-label">Total Media</div>
-        <div class="stats-change positive">
-        </div>
       </div>
       
       <div class="stats-card audio">
@@ -677,8 +587,6 @@
         </div>
         <div class="stats-number" id="totalAudio">0</div>
         <div class="stats-label">Audio Files</div>
-        <div class="stats-change positive">
-        </div>
       </div>
       
       <div class="stats-card video">
@@ -687,8 +595,6 @@
         </div>
         <div class="stats-number" id="totalVideo">0</div>
         <div class="stats-label">Video Files</div>
-        <div class="stats-change positive">
-        </div>
       </div>
       
       <div class="stats-card image">
@@ -697,87 +603,75 @@
         </div>
         <div class="stats-number" id="totalImage">0</div>
         <div class="stats-label">Image Files</div>
-        <div class="stats-change negative">
-        </div>
       </div>
     </div>
 
-    <!-- Enhanced Media Management Section -->
+    <!-- Media Management Section -->
     <div class="dashboard-section">
       <div class="section-header">
         <h3 class="section-title">
           <i class="bi bi-folder2-open"></i>
-          Manajemen Media
+          Media Management
         </h3>
         <div class="d-flex gap-2">
-          <button class="btn btn-outline-primary btn-sm" onclick="refreshMedia()">
+          <button type="button" class="btn btn-outline-primary btn-sm" onclick="refreshData()">
             <i class="bi bi-arrow-clockwise"></i> Refresh
           </button>
-          <a href="{{ url('/input') }}" class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-circle"></i> Tambah Media
-          </a>
         </div>
       </div>
 
-      <!-- Enhanced Filter Section -->
+      <!-- Filter Section -->
       <div class="px-4 py-3 border-bottom" id="filterSection">
-        <!-- Hidden select used by fetchMedia() -->
         <select id="jenisMedia" class="form-select form-select-sm d-none" aria-hidden="true">
-          <option value="Semua Jenis" selected>Semua Jenis</option>
-          <option value="Gambar">Gambar</option>
-          <option value="Video">Video</option>
+          <option value="Semua Jenis" selected>All Types</option>
+          <option value="Gambar">Images</option>
+          <option value="Video">Videos</option>
           <option value="Audio">Audio</option>
         </select>
-        <div class="d-flex flex-wrap gap-2 align-items-center filter-row">
-          <div class="me-2 text-muted fw-semibold">Filter:</div>
-          <div class="btn-group" role="group" aria-label="Filter media">
-            <button type="button" class="btn btn-outline-primary btn-sm filter-btn active" data-type="">
-              <i class="bi bi-sliders me-1"></i> Semua
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+          <span class="text-muted fw-semibold">Filter:</span>
+          <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-secondary btn-sm filter-btn active" data-type="">
+              <i class="bi bi-grid me-1"></i> All
             </button>
-            <button type="button" class="btn btn-outline-primary btn-sm filter-btn" data-type="Gambar">
-              <i class="bi bi-image me-1"></i> Gambar
+            <button type="button" class="btn btn-outline-secondary btn-sm filter-btn" data-type="Gambar">
+              <i class="bi bi-image me-1"></i> Images
             </button>
-            <button type="button" class="btn btn-outline-primary btn-sm filter-btn" data-type="Video">
-              <i class="bi bi-play-circle me-1"></i> Video
+            <button type="button" class="btn btn-outline-secondary btn-sm filter-btn" data-type="Video">
+              <i class="bi bi-play-circle me-1"></i> Videos
             </button>
-            <button type="button" class="btn btn-outline-primary btn-sm filter-btn" data-type="Audio">
+            <button type="button" class="btn btn-outline-secondary btn-sm filter-btn" data-type="Audio">
               <i class="bi bi-music-note me-1"></i> Audio
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Enhanced Bulk Actions -->
+      <!-- Bulk Actions -->
       <div class="bulk-actions">
         <div class="bulk-select">
           <div class="form-check">
             <input class="form-check-input checkbox-enhanced" type="checkbox" value="" id="selectAll">
-            <label class="form-check-label fw-semibold" for="selectAll">
-              Pilih Semua Media
+            <label class="form-check-label" for="selectAll">
+              Select All
             </label>
           </div>
-          <span class="text-muted" id="selectedCount">0 dipilih</span>
+          <span class="text-muted" id="selectedCount">0 selected</span>
         </div>
         <div class="bulk-buttons">
-          <button type="button" id="btnBulkToggle" class="btn-bulk btn-bulk-toggle" data-bs-toggle="tooltip" title="Toggle tampil/sembunyi pada Landing untuk media yang dipilih">
-            <i class="bi bi-shuffle"></i> Toggle
+          <button type="button" id="btnBulkShow" class="btn-bulk btn-bulk-show" title="Show selected media on landing page">
+            <i class="bi bi-eye"></i> Show
           </button>
-          <button type="button" id="btnBulkShow" class="btn-bulk btn-bulk-show" data-bs-toggle="tooltip" title="Tampilkan semua media terpilih di Landing">
-            <i class="bi bi-eye"></i> Tampilkan
-          </button>
-          <button type="button" id="btnBulkHide" class="btn-bulk btn-bulk-hide" data-bs-toggle="tooltip" title="Sembunyikan semua media terpilih dari Landing">
-            <i class="bi bi-eye-slash"></i> Sembunyikan
-          </button>
-          <button type="button" class="btn-bulk btn-bulk-info" data-bs-toggle="tooltip" title="Media hanya akan tampil di Landing jika status 'Show on Landing' aktif dan (opsional) jadwalnya sedang aktif.">
-            <i class="bi bi-info-circle"></i>
+          <button type="button" id="btnBulkHide" class="btn-bulk btn-bulk-hide" title="Hide selected media from landing page">
+            <i class="bi bi-eye-slash"></i> Hide
           </button>
         </div>
       </div>
 
-      <!-- Enhanced Media Grid -->
+      <!-- Media Grid -->
       <div class="section-content">
         <div class="media-grid" id="mediaContainer">
-            <!-- Sample media cards will be rendered here -->
+            <!-- Media cards will be rendered here -->
         </div>
       </div>
     </div>
@@ -852,12 +746,12 @@
         const url = `${API.filter}?${q.toString()}`;
         const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
         const json = await res.json();
-        if (!json.success) throw new Error(json.message || 'Gagal memuat media');
+        if (!json.success) throw new Error(json.message || 'Failed to load media');
         state.media = Array.isArray(json.data) ? json.data : [];
         renderAll();
       } catch (e) {
         console.error(e);
-        toast('Terjadi kesalahan saat memuat data media', 'error');
+        toast('Error loading media data', 'error');
       } finally {
         showLoading(false);
       }
@@ -912,8 +806,8 @@
       if (!items.length) {
         container.innerHTML = `
           <div class="empty-state w-100">
-            <i class="bi bi-emoji-frown"></i>
-            <div>Tidak ada media.</div>
+            <i class="bi bi-folder-x"></i>
+            <div>No media found.</div>
           </div>`;
         return;
       }
@@ -932,7 +826,7 @@
       container.querySelectorAll('[data-action="delete"]').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           const id = e.currentTarget.dataset.id;
-          if (!confirm('Hapus media ini?')) return;
+          if (!confirm('Delete this media?')) return;
           await deleteMedia(id);
           await refreshMedia();
         });
@@ -950,14 +844,14 @@
         const mime = guessMimeFromPath(m.file_path, 'video/mp4');
         preview = `<video class="w-100 rounded" controls preload="metadata" playsinline>
           <source src="${src}" type="${mime}">
-          Browser Anda tidak mendukung pemutar video.
+          Your browser does not support video playback.
         </video>`;
       } else if (m.type === 'Audio') {
         const src = fileUrl(m.file_path);
         const mime = guessMimeFromPath(m.file_path, 'audio/mpeg');
         preview = `<div class="audio-player-container"><audio class="js-player" controls preload="metadata" playsinline>
           <source src="${src}" type="${mime}">
-          Browser Anda tidak mendukung pemutar audio.
+          Your browser does not support audio playback.
         </audio></div>`;
       }
       return `
@@ -972,7 +866,7 @@
             <div class="d-flex align-items-center justify-content-between">
               <div class="form-check">
                 <input class="form-check-input checkbox-enhanced media-checkbox" type="checkbox" value="${m.id}" data-id="${m.id}">
-                <label class="form-check-label">Pilih</label>
+                <label class="form-check-label">Select</label>
               </div>
               <div class="media-actions">
                 ${m.type === 'Audio' ? `
@@ -985,7 +879,7 @@
                 </button>
                 `}
                 <button class="btn-enhanced btn-delete" data-action="delete" data-id="${m.id}">
-                  <i class="bi bi-trash"></i> Hapus
+                  <i class="bi bi-trash"></i> Delete
                 </button>
               </div>
             </div>
@@ -1001,7 +895,7 @@
     function updateSelectedCount() {
       const count = getSelectedIds().length;
       const el = document.getElementById('selectedCount');
-      if (el) el.textContent = `${count} dipilih`;
+      if (el) el.textContent = `${count} selected`;
     }
 
     async function refreshMedia() { return fetchMedia({}); }
@@ -1009,7 +903,7 @@
     function applyAdvancedFilters() { fetchMedia({}); }
 
     async function toggleLanding(mediaIds, desiredStatus = null) {
-      if (!mediaIds || !mediaIds.length) return toast('Pilih media terlebih dahulu', 'error');
+      if (!mediaIds || !mediaIds.length) return toast('Please select media first', 'error');
       try {
         showLoading(true);
         let ids = [...mediaIds];
@@ -1022,7 +916,7 @@
             ids = [existsOpposite, ...ids.filter(x => x !== existsOpposite)];
           } else {
             // All already in desired state; nothing to do
-            toast('Semua media sudah dalam status yang diinginkan');
+            toast('All media already in desired status');
             return;
           }
         }
@@ -1036,11 +930,11 @@
           body: JSON.stringify({ media_ids: ids }),
         });
         const json = await res.json();
-        if (!json.success) throw new Error(json.message || 'Gagal mengubah status');
-        toast(json.message || 'Berhasil mengubah status');
+        if (!json.success) throw new Error(json.message || 'Failed to change status');
+        toast(json.message || 'Status changed successfully');
       } catch (e) {
         console.error(e);
-        toast('Terjadi kesalahan saat mengubah status', 'error');
+        toast('Error changing status', 'error');
       } finally {
         showLoading(false);
       }
@@ -1057,11 +951,11 @@
           },
         });
         const json = await res.json();
-        if (!json.success) throw new Error(json.message || 'Gagal menghapus media');
-        toast(json.message || 'Media dihapus');
+        if (!json.success) throw new Error(json.message || 'Failed to delete media');
+        toast(json.message || 'Media deleted');
       } catch (e) {
         console.error(e);
-        toast('Terjadi kesalahan saat menghapus media', 'error');
+        toast('Error deleting media', 'error');
       } finally {
         showLoading(false);
       }
@@ -1126,7 +1020,7 @@
         m.addEventListener('error', () => {
           const src = (m.currentSrc || (m.querySelector('source')?.src) || '');
           console.error('Media load error:', src, m.error);
-          toast('Gagal memuat media: ' + (src || 'unknown'), 'error');
+          toast('Failed to load media: ' + (src || 'unknown'), 'error');
         }, { once: true });
       });
     }
@@ -1154,7 +1048,7 @@
       modal.innerHTML = `
         <div style="background:#fff;border-radius:12px;max-width:520px;width:92%;box-shadow:0 10px 30px rgba(0,0,0,0.2);">
           <div style="padding:12px 16px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;">
-            <div class="fw-semibold" id="playAudioTitle">Putar Audio</div>
+            <div class="fw-semibold" id="playAudioTitle">Play Audio</div>
             <button type="button" id="closePlayAudio" class="btn btn-sm btn-outline-secondary"><i class="bi bi-x"></i></button>
           </div>
           <div style="padding:16px;">
@@ -1172,7 +1066,7 @@
       const audio = document.getElementById('playAudioElement');
       const ttl = document.getElementById('playAudioTitle');
       if (!modal || !audio) return;
-      ttl && (ttl.textContent = title || 'Putar Audio');
+      ttl && (ttl.textContent = title || 'Play Audio');
       // set source fresh each time
       audio.src = src;
       audio.muted = false; audio.volume = 1.0;

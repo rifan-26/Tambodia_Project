@@ -817,15 +817,38 @@
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h5 class="card-title mb-0">Media Tersedia</h5>
-          <div class="d-flex gap-2">
-            <button class="btn btn-outline-primary btn-sm" data-filter="all">Semua</button>
-            <button class="btn btn-outline-primary btn-sm" data-filter="image">Gambar</button>
-            <button class="btn btn-outline-primary btn-sm" data-filter="video">Video</button>
-            <button class="btn btn-outline-primary btn-sm" data-filter="audio">Audio</button>
+          <div class="d-flex gap-2 align-items-center">
+            <!-- Search Input -->
+            <div class="input-group" style="width: 250px;">
+              <input type="text" class="form-control form-control-sm" id="mediaSearch" placeholder="Cari media...">
+              <button class="btn btn-outline-secondary btn-sm" type="button" id="clearSearch">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+            <!-- Filter Buttons -->
+            <div class="btn-group" role="group">
+              <button class="btn btn-outline-primary btn-sm active" data-filter="all">Semua</button>
+              <button class="btn btn-outline-primary btn-sm" data-filter="image">Gambar</button>
+              <button class="btn btn-outline-primary btn-sm" data-filter="video">Video</button>
+              <button class="btn btn-outline-primary btn-sm" data-filter="audio">Audio</button>
+            </div>
           </div>
         </div>
         <div class="row" id="mediaGrid">
           <!-- Media items will be rendered here -->
+        </div>
+        <!-- Loading indicator for media grid -->
+        <div id="mediaGridLoading" class="text-center py-4 d-none">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-2 text-muted">Memuat media...</p>
+        </div>
+        <!-- No results message -->
+        <div id="noMediaResults" class="text-center py-4 d-none">
+          <i class="bi bi-search text-muted" style="font-size: 3rem;"></i>
+          <p class="mt-2 text-muted">Tidak ada media yang ditemukan</p>
+          <button class="btn btn-outline-primary btn-sm" id="resetFilters">Reset Filter</button>
         </div>
       </div>
     </div>
@@ -1065,47 +1088,242 @@
 
       // Media grid filtering and fetch
       const mediaGrid = qs('#mediaGrid');
-      qsa('.card .btn-outline-primary[data-filter]').forEach(btn => {
+      const mediaSearch = qs('#mediaSearch');
+      const clearSearchBtn = qs('#clearSearch');
+      const mediaGridLoading = qs('#mediaGridLoading');
+      const noMediaResults = qs('#noMediaResults');
+      const resetFiltersBtn = qs('#resetFilters');
+      let currentFilter = 'all';
+      let currentSearch = '';
+      let searchTimeout = null;
+
+      // Filter button handlers
+      qsa('.btn-group .btn[data-filter]').forEach(btn => {
         btn.addEventListener('click', ()=>{
-          qsa('.card .btn-outline-primary[data-filter]').forEach(b=> b.classList.remove('active'));
+          qsa('.btn-group .btn[data-filter]').forEach(b=> b.classList.remove('active'));
           btn.classList.add('active');
-          fetchMedia(btn.dataset.filter, '');
+          currentFilter = btn.dataset.filter;
+          fetchMedia(currentFilter, currentSearch);
         });
       });
 
+      // Search input handlers with debouncing
+      mediaSearch.addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        currentSearch = e.target.value.trim();
+        
+        // Show/hide clear button
+        clearSearchBtn.style.display = currentSearch ? 'block' : 'none';
+        
+        // Debounce search to avoid too many API calls
+        searchTimeout = setTimeout(() => {
+          fetchMedia(currentFilter, currentSearch);
+        }, 300);
+      });
+
+      // Clear search button
+      clearSearchBtn.addEventListener('click', () => {
+        mediaSearch.value = '';
+        currentSearch = '';
+        clearSearchBtn.style.display = 'none';
+        fetchMedia(currentFilter, currentSearch);
+      });
+
+      // Reset filters button
+      resetFiltersBtn.addEventListener('click', () => {
+        mediaSearch.value = '';
+        currentSearch = '';
+        currentFilter = 'all';
+        clearSearchBtn.style.display = 'none';
+        qsa('.btn-group .btn[data-filter]').forEach(b=> b.classList.remove('active'));
+        qs('.btn-group .btn[data-filter="all"]').classList.add('active');
+        fetchMedia('all', '');
+      });
+
       async function fetchMedia(type='all', search=''){
-        mediaGrid.innerHTML = '<div class="col-12 text-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+        // Show loading state
+        mediaGrid.classList.add('d-none');
+        noMediaResults.classList.add('d-none');
+        mediaGridLoading.classList.remove('d-none');
+        
         const params = new URLSearchParams();
         if(type && type!=='all'){ params.append('type', type); }
-        if(search){ params.append('search', search); }
-        const endpoint = search && search.trim().length>0 ? '{{ route('api.media.search') }}' : '{{ route('api.media.filter') }}';
+        if(search && search.trim().length > 0){ params.append('search', search); }
+        
+        // Use search endpoint if there's a search term, otherwise use filter endpoint
+        const endpoint = search && search.trim().length > 0 ? '{{ route('api.media.search') }}' : '{{ route('api.media.filter') }}';
+        
         try{
-          const res = await fetch(endpoint + '?' + params.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+          const res = await fetch(endpoint + '?' + params.toString(), { 
+            headers: { 
+              'X-Requested-With': 'XMLHttpRequest',
+              'Accept': 'application/json'
+            } 
+          });
+          
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+          }
+          
           const json = await res.json();
-          if(!json.success) throw new Error(json.message||'Failed');
-          renderMedia(json.data||[]);
-        }catch(e){ mediaGrid.innerHTML = '<div class="col-12 text-center py-4"><p>Error loading media.</p></div>'; toast('Gagal memuat data media', 'error'); }
+          
+          if(!json.success) {
+            throw new Error(json.message || 'Failed to fetch media');
+          }
+          
+          renderMedia(json.data || []);
+          
+        } catch(e) { 
+          console.error('Error fetching media:', e);
+          mediaGridLoading.classList.add('d-none');
+          mediaGrid.classList.remove('d-none');
+          mediaGrid.innerHTML = `
+            <div class="col-12 text-center py-4">
+              <i class="bi bi-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
+              <p class="mt-2 text-muted">Gagal memuat data media</p>
+              <button class="btn btn-outline-primary btn-sm" onclick="fetchMedia('${type}', '${search}')">Coba Lagi</button>
+            </div>
+          `;
+          toast('Gagal memuat data media: ' + e.message, 'error'); 
+        }
       }
 
       function renderMedia(list){
-        if(!list.length){ mediaGrid.innerHTML = '<div class="col-12 text-center py-4"><p>Tidak ada media.</p></div>'; return; }
+        // Hide loading state
+        mediaGridLoading.classList.add('d-none');
+        
+        if(!list || list.length === 0){ 
+          mediaGrid.classList.add('d-none');
+          noMediaResults.classList.remove('d-none');
+          return; 
+        }
+        
+        // Show media grid and hide no results message
+        mediaGrid.classList.remove('d-none');
+        noMediaResults.classList.add('d-none');
         mediaGrid.innerHTML = '';
+        
         list.forEach(item=>{
-          const col = document.createElement('div'); col.className='col-md-4 col-lg-3 mb-4';
+          const col = document.createElement('div'); 
+          col.className='col-md-4 col-lg-3 mb-4';
+          
+          // Format date
+          const date = item.created_at ? new Date(item.created_at).toLocaleDateString('id-ID') : (item.date || '');
+          
+          // Get type badge color
+          const badgeColor = {
+            'Gambar': 'bg-success',
+            'Video': 'bg-primary', 
+            'Audio': 'bg-info'
+          }[item.type] || 'bg-secondary';
+          
+          // Get type icon
+          const typeIcon = {
+            'Gambar': 'bi-image',
+            'Video': 'bi-play-circle',
+            'Audio': 'bi-music-note'
+          }[item.type] || 'bi-file-earmark';
+          
           col.innerHTML = `
-            <div class="card h-100">
-              <div class="card-body">
-                <h6 class="card-title">${item.name}</h6>
-                <p class="card-text"><span class="badge bg-info">${item.type}</span></p>
-                <p class="card-text small">${item.created_at||item.date||''}</p>
+            <div class="card h-100 shadow-sm">
+              <div class="card-body d-flex flex-column">
+                <div class="d-flex align-items-center mb-2">
+                  <i class="${typeIcon} text-muted me-2"></i>
+                  <h6 class="card-title mb-0 flex-grow-1" title="${item.name}">${item.name.length > 20 ? item.name.substring(0, 20) + '...' : item.name}</h6>
+                </div>
+                <div class="mb-2">
+                  <span class="badge ${badgeColor}">${item.type}</span>
+                </div>
+                <p class="card-text small text-muted mt-auto">
+                  <i class="bi bi-calendar3 me-1"></i>${date}
+                </p>
+                <div class="btn-group btn-group-sm mt-2" role="group">
+                  <button class="btn btn-outline-primary" onclick="previewMedia(${item.id}, '${item.type}', '${item.file_path}', '${item.name}')" title="Preview">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                  <button class="btn btn-outline-danger" onclick="deleteMedia(${item.id}, '${item.name}')" title="Hapus">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
               </div>
             </div>`;
           mediaGrid.appendChild(col);
         });
       }
 
-      // Initial
+      // Media preview function
+      window.previewMedia = function(id, type, filePath, name) {
+        const modalEl = document.getElementById('mediaPreviewModal');
+        const modalBody = document.getElementById('modalPreviewContent');
+        const modalTitle = document.getElementById('modalPreviewTitle');
+        
+        modalBody.innerHTML = '';
+        modalTitle.textContent = `Preview: ${name}`;
+        
+        const mediaUrl = `{{ url('/media') }}/${filePath}`;
+        
+        if(type === 'Gambar') {
+          const img = document.createElement('img');
+          img.src = mediaUrl;
+          img.className = 'img-fluid rounded shadow';
+          img.style.maxHeight = '400px';
+          modalBody.appendChild(img);
+        } else if(type === 'Video') {
+          const video = document.createElement('video');
+          video.src = mediaUrl;
+          video.controls = true;
+          video.style.width = '100%';
+          video.style.maxHeight = '400px';
+          video.className = 'rounded shadow';
+          modalBody.appendChild(video);
+        } else if(type === 'Audio') {
+          const audio = document.createElement('audio');
+          audio.src = mediaUrl;
+          audio.controls = true;
+          audio.style.width = '100%';
+          modalBody.appendChild(audio);
+        }
+        
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+      };
+      
+      // Media delete function
+      window.deleteMedia = function(id, name) {
+        if(!confirm(`Apakah Anda yakin ingin menghapus media "${name}"?`)) {
+          return;
+        }
+        
+        showLoading('Menghapus media...');
+        
+        fetch(`{{ url('/media') }}/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          hideLoading();
+          if(data.success) {
+            toast('Media berhasil dihapus', 'success');
+            fetchMedia(currentFilter, currentSearch);
+          } else {
+            toast(data.message || 'Gagal menghapus media', 'error');
+          }
+        })
+        .catch(error => {
+          hideLoading();
+          console.error('Error:', error);
+          toast('Terjadi kesalahan saat menghapus media', 'error');
+        });
+      };
+
+      // Initial setup
       setStep(1);
+      clearSearchBtn.style.display = 'none';
       fetchMedia('all','');
 
       // Extra buttons handlers
