@@ -11,6 +11,8 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.plyr.io/3.7.8/plyr.css" rel="stylesheet" />
   <style>
+ @import url('https://fonts.googleapis.com/css2?family=Playfair+Display&family=Open+Sans&display=swap');
+
     * {
       margin: 0;
       padding: 0;
@@ -83,11 +85,18 @@
     .text-content {
       position: relative;
       z-index: 2;
-      max-width: 600px;
-      padding: 2rem;
-      text-align: left;
-      margin-left: 5%;
-      flex: 1;
+      font-family: 'Playfair Display', serif;
+      font-weight: 450px;
+      font-size: 70px; /* sedikit lebih besar */
+      line-height: 1.2;
+      letter-spacing: 1px; /* spasi antar huruf */
+      margin-top: 220px; /* sedikit lebih rapat ke atas */
+      margin-bottom: 20px;
+      max-width: 650px;
+      color: #fff;
+      text-shadow:
+        0 4px 10px rgba(0, 0, 0, 0.6), /* shadow lembut */
+        0 0 25px rgba(0, 0, 0, 0.4);    /* glow tambahan */
     }
 
     /* Layout Images Grid */
@@ -159,9 +168,10 @@
     }
 
     .bps-word {
-      font-size: 3.8rem;
-      margin-right: 0.1px;
-      text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.8);
+       font-weight: 700;
+      font-family: 'Playfair Display', serif;
+      font-size: 3.5rem;
+      line-height: 1.2;
     }
 
     .provinsi-word {
@@ -414,7 +424,7 @@
         </h2>
         <h3>Sumatera Utara</h3>
         <p>
-          {{ $description ?? 'Kami adalah lembaga resmi pemerintah yang bertugas menyelenggarakan kegiatan statistik di wilayah Sumatera Utara. BPS hadir untuk memberikan data akurat, terpercaya, dan terkini.' }}
+          {{ $description }}
         </p>
       </div>
 
