@@ -21,38 +21,37 @@
 
 
     .sidebar {
-      background: linear-gradient( 180deg,#E7FFEA 0%,#ffffff 50%,#dcedff 100%);
+      background: linear-gradient(180deg, #E7FFEA 0%, #ffffff 50%, #dcedff 100%);
       border-right: none;
       min-height: 100vh;
-      width: 240px;
+      width: 250px;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      padding-top: 0.1rem;
-      box-sizing: border-box;
       position: fixed;
       left: 0;
       top: 0;
+      bottom: 0;
+      z-index: 1000;
+      overflow: hidden;
     }
     .sidebar-header {
-      padding: 0;
-      margin-top: 20px;
-      user-select: none;
-      margin-bottom: 20px;
+      padding: 1.5rem 1.5rem 1rem;
+      border-bottom: 1px solid #f1f3f4;
+      flex-shrink: 0;
     }
 
     .sidebar-header img {
-      width: 70px;
-      margin-left: 20px;
-      
+      width: 50px;
+      height: 50px;
     }
 
     .sidebar-title {
-      font-weight: 700;
+      font-weight: 600;
       font-size: 1.25rem;
       margin: 0;
       display: flex;
       align-items: center;
+      gap: 0.75rem;
     }
 
 
@@ -72,27 +71,36 @@
         color: #1f9e76;
     }
 
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 0;
+    }
+
     .nav-link.active {
-      background-color: #1f9e76 !important;
-      color: #fffff1 !important;
-      font-weight: 600;
+      background-color: #1f9e76;
+      color: white;
+      font-weight: 500;
       border-radius: 0.375rem;
     }
+    
     .nav-link {
       color: #4b596a;
       padding: 0.5rem 1rem;
+      margin: 0.25rem 0.75rem;
       display: flex;
       align-items: center;
       gap: 0.5rem;
       font-size: 1rem;
       border-radius: 0.375rem;
-      transition: background-color 0.3s ease, color 0.3s ease;
-      user-select: none;
+      transition: all 0.2s ease;
+      text-decoration: none;
     }
+    
     .nav-link:hover:not(.active) {
-      background-color: #bcddc9;
+      background-color: #f8f9fa;
       color: #1f9e76;
-      cursor: pointer;
+      text-decoration: none;
     }
     .sidebar-footer-img-container {
         position: relative;
@@ -128,7 +136,6 @@
     }
 
 
-    /* Icons from Bootstrap Icons CDN */
     .bi {
       font-size: 1.2rem;
     }
@@ -229,34 +236,42 @@
       background-color: #a8bee3;
       border-radius: 0.3rem;
     }
-    /* Responsive adjustments */
+    /* Responsive */
     @media (max-width: 768px) {
       .sidebar {
-        width: 60px;
-        border-right: 3px solid #1f9e76;
-        padding-top: 1rem;
+        width: 70px;
       }
-    .sidebar-header h1 {
-        font-size: 0;
+      .sidebar-header {
+        padding: 1rem 0.5rem 0;
+        margin-bottom: 1rem;
       }
-    main.content-area {
-      margin-left: 60px;
-      padding: 1rem;
-      min-height: 100vh;
-      background: linear-gradient(90deg, #ffffff, #e9edfa);
-      box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
-      position: relative;
-    }
-    .nav-link {
-        font-size: 0;
+      .sidebar-header img {
+        width: 40px;
+        height: 40px;
+      }
+      .sidebar-title {
+        display: none;
+      }
+      .sidebar-content {
+        padding: 0;
+      }
+      main.content-area {
+        margin-left: 70px;
+        padding: 1rem;
+      }
+      .nav-link {
         justify-content: center;
-        padding: 0.5rem 0;
+        padding: 0.75rem 0.5rem;
+        margin: 0 0.25rem;
+        flex-direction: column;
+        gap: 0.25rem;
+        font-size: 0.7rem;
       }
-    .nav-link .bi {
-        font-size: 1.6rem;
+      .nav-link i {
+        font-size: 1.2rem;
       }
-    .nav-link.active {
-        border-radius: 0;
+      .nav-link span {
+        display: none;
       }
     }
 
@@ -286,10 +301,78 @@
       cursor: pointer;
       background: #e9f7e9;
     }
+    /* Button Styling */
     .button-section {
       display: flex;
       justify-content: flex-end;
-      gap: 1rem;
+      gap: 0.75rem;
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e9ecef;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #1f9e76 0%, #16a085 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(31, 158, 118, 0.3);
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(31, 158, 118, 0.4);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+    }
+
+    /* Loading and feedback states */
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .loading {
+      position: relative;
+      color: transparent;
+    }
+
+    .loading::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      top: 50%;
+      left: 50%;
+      margin-left: -8px;
+      margin-top: -8px;
+      border: 2px solid transparent;
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
     .card {
       background: white;
@@ -304,37 +387,73 @@
       color: #273554;
     }
 
+    /* Table Styling */
+    .table-container {
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e9ecef;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
       background-color: #ffffff;
-      box-shadow: 0 0 5px rgba(0,0,0,0.05);
+      margin: 0;
     }
+
     thead {
-      background-color: #e0e7ff;
+      background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
     }
+
     thead th {
       color: #3b82f6;
       font-weight: 600;
-      padding: 12px 15px;
+      padding: 1rem;
       text-align: left;
-      border-bottom: 1px solid #c7d2fe;
+      border: none;
       user-select: none;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
+
     tbody td {
-      padding: 12px 15px;
-      border-bottom: 1px solid #e0e7ff;
+      padding: 1rem;
+      border-bottom: 1px solid #f1f5f9;
       color: #475569;
+      vertical-align: middle;
     }
+
+    tbody tr {
+      transition: all 0.2s ease;
+    }
+
     tbody tr:hover {
-      background-color: #f1f5f9;
+      background-color: #f8fafc;
+      transform: translateY(-1px);
     }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
     .icon-cell {
-      width: 40px;
+      width: 60px;
       text-align: center;
-      color: #3b82f6;
+    }
+
+    .checkbox-custom {
+      width: 18px;
+      height: 18px;
+      accent-color: #1f9e76;
       cursor: pointer;
-      user-select: none;
+    }
+
+    /* Selected row styling */
+    tbody tr.selected {
+      background-color: rgba(31, 158, 118, 0.1);
+      border-left: 4px solid #1f9e76;
     }
 
     .card- {
@@ -353,48 +472,187 @@
       margin-bottom: 10px;
     }
 
+    /* Alert and notification styles */
+    .alert-custom {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      border: none;
+      font-weight: 500;
+    }
+
+    .alert-success {
+      background-color: rgba(31, 158, 118, 0.1);
+      color: #1f9e76;
+      border-left: 4px solid #1f9e76;
+    }
+
+    .alert-error {
+      background-color: rgba(220, 53, 69, 0.1);
+      color: #dc3545;
+      border-left: 4px solid #dc3545;
+    }
+
+    /* Empty state styling */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #6c757d;
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    /* Responsive improvements */
+    @media (max-width: 992px) {
+      .content-area {
+        padding: 1rem;
+      }
+      
+      .header-top {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+      }
+      
+      .button-section {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .table-container {
+        overflow-x: auto;
+      }
+      
+      table {
+        min-width: 500px;
+      }
+    }
+    .content-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e9ecef;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .content-card:hover {
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.12);
+    }
+
+    .content-card h5 {
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      color: #2c3a67;
+      font-size: 1.1rem;
+      border-bottom: 2px solid #1f9e76;
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    .form-section {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      font-weight: 500;
+      color: #405672;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .form-control, .form-select {
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      padding: 0.75rem;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+      background-color: #fff;
+    }
+
+    .form-control:focus, .form-select:focus {
+      outline: none;
+      border-color: #1f9e76;
+      box-shadow: 0 0 0 3px rgba(31, 158, 118, 0.1);
+    }
+
+    .form-control[readonly] {
+      background-color: #f8f9fa;
+      border-color: #e9ecef;
+    }
+
+    .search-container {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-input {
+      padding-left: 2.5rem;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6c757d;
+      z-index: 2;
+    }
 </style>
-<!-- css dari superadmin bwangg -->
 
 <body>
-  <nav class="sidebar d-flex flex-column justify-content-between">
-    <div>
-      <div class="sidebar-header d-flex align-items-center gap-2">
-        <img src="{{ asset('img/Desain tanpa judul.svg') }}" alt="Logo Tambodia" style="width:70px; height:70px; margin-left:20px; object-fit:contain;"/>
-        <h1 class="sidebar-title">
-            <span class="title-text">
-                <span class="tam">Tam</span><span class="bo">bo</span><span class="dia">dia</span>
-            </span>
-        </h1>
-
-      </div>
-      <ul class="nav flex-column px-1">
-        <li class="nav-item mb-1">
+  <nav class="sidebar">
+    <div class="sidebar-header d-flex align-items-center gap-2">
+      <img src="{{ asset('img/Desain tanpa judul.svg') }}" alt="Logo Tambodia" />
+      <h1 class="sidebar-title">
+        <span class="title-text">
+          <span class="tam">Tam</span><span class="bo">bo</span><span class="dia">dia</span>
+        </span>
+      </h1>
+    </div>
+    
+    <div class="sidebar-content">
+      <ul class="nav flex-column">
+        <li class="nav-item">
           <a class="nav-link" href="{{ route('dashboard.pegawai') }}">
-            <i class="bi bi-speedometer2"></i> Dashboard
+            <i class="bi bi-speedometer2"></i> <span>Dashboard</span>
           </a>
         </li>
-        <li class="nav-item mb-1">
+        <li class="nav-item">
           <a class="nav-link" href="{{ route('media.input') }}">
-            <i class="bi bi-pencil-square"></i> Input Media
+            <i class="bi bi-pencil-square"></i> <span>Input Media</span>
           </a>
         </li>
-        <li class="nav-item mb-1">
+        <li class="nav-item">
+          <a class="nav-link" href="{{ route('layout.index') }}">
+            <i class="bi bi-grid-3x3-gap"></i> <span>Layout Manager</span>
+          </a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link active" href="{{ route('schedule.index') }}">
-            <i class="bi bi-calendar3"></i> Penjadwalan
+            <i class="bi bi-calendar3"></i> <span>Penjadwalan</span>
           </a>
         </li>
-        <li class="nav-item mt-1">
+        <li class="nav-item">
           <form action="{{ route('logout') }}" method="POST" id="logout-form" style="display: none;">
             @csrf
           </form>
           <a class="nav-link" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <i class="bi bi-box-arrow-left"></i> Log Out
+            <i class="bi bi-box-arrow-left"></i> <span>Log Out</span>
           </a>
         </li>
       </ul>
     </div>
-
   </nav>
 
     <main class="content-area">
@@ -405,31 +663,33 @@
         <span>{{ Auth::user()->name }}</span>
       </div>
     </div>
-      <div class="container">
-        <div class="row">
-          <div class="col">
-              <div class="mb-3 form-section">
-                <label for="cariFile" class="form-label">Cari File</label>
-                <input type="text" class="form-control" id="cariFile" placeholder="Cari Nama File...">
-                <button type="button" class="btn btn-outline-success mt-2 button-search">Search</button>
-              </div>
-              
-              <div class="card-media">
+    <div class="container-fluid">
+      <div class="row g-4">
+        <div class="col-lg-7">
+          <div class="content-card">
+            <h5><i class="bi bi-table me-2"></i>Pilih Media</h5>
+            
+            <div class="search-container">
+              <i class="bi bi-search search-icon"></i>
+              <input type="text" class="form-control search-input" id="cariFile" placeholder="Cari nama file media...">
+            </div>
+            
+            <div class="table-container">
               <table>
                 <thead>
                   <tr>
-                    <th class="icon-cell">✔</th>
-                    <th>Media Name</th>
-                    <th>File</th>
-                    <th>Date</th>
+                    <th class="icon-cell"><i class="bi bi-check-square"></i></th>
+                    <th><i class="bi bi-file-earmark me-2"></i>Nama Media</th>
+                    <th><i class="bi bi-file-type me-2"></i>Tipe File</th>
+                    <th><i class="bi bi-calendar-date me-2"></i>Tanggal</th>
                   </tr>
                 </thead>
                 <tbody>
                   @if(isset($media) && $media->count() > 0)
                     @foreach($media as $item)
-                    <tr data-id="{{ $item->id }}">
-                      <td>
-                        <input type="checkbox" name="select_row" value="{{ $item->id }}">
+                    <tr data-id="{{ $item->id }}" class="media-row">
+                      <td class="icon-cell">
+                        <input type="checkbox" name="select_row" value="{{ $item->id }}" class="checkbox-custom">
                       </td>
                       <td>{{ $item->name }}</td>
                       <td>{{ $item->type }}</td>
@@ -438,7 +698,11 @@
                     @endforeach
                   @else
                     <tr>
-                      <td colspan="4" class="text-center">Tidak ada media yang tersedia</td>
+                      <td colspan="4" class="empty-state">
+                        <i class="bi bi-inbox"></i>
+                        <div>Tidak ada media yang tersedia</div>
+                        <small>Silakan tambahkan media terlebih dahulu</small>
+                      </td>
                     </tr>
                   @endif
                 </tbody>
@@ -446,48 +710,77 @@
             </div>
 
           </div>
-          <div class="col">
-          <form id="scheduleForm" action="{{ route('schedule.store') }}" method="POST">
-            @csrf
-            <input type="hidden" id="media_id" name="media_id">
+        </div>
+        
+        <div class="col-lg-5">
+          <div class="content-card">
+            <h5><i class="bi bi-calendar-plus me-2"></i>Atur Jadwal</h5>
             
-            <div class="mb-3 form-section">
-              <label for="namaFile" class="form-label">Nama File</label>
-              <input type="text" class="form-control" id="namaFile" readonly>
-            </div>
+            <div id="alertContainer"></div>
             
-            <div class="mb-3 form-section">
-              <label for="start_date" class="form-label">Tanggal Mulai</label>
-              <input type="date" class="form-control" id="start_date" name="start_date" required>
-            </div>
-            
-            <div class="mb-3 form-section">
-              <label for="end_date" class="form-label">Tanggal Selesai</label>
-              <input type="date" class="form-control" id="end_date" name="end_date" required>
-            </div>
-            
-            <div class="mb-3 form-section">
-              <label for="day_of_week" class="form-label">Pilih Hari</label>
-              <select class="form-select mb-2" id="day_of_week" name="day_of_week">
-                <option value="">Semua Hari</option>
-                <option value="senin">Senin</option>
-                <option value="selasa">Selasa</option>
-                <option value="rabu">Rabu</option>
-                <option value="kamis">Kamis</option>
-                <option value="jumat">Jumat</option>
-                <option value="sabtu">Sabtu</option>
-                <option value="minggu">Minggu</option>
-              </select>
+            <form id="scheduleForm" action="{{ route('schedule.store') }}" method="POST">
+              @csrf
+              <input type="hidden" id="media_id" name="media_id">
               
-              <label for="time" class="form-label">Pilih Jam</label>
-              <input type="time" class="form-control" id="time" name="time">
-            </div>
+              <div class="form-section">
+                <label for="namaFile" class="form-label">
+                  <i class="bi bi-file-earmark-text me-2"></i>Media Terpilih
+                </label>
+                <input type="text" class="form-control" id="namaFile" readonly placeholder="Pilih media dari tabel">
+              </div>
+              
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-section">
+                    <label for="start_date" class="form-label">
+                      <i class="bi bi-calendar-event me-2"></i>Tanggal Mulai
+                    </label>
+                    <input type="date" class="form-control" id="start_date" name="start_date" required>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-section">
+                    <label for="end_date" class="form-label">
+                      <i class="bi bi-calendar-check me-2"></i>Tanggal Selesai
+                    </label>
+                    <input type="date" class="form-control" id="end_date" name="end_date" required>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-section">
+                <label for="day_of_week" class="form-label">
+                  <i class="bi bi-calendar-week me-2"></i>Hari dalam Seminggu
+                </label>
+                <select class="form-select" id="day_of_week" name="day_of_week">
+                  <option value="">Semua Hari</option>
+                  <option value="senin">Senin</option>
+                  <option value="selasa">Selasa</option>
+                  <option value="rabu">Rabu</option>
+                  <option value="kamis">Kamis</option>
+                  <option value="jumat">Jumat</option>
+                  <option value="sabtu">Sabtu</option>
+                  <option value="minggu">Minggu</option>
+                </select>
+              </div>
+              
+              <div class="form-section">
+                <label for="time" class="form-label">
+                  <i class="bi bi-clock me-2"></i>Waktu Tayang
+                </label>
+                <input type="time" class="form-control" id="time" name="time">
+              </div>
             
-            <div class="button-section">
-              <button type="reset" class="btn btn-danger" id="resetButton">Reset</button>
-              <button type="submit" class="btn btn-success" id="submitButton">Simpan</button>
-            </div>
-          </form>
+              <div class="button-section">
+                <button type="reset" class="btn btn-danger" id="resetButton">
+                  <i class="bi bi-arrow-clockwise me-2"></i>Reset
+                </button>
+                <button type="submit" class="btn btn-success" id="submitButton">
+                  <i class="bi bi-check-lg me-2"></i>Simpan Jadwal
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>

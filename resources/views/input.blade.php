@@ -18,82 +18,148 @@
       min-height: 100vh;
       margin: 0;
       padding: 0;
+      opacity: 0;
+      animation: pageLoad 0.6s ease-out forwards;
+    }
+
+    @keyframes pageLoad {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Smooth transitions for all interactive elements */
+    * {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Page transition overlay */
+    .page-transition {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, #1f9e76, #58cbaa);
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.4s ease;
+    }
+
+    .page-transition.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .transition-content {
+      text-align: center;
+      color: white;
+    }
+
+    .transition-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     .sidebar {
-      background: linear-gradient( 180deg,#E7FFEA 0%,#ffffff 50%,#dcedff 100%);
+      background: linear-gradient(180deg, #E7FFEA 0%, #ffffff 50%, #dcedff 100%);
       border-right: none;
       min-height: 100vh;
-      width: 240px;
+      width: 250px;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      padding-top: 0.1rem;
-      box-sizing: border-box;
       position: fixed;
       left: 0;
       top: 0;
+      bottom: 0;
+      z-index: 1000;
+      overflow: hidden;
     }
     
     .sidebar-header {
-      padding: 0;
-      margin-top: 20px;
-      user-select: none;
-      margin-bottom: 20px;
+      padding: 1.5rem 1.5rem 1rem;
+      border-bottom: 1px solid #f1f3f4;
+      flex-shrink: 0;
     }
 
     .sidebar-header img {
-      width: 70px;
-      margin-left: 20px;
+      width: 50px;
+      height: 50px;
     }
 
     .sidebar-title {
-      font-weight: 700;
+      font-weight: 600;
       font-size: 1.25rem;
       margin: 0;
       display: flex;
       align-items: center;
+      gap: 0.75rem;
     }
 
     .title-text {
-        display: inline-block;
+      display: inline-block;
     }
 
     .tam { color: #0084d6; }
     .bo { color: #a0d5d2; }
     .dia { color: #1f9e76; }
 
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 0;
+    }
+
     .nav-link.active {
-      background-color: #1f9e76 !important;
-      color: #fffff1 !important;
-      font-weight: 600;
+      background-color: #1f9e76;
+      color: white;
+      font-weight: 500;
       border-radius: 0.375rem;
     }
     
     .nav-link {
       color: #4b596a;
       padding: 0.5rem 1rem;
+      margin: 0.25rem 0.75rem;
       display: flex;
       align-items: center;
       gap: 0.5rem;
       font-size: 1rem;
       border-radius: 0.375rem;
-      transition: background-color 0.3s ease, color 0.3s ease;
-      user-select: none;
+      transition: all 0.2s ease;
+      text-decoration: none;
     }
     
     .nav-link:hover:not(.active) {
-      background-color: #bcddc9;
+      background-color: #f8f9fa;
       color: #1f9e76;
-      cursor: pointer;
+      text-decoration: none;
     }
 
     main.content-area {
-      margin-left: 240px;
+      margin-left: 250px;
       padding: 1.75rem 2rem 2rem 2rem;
       min-height: 100vh;
-      background: linear-gradient(90deg, #ffffff, #e9edfa);
-      box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+      background: #f8f9fa;
       position: relative;
     }
     
@@ -545,24 +611,39 @@
     /* Responsive */
     @media (max-width: 768px) {
       .sidebar {
-        width: 60px;
-        border-right: 3px solid #1f9e76;
-        padding-top: 1rem;
+        width: 70px;
       }
-      .sidebar-header h1 {
-          font-size: 0;
-        }
+      .sidebar-header {
+        padding: 1rem 0.5rem 0;
+        margin-bottom: 1rem;
+      }
+      .sidebar-header img {
+        width: 40px;
+        height: 40px;
+      }
+      .sidebar-title {
+        display: none;
+      }
+      .sidebar-content {
+        padding: 0;
+      }
       main.content-area {
-          margin-left: 60px;
-          padding: 1rem;
+        margin-left: 70px;
+        padding: 1rem;
       }
       .nav-link {
-          font-size: 0;
-          justify-content: center;
-          padding: 0.5rem 0;
+        justify-content: center;
+        padding: 0.75rem 0.5rem;
+        margin: 0 0.25rem;
+        flex-direction: column;
+        gap: 0.25rem;
+        font-size: 0.7rem;
       }
-      .nav-link .bi {
-          font-size: 1.6rem;
+      .nav-link i {
+        font-size: 1.2rem;
+      }
+      .nav-link span {
+        display: none;
       }
       .wizard-content {
         padding: 1rem;
@@ -584,38 +665,52 @@
     </div>
   </div>
   
-  <nav class="sidebar d-flex flex-column justify-content-between">
-    <div>
-      <div class="sidebar-header d-flex align-items-center gap-2">
-        <img src="{{ asset('img/Desain tanpa judul.svg') }}" alt="Logo Tambodia" style="width:70px; height:70px; margin-left:20px; object-fit:contain;"/>
-        <h1 class="sidebar-title">
-            <span class="title-text">
-                <span class="tam">Tam</span><span class="bo">bo</span><span class="dia">dia</span>
-            </span>
-        </h1>
-      </div>
-      <ul class="nav flex-column px-1">
-        <li class="nav-item mb-1">
+  <!-- Page Transition Overlay -->
+  <div class="page-transition" id="pageTransition">
+    <div class="transition-content">
+      <div class="transition-spinner"></div>
+      <div>Memuat halaman...</div>
+    </div>
+  </div>
+
+  <nav class="sidebar">
+    <div class="sidebar-header d-flex align-items-center gap-2">
+      <img src="{{ asset('img/Desain tanpa judul.svg') }}" alt="Logo Tambodia" />
+      <h1 class="sidebar-title">
+        <span class="title-text">
+          <span class="tam">Tam</span><span class="bo">bo</span><span class="dia">dia</span>
+        </span>
+      </h1>
+    </div>
+    
+    <div class="sidebar-content">
+      <ul class="nav flex-column">
+        <li class="nav-item">
           <a class="nav-link" href="{{ route('dashboard.pegawai') }}">
-            <i class="bi bi-speedometer2"></i> Dashboard
+            <i class="bi bi-speedometer2"></i> <span>Dashboard</span>
           </a>
         </li>
-        <li class="nav-item mb-1">
+        <li class="nav-item">
           <a class="nav-link active" href="{{ route('media.input') }}">
-            <i class="bi bi-pencil-square"></i> Input Media
+            <i class="bi bi-pencil-square"></i> <span>Input Media</span>
           </a>
         </li>
-        <li class="nav-item mb-1">
+        <li class="nav-item">
+          <a class="nav-link" href="{{ route('layout.index') }}">
+            <i class="bi bi-grid-3x3-gap"></i> <span>Layout Manager</span>
+          </a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" href="{{ route('schedule.index') }}">
-            <i class="bi bi-calendar3"></i> Penjadwalan
+            <i class="bi bi-calendar3"></i> <span>Penjadwalan</span>
           </a>
         </li>
-        <li class="nav-item mt-1">
+        <li class="nav-item">
           <form action="{{ route('logout') }}" method="POST" id="logout-form" style="display:none;">
             @csrf
           </form>
           <a class="nav-link" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <i class="bi bi-box-arrow-left"></i> Log Out
+            <i class="bi bi-box-arrow-left"></i> <span>Log Out</span>
           </a>
         </li>
       </ul>
@@ -695,8 +790,8 @@
 
           <!-- Step 2: File Upload -->
           <div class="step-content" id="step2">
-            <h4 class="mb-4">Upload File</h4>
-            <p class="text-muted mb-4">Pilih file dari komputer Anda atau drag & drop ke area di bawah</p>
+            <h4 class="mb-4" id="step2Title">Upload File</h4>
+            <p class="text-muted mb-4" id="step2Sub">Pilih file dari komputer Anda atau drag & drop ke area di bawah</p>
             
             <div class="enhanced-upload-area" id="uploadArea">
               <div class="upload-icon">
@@ -708,6 +803,15 @@
               <button type="button" class="upload-btn" id="uploadButton">
                 <i class="bi bi-folder2-open me-2"></i>Pilih File
               </button>
+            </div>
+            <!-- Video URL input (shown when jenisMedia = video) -->
+            <div id="videoLinkGroup" class="mt-3 d-none">
+              <label class="form-label-enhanced" for="videoUrl">
+                <i class="bi bi-link-45deg"></i>
+                Link Video (YouTube atau URL video lain)
+              </label>
+              <input type="url" id="videoUrl" name="video_url" class="form-control form-control-enhanced" placeholder="https://www.youtube.com/watch?v=... atau https://example.com/video.mp4">
+              <div class="form-text">Masukkan URL video. Untuk YouTube, tempelkan link video (kami akan menampilkan embed).</div>
             </div>
             <div id="uploadInlineError" class="alert alert-danger mt-3 d-none" role="alert"></div>
 
@@ -817,15 +921,38 @@
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h5 class="card-title mb-0">Media Tersedia</h5>
-          <div class="d-flex gap-2">
-            <button class="btn btn-outline-primary btn-sm" data-filter="all">Semua</button>
-            <button class="btn btn-outline-primary btn-sm" data-filter="image">Gambar</button>
-            <button class="btn btn-outline-primary btn-sm" data-filter="video">Video</button>
-            <button class="btn btn-outline-primary btn-sm" data-filter="audio">Audio</button>
+          <div class="d-flex gap-2 align-items-center">
+            <!-- Search Input -->
+            <div class="input-group" style="width: 250px;">
+              <input type="text" class="form-control form-control-sm" id="mediaSearch" placeholder="Cari media...">
+              <button class="btn btn-outline-secondary btn-sm" type="button" id="clearSearch">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+            <!-- Filter Buttons -->
+            <div class="btn-group" role="group">
+              <button class="btn btn-outline-primary btn-sm active" data-filter="all">Semua</button>
+              <button class="btn btn-outline-primary btn-sm" data-filter="image">Gambar</button>
+              <button class="btn btn-outline-primary btn-sm" data-filter="video">Video</button>
+              <button class="btn btn-outline-primary btn-sm" data-filter="audio">Audio</button>
+            </div>
           </div>
         </div>
         <div class="row" id="mediaGrid">
           <!-- Media items will be rendered here -->
+        </div>
+        <!-- Loading indicator for media grid -->
+        <div id="mediaGridLoading" class="text-center py-4 d-none">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-2 text-muted">Memuat media...</p>
+        </div>
+        <!-- No results message -->
+        <div id="noMediaResults" class="text-center py-4 d-none">
+          <i class="bi bi-search text-muted" style="font-size: 3rem;"></i>
+          <p class="mt-2 text-muted">Tidak ada media yang ditemukan</p>
+          <button class="btn btn-outline-primary btn-sm" id="resetFilters">Reset Filter</button>
         </div>
       </div>
     </div>
@@ -873,6 +1000,7 @@
       function setInlineError(msg){ if(!inlineErrorEl) return; inlineErrorEl.textContent = msg || ''; inlineErrorEl.classList.toggle('d-none', !msg); }
       function clearInlineError(){ setInlineError(''); }
       function formatBytes(bytes){ if(bytes===0) return '0 B'; const k=1024, s=['B','KB','MB','GB']; const i=Math.floor(Math.log(bytes)/Math.log(k)); return (bytes/Math.pow(k,i)).toFixed(2)+' '+s[i]; }
+      function isValidUrl(str){ try{ const u=new URL(str); return !!u.protocol && !!u.host; } catch(e){ return false; } }
 
       // Wizard state
       const steps = qsa('.wizard-step');
@@ -897,7 +1025,14 @@
 
       function canProceed(){
         if(currentStep===1){ return !!jenisMediaInput.value; }
-        if(currentStep===2){ return (qs('#fileUpload').files||[]).length>0; }
+        if(currentStep===2){
+          const jm = (jenisMediaInput.value||'').toLowerCase();
+          if(jm==='video'){
+            const url = (qs('#videoUrl')?.value||'').trim();
+            return isValidUrl(url);
+          }
+          return (qs('#fileUpload').files||[]).length>0;
+        }
         if(currentStep===3){ return (qs('#namaFile').value||'').trim().length>0; }
         return true;
       }
@@ -907,16 +1042,33 @@
         if(currentStep<3){ setStep(currentStep+1); return; }
         if(currentStep===3){
           // Submit via AJAX
+          const jm = (jenisMediaInput.value||'').toLowerCase();
           const fileInput = qs('#fileUpload');
-          if(!fileInput.files.length){ toast('Pilih file terlebih dahulu', 'error'); return; }
-          // Client-side size validation (<= 250MB)
-          const maxBytes = 256000 * 1024; // ~250MB matching server rule
-          if (fileInput.files[0].size > maxBytes) {
-            const m='Ukuran file melebihi 250MB';
-            toast(m, 'error'); setInlineError(m);
-            return;
+          const videoUrlVal = (qs('#videoUrl')?.value||'').trim();
+          if(jm!=='video'){
+            if(!fileInput.files.length){ toast('Pilih file terlebih dahulu', 'error'); return; }
+            // Client-side size validation (<= 250MB)
+            const maxBytes = 256000 * 1024; // ~250MB matching server rule
+            if (fileInput.files[0].size > maxBytes) {
+              const m='Ukuran file melebihi 250MB';
+              toast(m, 'error'); setInlineError(m);
+              return;
+            }
+          } else {
+            if(!isValidUrl(videoUrlVal)){
+              const m='Link video tidak valid';
+              toast(m, 'error'); setInlineError(m);
+              setStep(2);
+              return;
+            }
           }
           const fd = new FormData(form);
+          // Ensure only relevant fields are sent
+          if(jm==='video'){
+            // Make sure no file is sent if accidentally selected
+            fd.delete('file');
+            fd.set('video_url', videoUrlVal);
+          }
           showLoading('Mengunggah media...');
           clearInlineError();
           // progress UI
@@ -988,6 +1140,32 @@
           // adjust accept
           const accept = card.dataset.type==='image' ? 'image/*' : card.dataset.type==='video' ? 'video/*' : 'audio/*';
           qs('#fileUpload').setAttribute('accept', accept);
+          // Toggle UI for video link mode
+          const uploadArea = qs('#uploadArea');
+          const filePreview = qs('#filePreview');
+          const videoGroup = qs('#videoLinkGroup');
+          const videoUrlInput = qs('#videoUrl');
+          const step2Title = qs('#step2Title');
+          const step2Sub = qs('#step2Sub');
+          if(card.dataset.type==='video'){
+            // Switch to URL mode for videos
+            uploadArea.classList.add('d-none');
+            filePreview.classList.add('d-none');
+            if(videoGroup) videoGroup.classList.remove('d-none');
+            // clear file input
+            const fi = qs('#fileUpload'); if(fi){ fi.value=''; }
+            if(step2Title) step2Title.textContent='Masukkan Link Video';
+            if(step2Sub) step2Sub.textContent='Tempelkan URL YouTube atau tautan langsung ke file video.';
+            if(videoUrlInput){
+              videoUrlInput.addEventListener('input', ()=>{ nextBtn.disabled = !canProceed(); clearInlineError(); });
+            }
+          } else {
+            // Back to file upload mode
+            uploadArea.classList.remove('d-none');
+            if(videoGroup) videoGroup.classList.add('d-none');
+            if(step2Title) step2Title.textContent='Upload File';
+            if(step2Sub) step2Sub.textContent='Pilih file dari komputer Anda atau drag & drop ke area di bawah';
+          }
           nextBtn.disabled = !canProceed();
         });
       });
@@ -1048,15 +1226,41 @@
       removeFileBtn.addEventListener('click', ()=>{ fileInput.value=''; filePreview.classList.add('d-none'); previewContainer.innerHTML=''; nextBtn.disabled = !canProceed(); });
 
       function openPreviewModal(){
-        if(!fileInput.files.length) return;
+        const jm = (jenisMediaInput.value||'').toLowerCase();
         const modalEl = document.getElementById('mediaPreviewModal');
         const modalBody = document.getElementById('modalPreviewContent');
         const modalTitle = document.getElementById('modalPreviewTitle');
         modalBody.innerHTML='';
-        const f = fileInput.files[0]; const url = URL.createObjectURL(f); const type = jenisMediaInput.value;
-        if(type==='image'){ const img=document.createElement('img'); img.src=url; img.className='img-fluid rounded shadow'; modalBody.appendChild(img); modalTitle.textContent='Preview Gambar'; }
-        else if(type==='video'){ const v=document.createElement('video'); v.src=url; v.controls=true; v.autoplay=true; v.style.width='100%'; v.className='rounded shadow'; modalBody.appendChild(v); modalTitle.textContent='Preview Video'; }
-        else { const a=document.createElement('audio'); a.src=url; a.controls=true; a.style.width='100%'; modalBody.appendChild(a); modalTitle.textContent='Preview Audio'; }
+        if(jm==='video'){
+          const urlInput = (qs('#videoUrl')?.value||'').trim();
+          if(urlInput){
+            // YouTube embed handling
+            const ytMatch = urlInput.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
+            if(ytMatch){
+              const iframe = document.createElement('iframe');
+              iframe.width='100%'; iframe.height='320';
+              iframe.src = `https://www.youtube.com/embed/${ytMatch[1]}`;
+              iframe.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+              iframe.allowFullscreen = true;
+              iframe.className='rounded shadow';
+              modalBody.appendChild(iframe);
+            } else {
+              const v=document.createElement('video'); v.src=urlInput; v.controls=true; v.autoplay=true; v.style.width='100%'; v.className='rounded shadow'; modalBody.appendChild(v);
+            }
+            modalTitle.textContent='Preview Video';
+          } else if(fileInput.files.length){
+            const url = URL.createObjectURL(fileInput.files[0]);
+            const v=document.createElement('video'); v.src=url; v.controls=true; v.autoplay=true; v.style.width='100%'; v.className='rounded shadow'; modalBody.appendChild(v);
+            modalTitle.textContent='Preview Video';
+          } else {
+            return;
+          }
+        } else {
+          if(!fileInput.files.length) return;
+          const f = fileInput.files[0]; const url = URL.createObjectURL(f); const type = jenisMediaInput.value;
+          if(type==='image'){ const img=document.createElement('img'); img.src=url; img.className='img-fluid rounded shadow'; modalBody.appendChild(img); modalTitle.textContent='Preview Gambar'; }
+          else if(type==='audio'){ const a=document.createElement('audio'); a.src=url; a.controls=true; a.style.width='100%'; modalBody.appendChild(a); modalTitle.textContent='Preview Audio'; }
+        }
         const modal = bootstrap.Modal.getOrCreateInstance(modalEl); modal.show();
       }
 
@@ -1065,55 +1269,286 @@
 
       // Media grid filtering and fetch
       const mediaGrid = qs('#mediaGrid');
-      qsa('.card .btn-outline-primary[data-filter]').forEach(btn => {
+      const mediaSearch = qs('#mediaSearch');
+      const clearSearchBtn = qs('#clearSearch');
+      const mediaGridLoading = qs('#mediaGridLoading');
+      const noMediaResults = qs('#noMediaResults');
+      const resetFiltersBtn = qs('#resetFilters');
+      let currentFilter = 'all';
+      let currentSearch = '';
+      let searchTimeout = null;
+
+      // Filter button handlers
+      qsa('.btn-group .btn[data-filter]').forEach(btn => {
         btn.addEventListener('click', ()=>{
-          qsa('.card .btn-outline-primary[data-filter]').forEach(b=> b.classList.remove('active'));
+          qsa('.btn-group .btn[data-filter]').forEach(b=> b.classList.remove('active'));
           btn.classList.add('active');
-          fetchMedia(btn.dataset.filter, '');
+          currentFilter = btn.dataset.filter;
+          fetchMedia(currentFilter, currentSearch);
         });
       });
 
+      // Search input handlers with debouncing
+      mediaSearch.addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        currentSearch = e.target.value.trim();
+        
+        // Show/hide clear button
+        clearSearchBtn.style.display = currentSearch ? 'block' : 'none';
+        
+        // Debounce search to avoid too many API calls
+        searchTimeout = setTimeout(() => {
+          fetchMedia(currentFilter, currentSearch);
+        }, 300);
+      });
+
+      // Clear search button
+      clearSearchBtn.addEventListener('click', () => {
+        mediaSearch.value = '';
+        currentSearch = '';
+        clearSearchBtn.style.display = 'none';
+        fetchMedia(currentFilter, currentSearch);
+      });
+
+      // Reset filters button
+      resetFiltersBtn.addEventListener('click', () => {
+        mediaSearch.value = '';
+        currentSearch = '';
+        currentFilter = 'all';
+        clearSearchBtn.style.display = 'none';
+        qsa('.btn-group .btn[data-filter]').forEach(b=> b.classList.remove('active'));
+        qs('.btn-group .btn[data-filter="all"]').classList.add('active');
+        fetchMedia('all', '');
+      });
+
       async function fetchMedia(type='all', search=''){
-        mediaGrid.innerHTML = '<div class="col-12 text-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+        // Show loading state
+        mediaGrid.classList.add('d-none');
+        noMediaResults.classList.add('d-none');
+        mediaGridLoading.classList.remove('d-none');
+        
         const params = new URLSearchParams();
         if(type && type!=='all'){ params.append('type', type); }
-        if(search){ params.append('search', search); }
-        const endpoint = search && search.trim().length>0 ? '{{ route('api.media.search') }}' : '{{ route('api.media.filter') }}';
+        if(search && search.trim().length > 0){ params.append('search', search); }
+        
+        // Use search endpoint if there's a search term, otherwise use filter endpoint
+        const endpoint = search && search.trim().length > 0 ? '{{ route('api.media.search') }}' : '{{ route('api.media.filter') }}';
+        
         try{
-          const res = await fetch(endpoint + '?' + params.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+          const res = await fetch(endpoint + '?' + params.toString(), { 
+            headers: { 
+              'X-Requested-With': 'XMLHttpRequest',
+              'Accept': 'application/json'
+            } 
+          });
+          
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+          }
+          
           const json = await res.json();
-          if(!json.success) throw new Error(json.message||'Failed');
-          renderMedia(json.data||[]);
-        }catch(e){ mediaGrid.innerHTML = '<div class="col-12 text-center py-4"><p>Error loading media.</p></div>'; toast('Gagal memuat data media', 'error'); }
+          
+          if(!json.success) {
+            throw new Error(json.message || 'Failed to fetch media');
+          }
+          
+          renderMedia(json.data || []);
+          
+        } catch(e) { 
+          console.error('Error fetching media:', e);
+          mediaGridLoading.classList.add('d-none');
+          mediaGrid.classList.remove('d-none');
+          mediaGrid.innerHTML = `
+            <div class="col-12 text-center py-4">
+              <i class="bi bi-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
+              <p class="mt-2 text-muted">Gagal memuat data media</p>
+              <button class="btn btn-outline-primary btn-sm" onclick="fetchMedia('${type}', '${search}')">Coba Lagi</button>
+            </div>
+          `;
+          toast('Gagal memuat data media: ' + e.message, 'error'); 
+        }
       }
 
       function renderMedia(list){
-        if(!list.length){ mediaGrid.innerHTML = '<div class="col-12 text-center py-4"><p>Tidak ada media.</p></div>'; return; }
+        // Hide loading state
+        mediaGridLoading.classList.add('d-none');
+        
+        if(!list || list.length === 0){ 
+          mediaGrid.classList.add('d-none');
+          noMediaResults.classList.remove('d-none');
+          return; 
+        }
+        
+        // Show media grid and hide no results message
+        mediaGrid.classList.remove('d-none');
+        noMediaResults.classList.add('d-none');
         mediaGrid.innerHTML = '';
+        
         list.forEach(item=>{
-          const col = document.createElement('div'); col.className='col-md-4 col-lg-3 mb-4';
+          const col = document.createElement('div'); 
+          col.className='col-md-4 col-lg-3 mb-4';
+          
+          // Format date
+          const date = item.created_at ? new Date(item.created_at).toLocaleDateString('id-ID') : (item.date || '');
+          
+          // Get type badge color
+          const badgeColor = {
+            'Gambar': 'bg-success',
+            'Video': 'bg-primary', 
+            'Audio': 'bg-info'
+          }[item.type] || 'bg-secondary';
+          
+          // Get type icon
+          const typeIcon = {
+            'Gambar': 'bi-image',
+            'Video': 'bi-play-circle',
+            'Audio': 'bi-music-note'
+          }[item.type] || 'bi-file-earmark';
+          
           col.innerHTML = `
-            <div class="card h-100">
-              <div class="card-body">
-                <h6 class="card-title">${item.name}</h6>
-                <p class="card-text"><span class="badge bg-info">${item.type}</span></p>
-                <p class="card-text small">${item.created_at||item.date||''}</p>
+            <div class="card h-100 shadow-sm">
+              <div class="card-body d-flex flex-column">
+                <div class="d-flex align-items-center mb-2">
+                  <i class="${typeIcon} text-muted me-2"></i>
+                  <h6 class="card-title mb-0 flex-grow-1" title="${item.name}">${item.name.length > 20 ? item.name.substring(0, 20) + '...' : item.name}</h6>
+                </div>
+                <div class="mb-2">
+                  <span class="badge ${badgeColor}">${item.type}</span>
+                </div>
+                <p class="card-text small text-muted mt-auto">
+                  <i class="bi bi-calendar3 me-1"></i>${date}
+                </p>
+                <div class="btn-group btn-group-sm mt-2" role="group">
+                  <button class="btn btn-outline-primary" onclick="previewMedia(${item.id}, '${item.type}', '${item.file_path}', '${item.name}')" title="Preview">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                  <button class="btn btn-outline-danger" onclick="deleteMedia(${item.id}, '${item.name}')" title="Hapus">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
               </div>
             </div>`;
           mediaGrid.appendChild(col);
         });
       }
 
-      // Initial
+      // Media preview function
+      window.previewMedia = function(id, type, filePath, name) {
+        const modalEl = document.getElementById('mediaPreviewModal');
+        const modalBody = document.getElementById('modalPreviewContent');
+        const modalTitle = document.getElementById('modalPreviewTitle');
+        
+        modalBody.innerHTML = '';
+        modalTitle.textContent = `Preview: ${name}`;
+        
+        const mediaUrl = `{{ url('/media') }}/${filePath}`;
+        
+        if(type === 'Gambar') {
+          const img = document.createElement('img');
+          img.src = mediaUrl;
+          img.className = 'img-fluid rounded shadow';
+          img.style.maxHeight = '400px';
+          modalBody.appendChild(img);
+        } else if(type === 'Video') {
+          const video = document.createElement('video');
+          video.src = mediaUrl;
+          video.controls = true;
+          video.style.width = '100%';
+          video.style.maxHeight = '400px';
+          video.className = 'rounded shadow';
+          modalBody.appendChild(video);
+        } else if(type === 'Audio') {
+          const audio = document.createElement('audio');
+          audio.src = mediaUrl;
+          audio.controls = true;
+          audio.style.width = '100%';
+          modalBody.appendChild(audio);
+        }
+        
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+      };
+      
+      // Media delete function
+      window.deleteMedia = function(id, name) {
+        if(!confirm(`Apakah Anda yakin ingin menghapus media "${name}"?`)) {
+          return;
+        }
+        
+        showLoading('Menghapus media...');
+        
+        fetch(`{{ url('/media') }}/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          hideLoading();
+          if(data.success) {
+            toast('Media berhasil dihapus', 'success');
+            fetchMedia(currentFilter, currentSearch);
+          } else {
+            toast(data.message || 'Gagal menghapus media', 'error');
+          }
+        })
+        .catch(error => {
+          hideLoading();
+          console.error('Error:', error);
+          toast('Terjadi kesalahan saat menghapus media', 'error');
+        });
+      };
+
+      // Initial setup
       setStep(1);
+      clearSearchBtn.style.display = 'none';
       fetchMedia('all','');
 
       // Extra buttons handlers
       const uploadAnother = document.getElementById('uploadAnotherBtn');
       const viewMediaBtn = document.getElementById('viewMediaBtn');
-      if(uploadAnother){ uploadAnother.addEventListener('click', ()=>{ form.reset(); qs('#filePreview').classList.add('d-none'); qs('#previewContainer').innerHTML=''; jenisMediaInput.value=''; qsa('.media-type-card').forEach(c=> c.classList.remove('selected')); setStep(1); }); }
+      if(uploadAnother){ uploadAnother.addEventListener('click', ()=>{ form.reset(); qs('#filePreview').classList.add('d-none'); qs('#previewContainer').innerHTML=''; jenisMediaInput.value=''; qsa('.media-type-card').forEach(c=> c.classList.remove('selected')); const vg=qs('#videoLinkGroup'); if(vg) vg.classList.add('d-none'); const ua=qs('#uploadArea'); if(ua) ua.classList.remove('d-none'); const t=qs('#step2Title'); if(t) t.textContent='Upload File'; const s=qs('#step2Sub'); if(s) s.textContent='Pilih file dari komputer Anda atau drag & drop ke area di bawah'; setStep(1); }); }
       if(viewMediaBtn){ viewMediaBtn.addEventListener('click', ()=>{ document.querySelector('#mediaGrid')?.scrollIntoView({ behavior: 'smooth' }); }); }
     })();
+    // Page transition functionality
+    function showPageTransition() {
+      const transition = document.getElementById('pageTransition');
+      if (transition) {
+        transition.classList.add('active');
+      }
+    }
+
+    function hidePageTransition() {
+      const transition = document.getElementById('pageTransition');
+      if (transition) {
+        transition.classList.remove('active');
+      }
+    }
+
+    // Add smooth page transitions to navigation links
+    document.addEventListener('DOMContentLoaded', function() {
+      const navLinks = document.querySelectorAll('.nav-link[href]');
+      
+      navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          const href = this.getAttribute('href');
+          
+          if (href === '#' || this.closest('form')) return;
+          
+          e.preventDefault();
+          showPageTransition();
+          
+          setTimeout(() => {
+            window.location.href = href;
+          }, 200);
+        });
+      });
+
+      setTimeout(hidePageTransition, 100);
+    });
   </script>
-  </body>
-  </html>
+</body>
+</html>
