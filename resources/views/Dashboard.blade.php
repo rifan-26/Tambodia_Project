@@ -336,7 +336,7 @@
     /* Media Grid */
     .media-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
       gap: 1.5rem;
       padding: 1.5rem;
     }
@@ -411,24 +411,23 @@
       background: var(--bg-light);
       border-radius: 4px;
       overflow: hidden;
-      min-height: 150px;
+      min-height: 160px;
       margin-bottom: 1rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
     }
 
     .media-preview img {
       width: 100%;
-      height: 150px;
+      height: 160px;
       object-fit: cover;
       display: block;
     }
 
     .media-preview video {
       width: 100%;
-      max-height: 150px;
+      max-height: 160px;
       object-fit: cover;
       display: block;
     }
@@ -438,7 +437,9 @@
       display: block;
     }
 
-    .media-preview .ratio { height: 150px; }
+    .media-preview .ratio {
+      height: 160px;
+    }
 
     .audio-player-container {
       width: 100%;
@@ -449,6 +450,7 @@
       align-items: center;
       justify-content: center;
     }
+
     .media-actions {
       display: flex;
       gap: 0.5rem;
@@ -746,30 +748,30 @@
       <ul class="nav flex-column px-1">
         <li class="nav-item mb-1">
           <a class="nav-link active" href="{{ route('dashboard.pegawai') }}">
-            <i class="bi bi-speedometer2"></i> <span>Dashboard</span>
+            <i class="bi bi-speedometer2"></i> Dashboard
           </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item mb-1">
           <a class="nav-link" href="{{ route('media.input') }}">
-            <i class="bi bi-pencil-square"></i> <span>Input Media</span>
+            <i class="bi bi-pencil-square"></i> Input Media
           </a>
         </li>
         <li class="nav-item mb-1">
           <a class="nav-link" href="{{ route('layout.index') }}">
-            <i class="bi bi-grid-3x3-gap"></i> <span>Layout Manager</span>
+            <i class="bi bi-grid-3x3-gap"></i> Layout Manager
           </a>
         </li>
         <li class="nav-item mb-1">
           <a class="nav-link" href="{{ route('schedule.index') }}">
-            <i class="bi bi-calendar3"></i> <span>Penjadwalan</span>
+            <i class="bi bi-calendar3"></i> Penjadwalan
           </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item mt-1">
           <form action="{{ route('logout') }}" method="POST" id="logout-form" style="display:none;">
             @csrf
           </form>
           <a class="nav-link" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <i class="bi bi-box-arrow-left"></i> <span>Log Out</span>
+            <i class="bi bi-box-arrow-left"></i> Log Out
           </a>
         </li>
       </ul>
@@ -792,8 +794,8 @@
   <main class="content-area">
     <div class="header-top">
         <h2>Dashboard</h2>
-        <div class="user-badge" title="Logged in as {{ Auth::user()->name ?? 'Admin' }}">
-            <span class="status-indicator" aria-label="online status"></span>
+        <div class="user-badge">
+            <span class="status-indicator"></span>
             <span>{{ Auth::user()->name ?? 'Admin' }}</span>
         </div>
     </div>
@@ -918,10 +920,6 @@
   <script>
     // ===== Dashboard JS: Fetch from backend and wire interactions =====
     const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    // Optional shared media origin (set in config/app.php via MEDIA_ORIGIN)
-    const MEDIA_ORIGIN = "{{ config('app.media_origin') }}";
-    // Normalize base origin for media serving
-    const __mediaOrigin = (MEDIA_ORIGIN && MEDIA_ORIGIN.trim()) ? MEDIA_ORIGIN.replace(/\/$/, '') : window.location.origin;
     const API = {
       filter: `${window.location.origin}/api/media/filter`,
       search: `${window.location.origin}/api/media/search`,
@@ -948,24 +946,9 @@
       // Normalize path coming from backend. If absolute URL, keep as-is.
       let p = String(path || '');
       if (/^(?:https?:)?\/\//i.test(p)) return p; // external URL (e.g., YouTube, CDN)
-      // strip leading slashes
       p = p.replace(/^\/+/, '');
-      // broader legacy prefixes to strip
-      p = p.replace(/^storage\/app\/public\//, '');
-      p = p.replace(/^app\/public\//, '');
       p = p.replace(/^public\//, '');
-      p = p.replace(/^storage\//, '');
-      // ensure it points under media/ on public disk
-      if (!p.startsWith('media/')) {
-        // if path is only a filename (no slash), prepend media/
-        if (!p.includes('/')) {
-          p = `media/${p}`;
-        }
-      }
-      // collapse duplicated media/ prefixes e.g., media/media/file -> media/file
-      p = p.replace(/^media\/(?:media\/)+/, 'media/');
-      // Build final URL from configured media origin (shared) or current origin
-      return `${__mediaOrigin}/${p}`;
+      return `${window.location.origin}/media/${p}`;
     }
 
     function guessMimeFromPath(path, fallback) {
@@ -1025,8 +1008,6 @@
       updateSelectedCount();
       initPlyrPlayers();
       wireMediaErrorHandlers();
-      // Run animations after content is rendered
-      animateCards();
     }
 
     function initFilterButtons() {
@@ -1080,12 +1061,11 @@
       container.querySelectorAll('.media-checkbox').forEach(cb => {
         cb.addEventListener('change', updateSelectedCount);
       });
-      container.querySelectorAll('[data-action="preview"]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const src = e.currentTarget.dataset.src;
-          const name = e.currentTarget.dataset.name;
-          const type = e.currentTarget.dataset.type;
-          showPreviewModal(src, name, type);
+      container.querySelectorAll('[data-action="toggle"]').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const id = e.currentTarget.dataset.id;
+          await toggleLanding([id]);
+          await refreshMedia();
         });
       });
       container.querySelectorAll('[data-action="delete"]').forEach(btn => {
@@ -1134,7 +1114,7 @@
           </div>
           <div class="media-card-body">
             <div class="media-date"><i class="bi bi-calendar3 me-1"></i>${created || '-'}</div>
-            <div class="media-preview" data-action="preview" data-id="${m.id}" data-src="${fileUrl(m.file_path)}" data-name="${escapeHtml(m.name)}" data-type="${m.type}">${preview}</div>
+            <div class="media-preview">${preview}</div>
             <div class="d-flex align-items-center justify-content-between">
               <div class="form-check">
                 <input class="form-check-input checkbox-enhanced media-checkbox" type="checkbox" value="${m.id}" data-id="${m.id}">
@@ -1145,7 +1125,11 @@
                 <button class="btn-enhanced btn-play" data-action="play" data-id="${m.id}" data-src="${fileUrl(m.file_path)}" data-name="${escapeHtml(m.name)}">
                   <i class="bi bi-play-circle"></i> Play
                 </button>
-                ` : ''}
+                ` : `
+                <button class="btn-enhanced btn-toggle" data-action="toggle" data-id="${m.id}">
+                  <i class="bi bi-shuffle"></i> Toggle
+                </button>
+                `}
                 <button class="btn-enhanced btn-delete" data-action="delete" data-id="${m.id}">
                   <i class="bi bi-trash"></i> Delete
                 </button>
@@ -1302,37 +1286,16 @@
     }
 
     function wireMediaErrorHandlers() {
-      // audio & video
       document.querySelectorAll('audio, video').forEach(m => {
         m.addEventListener('error', () => {
           const src = (m.currentSrc || (m.querySelector('source')?.src) || '');
           console.error('Media load error:', src, m.error);
-          // Silent fallback: replace with placeholder without showing popup
-          try {
-            const ph = Object.assign(document.createElement('div'), {
-              className: 'text-center w-100 p-3 text-muted'
-            });
-            ph.innerHTML = `
-              <div class="empty-state w-100">
-                <i class="bi bi-file-earmark-x"></i>
-                <div>Preview unavailable</div>
-              </div>`;
-            m.replaceWith(ph);
-          } catch (e) {}
+          toast('Failed to load media: ' + (src || 'unknown'), 'error');
         }, { once: true });
       });
-      // images
-      document.querySelectorAll('.media-card img').forEach(img => {
-        img.addEventListener('error', () => {
-          const src = img.currentSrc || img.src || '';
-          console.error('Image load error:', src);
-          // Simple visible fallback
-          img.replaceWith(Object.assign(document.createElement('div'), {
-            className: 'text-center w-100 p-3 text-muted'
-          }));
-        });
-      });
     }
+
+    
 
     function escapeHtml(str) {
       return String(str || '').replace(/[&<>"]+/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[s] || s));
@@ -1345,67 +1308,50 @@
       await fetchMedia({});
     });
 
-    // ====== Media Preview Modal ======
-    (function setupPreviewModal(){
+    // ====== Simple Audio Modal ======
+    // Modal markup
+    (function ensureAudioModal() {
+      if (document.getElementById('playAudioModal')) return;
       const modal = document.createElement('div');
-      modal.id = 'previewModal';
-      Object.assign(modal.style, {
-        position: 'fixed', inset: '0', display: 'none', alignItems: 'center', justifyContent: 'center',
-        background: 'rgba(0,0,0,0.6)', zIndex: '2000'
-      });
+      modal.id = 'playAudioModal';
+      modal.style.cssText = 'position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:1055;';
       modal.innerHTML = `
-        <div style="background:#fff;border-radius:12px;max-width:90vw;max-height:90vh;width:auto;box-shadow:0 10px 30px rgba(0,0,0,0.3);overflow:hidden;">
+        <div style="background:#fff;border-radius:12px;max-width:520px;width:92%;box-shadow:0 10px 30px rgba(0,0,0,0.2);">
           <div style="padding:12px 16px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;">
-            <div class="fw-semibold" id="previewTitle">Media Preview</div>
-            <button type="button" id="closePreview" class="btn btn-sm btn-outline-secondary"><i class="bi bi-x"></i></button>
+            <div class="fw-semibold" id="playAudioTitle">Play Audio</div>
+            <button type="button" id="closePlayAudio" class="btn btn-sm btn-outline-secondary"><i class="bi bi-x"></i></button>
           </div>
-          <div style="padding:16px;text-align:center;max-height:80vh;overflow:auto;" id="previewContent">
-            <!-- Content will be inserted here -->
+          <div style="padding:16px;">
+            <audio id="playAudioElement" controls preload="metadata" style="width:100%" playsinline></audio>
           </div>
-        </div>
-      `;
+        </div>`;
       document.body.appendChild(modal);
-      document.getElementById('closePreview').addEventListener('click', hidePreviewModal);
-      modal.addEventListener('click', (e) => { if (e.target === modal) hidePreviewModal(); });
-      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hidePreviewModal(); });
+      // close handlers
+      modal.addEventListener('click', (e) => { if (e.target === modal) hidePlayModal(); });
+      document.getElementById('closePlayAudio').addEventListener('click', hidePlayModal);
     })();
 
-    function showPreviewModal(src, title, type) {
-      const modal = document.getElementById('previewModal');
-      const content = document.getElementById('previewContent');
-      const safeTitle = String(title || 'Media Preview');
-      let previewHtml = '';
-      if (type && type.startsWith('image')) {
-        previewHtml = `<img src="${src}" alt="${safeTitle}" style="max-width:100%;height:auto;" />`;
-      } else if (type && type.startsWith('video')) {
-        previewHtml = `
-          <video controls autoplay style="max-width:100%;max-height:70vh;">
-            <source src="${src}" type="${guessMimeFromPath(src, 'video/mp4')}">
-            Browser Anda tidak mendukung pemutar video.
-          </video>`;
-      } else if (type && type.startsWith('audio')) {
-        previewHtml = `
-          <audio controls autoplay style="width:100%;">
-            <source src="${src}" type="${guessMimeFromPath(src, 'audio/mpeg')}">
-            Browser Anda tidak mendukung pemutar audio.
-          </audio>`;
-      } else {
-        previewHtml = `<div>Preview unavailable</div>`;
-      }
-      content.innerHTML = previewHtml;
+    function showPlayModal(src, title) {
+      const modal = document.getElementById('playAudioModal');
+      const audio = document.getElementById('playAudioElement');
+      const ttl = document.getElementById('playAudioTitle');
+      if (!modal || !audio) return;
+      ttl && (ttl.textContent = title || 'Play Audio');
+      // set source fresh each time
+      audio.src = src;
+      audio.muted = false; audio.volume = 1.0;
       modal.style.display = 'flex';
+      // try play on user gesture
+      audio.play().catch(() => {/* user can press play */});
     }
 
-    function hidePreviewModal() {
-      const modal = document.getElementById('previewModal');
-      const content = document.getElementById('previewContent');
-      if (!modal || !content) return;
-      
-      // Stop any playing media
-      const videos = content.querySelectorAll('video, audio');
-      videos.forEach(v => { v.pause(); v.currentTime = 0; });
-      
-      content.innerHTML = '';
+    function hidePlayModal() {
+      const modal = document.getElementById('playAudioModal');
+      const audio = document.getElementById('playAudioElement');
+      if (!modal || !audio) return;
+      audio.pause();
+      audio.removeAttribute('src');
+      audio.load();
       modal.style.display = 'none';
     }
 
@@ -1415,7 +1361,7 @@
       if (!btn) return;
       const src = btn.getAttribute('data-src');
       const name = btn.getAttribute('data-name') || 'Audio';
-      if (src) showPreviewModal(src, name, 'Audio');
+      if (src) showPlayModal(src, name);
     });
 
     // Page transition functionality
@@ -1462,13 +1408,8 @@
     function animateCards() {
       const cards = document.querySelectorAll('.stats-card, .media-card');
       cards.forEach((card, index) => {
-        try {
-          card.style.opacity = '0';
-          card.style.animationDelay = `${index * 0.1}s`;
-          card.addEventListener('animationend', () => {
-            card.style.opacity = '1';
-          }, { once: true });
-        } catch (e) {}
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.style.animation = 'slideInUp 0.6s ease-out forwards';
       });
     }
 

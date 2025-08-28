@@ -123,15 +123,4 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Media Origin (Optional)
-    |--------------------------------------------------------------------------
-    | If set, frontend will build media file URLs using this origin so that
-    | all users load media from a single shared backend instance.
-    | Example: MEDIA_ORIGIN=https://your-teammate-host:8000
-    */
-
-    'media_origin' => env('MEDIA_ORIGIN', null),
-
 ];
