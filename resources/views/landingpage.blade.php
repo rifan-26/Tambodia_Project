@@ -104,53 +104,54 @@
       position: absolute;
       top: 0;
       right: 0;
-      width: 30%;   /* sesuaikan lebar gallery */
-      height: 100%;
-      flex: 1.5;
-      padding: 20px;
+      width: 32%;
+      height: 100vh;
+      padding: 15px;
       display: flex;
       flex-direction: column;
+      justify-content: center;
+      align-items: center;
       z-index: 2;
       overflow: hidden;
-      background: rgba(0, 0, 0, 0.3); /* semi transparan */
-      backdrop-filter: blur(12px);    /* blur area di belakang */
-      -webkit-backdrop-filter: blur(12px); /* untuk Safari */
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border-left: 1px solid rgba(255,255,255,0.1);
     }
 
-    .right-section::before {
-      display: none;
-    }
-
-    /* Layout Images Grid */
     .layout-images {
       position: relative;
       z-index: 3;
-      width: 420px;
-      height: auto; /* let grid determine height */
-      flex: 0 0 auto;
+      width: 100%;
+      max-width: 400px;
+      height: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
       overflow: visible;
     }
 
-    .images-grid {
-      display: grid;
+    .images-grid { 
+      display: grid; 
       grid-template-columns: 1fr 1fr;
-      grid-template-areas:
+      grid-template-rows: auto auto auto auto;
+      grid-template-areas: 
         "img1 img2"
-        "img3 img2"
-        "img3 img4"
-        "img5 img6";
-      gap: 1.2rem;
-      align-content: start;
+        "img3 img2" 
+        "img3 img4" 
+        "img5 img6"; 
+      gap: 0.8rem; 
+      width: 100%; 
+      max-height: 80vh;
+      align-items: stretch;
+      justify-items: stretch;
     }
 
     .layout-image {
       border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: #111;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
       cursor: pointer;
     }
 
@@ -159,11 +160,8 @@
     .layout-image iframe {
       width: 100%;
       height: 100%;
-      object-fit: contain;
-      object-position: center;
+      object-fit: cover; /* isi penuh, sesuai rasio grid */
       display: block;
-      transition: transform 0.25s ease, filter 0.25s ease;
-      will-change: transform;
     }
 
     .layout-image:hover img {
@@ -171,17 +169,36 @@
       filter: brightness(0.95);
     }
 
-    .layout-image:nth-child(1) { grid-area: img1; aspect-ratio: 1 / 1; }
-
-    .layout-image:nth-child(2) { grid-area: img2; aspect-ratio: 9 / 16; }
-
-    .layout-image:nth-child(3) { grid-area: img3; aspect-ratio: 9 / 16; }
-
-    .layout-image:nth-child(4) { grid-area: img4; aspect-ratio: 1 / 1; }
-
-    .layout-image:nth-child(5) { grid-area: img5; aspect-ratio: 16 / 9; }
-
-    .layout-image:nth-child(6) { grid-area: img6; aspect-ratio: 16 / 9; }
+    .layout-image:nth-child(1) { 
+      grid-area: img1; 
+      aspect-ratio: 1 / 1; 
+      min-height: 120px;
+    }
+    .layout-image:nth-child(2) { 
+      grid-area: img2; 
+      aspect-ratio: 9 / 16; 
+      min-height: 200px;
+    }
+    .layout-image:nth-child(3) {
+      grid-area: img3; 
+      aspect-ratio: 9 / 16; 
+      min-height: 200px;
+    }
+    .layout-image:nth-child(4) { 
+      grid-area: img4; 
+      aspect-ratio: 1 / 1; 
+      min-height: 120px;
+    }
+    .layout-image:nth-child(5) { 
+      grid-area: img5; 
+      aspect-ratio: 16 / 9; 
+      min-height: 80px;
+    }
+    .layout-image:nth-child(6) { 
+      grid-area: img6; 
+      aspect-ratio: 16 / 9; 
+      min-height: 80px;
+    }
 
     .text-content h1 {
       font-size: 2.8rem;
@@ -342,10 +359,23 @@
       text-align: center;
     }
 
-    /* Responsive */
+    /* Responsive untuk full screen */
+    @media (min-width: 1600px) {
+      .images-grid {
+        gap: 1.2rem;
+      }
+    }
+
+    @media (min-width: 1400px) and (max-width: 1599px) {
+      .images-grid {
+        gap: 1.1rem;
+      }
+    }
+
+    /* Responsive untuk layar medium ke bawah */
     @media (max-width: 1200px) {
       .hero {
-        height: 100vh;
+        min-height: 100vh;
         padding: 0;
       }
       .hero-container {
@@ -371,7 +401,7 @@
     }
     @media (max-width: 992px) {
       .hero {
-        height: 100vh;
+        min-height: 100vh;
         padding: 0;
       }
 

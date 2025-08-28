@@ -978,12 +978,14 @@
         if (!isAll) {
           q.set('type', rawVal);
         } else {
-          // Be explicit to match controller logic that skips when type === 'all'
           q.set('type', 'all');
         }
-        const url = `${API.filter}?${q.toString()}`;
-        const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-        // Gracefully handle non-JSON (e.g., login redirect)
+        const res = await fetch(API.filter + '?' + q.toString(), {
+          headers: {
+            'X-CSRF-TOKEN': CSRF_TOKEN,
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+        });
         const contentType = res.headers.get('content-type') || '';
         if (!contentType.includes('application/json')) {
           throw new Error('Unexpected response');
