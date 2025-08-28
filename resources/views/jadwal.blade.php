@@ -98,9 +98,11 @@
     }
     
     .nav-link:hover:not(.active) {
-      background-color: #f8f9fa;
+      background-color: #bcddc9;
       color: #1f9e76;
-      text-decoration: none;
+      cursor: pointer;
+      transform: translateX(5px);
+      box-shadow: 0 4px 12px rgba(31, 158, 118, 0.2);
     }
     .sidebar-footer-img-container {
         position: relative;
