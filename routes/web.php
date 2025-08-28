@@ -5,8 +5,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\ScheduleController;
-use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\LandingController;
+use App\Http\Controllers\SuperAdminController;
+use App\Http\Controllers\LayoutController;
 
 Route::get('/test', function () {
     return 'Middleware works!';
@@ -26,6 +27,9 @@ Route::middleware(['auth'])->group(function () {
     
     // ===== DASHBOARD ROUTES =====
     Route::get('/dashboard', [DashboardController::class, 'pegawai'])->name('dashboard.pegawai');
+    
+    // ===== LAYOUT ROUTES =====
+    Route::get('/layout', [LayoutController::class, 'index'])->name('layout.index');
     
     // ===== MEDIA ROUTES (Pegawai) =====
     Route::get('/input', [MediaController::class, 'index'])->name('media.input');
@@ -51,9 +55,13 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // ===== API ROUTES (untuk AJAX calls) =====
-Route::middleware(['auth'])->prefix('api')->group(function () {
-    Route::get('/media/search', [MediaController::class, 'search'])->name('api.media.search');
-    Route::get('/media/filter', [MediaController::class, 'filter'])->name('api.media.filter');
+Route::middleware('auth')->group(function () {
+    Route::post('/api/layout/update', [LayoutController::class, 'updateLayout'])->name('layout.update');
+    Route::post('/api/layout/background', [LayoutController::class, 'updateBackground'])->name('layout.background');
+    
+    // Media AJAX endpoints
+    Route::get('/api/media/search', [MediaController::class, 'search'])->name('api.media.search');
+    Route::get('/api/media/filter', [MediaController::class, 'filter'])->name('api.media.filter');
 });
 
 // ===== MEDIA STREAM ROUTE (public for shared backend access) =====
