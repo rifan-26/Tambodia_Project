@@ -90,7 +90,7 @@
       font-size: 70px; /* sedikit lebih besar */
       line-height: 1.2;
       letter-spacing: 1px; /* spasi antar huruf */
-      margin-top: 220px; /* sedikit lebih rapat ke atas */
+      margin-top: 380px; /* sedikit lebih rapat ke atas */
       margin-bottom: 20px;
       max-width: 650px;
       color: #fff;
