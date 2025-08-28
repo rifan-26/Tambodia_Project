@@ -119,7 +119,7 @@
       background: linear-gradient(180deg, #E7FFEA 0%, #FFFFFF 50%, #DCEDFF 100%);
       border-right: none;
       min-height: 100vh;
-      width: 240px;
+      width: 250px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -138,7 +138,7 @@
     }
 
     .content-area {
-      margin-left: 240px;
+      margin-left: 250px;
       padding: 1.75rem 2rem 2rem 2rem;
       min-height: 100vh;
       background: linear-gradient(90deg, #FFFFFF, #E9EDFA);

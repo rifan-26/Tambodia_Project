@@ -17,7 +17,7 @@ class DashboardController extends Controller
 
     public function pegawai(Request $request)
     {
-        $query = Media::where('user_id', Auth::id());
+        $query = Media::query();
         
         // Filter berdasarkan jenis media jika ada
         if ($request->has('type') && $request->type != '') {

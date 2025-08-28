@@ -133,7 +133,7 @@
       font-size: 1.2rem;
     }
     main.content-area {
-      margin-left: 240px;
+      margin-left: 250px;
       padding: 1.75rem 2rem 2rem 2rem;
       min-height: 100vh;
       background: linear-gradient(90deg, #ffffff, #e9edfa);
@@ -264,9 +264,58 @@
       background-color: #1f9e76 !important;
       color: #ffffff !important;
     }
+
+    .sidebar-footer {
+      padding: 1rem;
+      border-top: 1px solid #f1f3f4;
+      flex-shrink: 0;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 0.375rem;
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1f9e76, #58cbaa);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .user-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .user-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #2c3a67;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-role {
+      font-size: 0.8rem;
+      color: #6c757d;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   
     main.content-area {
-      margin-left: 240px;
+      margin-left: 250px;
       padding: 1.75rem 2rem 2rem 2rem;
       min-height: 100vh;
       background: linear-gradient(90deg, #ffffff, #e9edfa);
@@ -400,9 +449,9 @@
     <main class="content-area">
       <div class="header-top">
       <h2 class="section-header">Atur Jadwal Media </h2>
-      <div class="user-badge" title="Logged in as {{ Auth::user()->name }}">
+      <div class="user-badge" title="Logged in as {{ Auth::user()->name ?? 'Admin' }}">
         <span class="status-indicator" aria-label="online status"></span>
-        <span>{{ Auth::user()->name }}</span>
+        <span>{{ Auth::user()->name ?? 'Admin' }}</span>
       </div>
     </div>
       <div class="container">

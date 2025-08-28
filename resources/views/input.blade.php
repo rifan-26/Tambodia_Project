@@ -18,6 +18,64 @@
       min-height: 100vh;
       margin: 0;
       padding: 0;
+      opacity: 0;
+      animation: pageLoad 0.6s ease-out forwards;
+    }
+
+    @keyframes pageLoad {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* Smooth transitions for all interactive elements */
+    * {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Page transition overlay */
+    .page-transition {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, #1f9e76, #58cbaa);
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.4s ease;
+    }
+
+    .page-transition.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .transition-content {
+      text-align: center;
+      color: white;
+    }
+
+    .transition-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     .sidebar {
@@ -86,6 +144,55 @@
       background-color: #bcddc9;
       color: #1f9e76;
       cursor: pointer;
+    }
+
+    .sidebar-footer {
+      padding: 1rem;
+      border-top: 1px solid #f1f3f4;
+      flex-shrink: 0;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 0.375rem;
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .user-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .user-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-dark);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-role {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     main.content-area {
@@ -625,9 +732,9 @@
   <main class="content-area">
     <div class="header-top">
       <h2>Input Media</h2>
-      <div class="user-badge" title="Logged in as Admin">
+      <div class="user-badge" title="Logged in as {{ Auth::user()->name ?? 'Admin' }}">
         <span class="status-indicator" aria-label="online status"></span>
-        <span>Admin</span>
+        <span>{{ Auth::user()->name ?? 'Admin' }}</span>
       </div>
     </div>
 

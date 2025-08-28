@@ -493,8 +493,23 @@ class MediaController extends Controller
     public function servePublic(Request $request, $path)
     {
         try {
+            // Decode URL-encoded path segments (handles spaces and non-ASCII)
+            $path = rawurldecode((string)$path);
             // Normalize any accidental leading slashes
             $path = ltrim($path, '/');
+            // Strip common legacy prefixes
+            if (str_starts_with($path, 'public/')) {
+                $path = substr($path, 7);
+            }
+            if (str_starts_with($path, 'storage/')) {
+                $path = substr($path, 8);
+            }
+            // If only a filename is provided, assume media/ directory on public disk
+            if (!str_contains($path, '/')) {
+                $path = 'media/' . $path;
+            }
+            // Collapse duplicated media/ prefixes (e.g., media/media/file)
+            $path = preg_replace('#^media/(?:media/)+#', 'media/', $path);
             if (!Storage::disk('public')->exists($path)) {
                 return response()->json(['message' => 'File not found'], 404);
             }

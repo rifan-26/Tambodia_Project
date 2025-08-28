@@ -32,6 +32,64 @@
       min-height: 100vh;
       margin: 0;
       padding: 0;
+      opacity: 0;
+      animation: pageLoad 0.6s ease-out forwards;
+    }
+
+    @keyframes pageLoad {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* Smooth transitions for all interactive elements */
+    * {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Page transition overlay */
+    .page-transition {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, #1f9e76, #58cbaa);
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.4s ease;
+    }
+
+    .page-transition.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .transition-content {
+      text-align: center;
+      color: white;
+    }
+
+    .transition-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     .sidebar {
@@ -269,9 +327,17 @@
     /* Enhanced Media Grid */
     .media-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 1rem;
-      padding: 1rem 1.25rem;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      padding: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .media-grid {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+        gap: 1rem;
+      }
     }
 
     .media-card {
@@ -336,20 +402,50 @@
     }
 
     .media-preview {
-      margin-bottom: 1rem;
-      border-radius: 8px;
+      position: relative;
+      background: var(--bg-light);
+      border-radius: 4px;
       overflow: hidden;
+      min-height: 150px;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
     }
 
-    .media-preview img,
-    .media-preview video,
-    .media-preview audio {
+    .media-preview img {
       width: 100%;
-      max-height: 160px;
+      height: 150px;
       object-fit: cover;
       display: block;
     }
 
+    .media-preview video {
+      width: 100%;
+      max-height: 150px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .media-preview audio {
+      width: 100%;
+      display: block;
+    }
+
+    .media-preview .ratio {
+      height: 150px;
+    }
+
+    .audio-player-container {
+      width: 100%;
+      padding: 1rem;
+      background: var(--bg-light);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     .media-actions {
       display: flex;
       gap: 0.5rem;
@@ -612,38 +708,44 @@
     </div>
   </div>
 
-  <nav class="sidebar d-flex flex-column justify-content-between">
-    <div>
-      <div class="sidebar-header d-flex align-items-center gap-2 mb-4">
-        <img src="{{ asset('img/Desain tanpa judul.svg') }}" alt="Logo Tambodia" style="width:70px; height:70px; margin-left:20px; object-fit:contain;"/>
-        <h1 class="sidebar-title">
-            <span class="title-text">
-                <span class="tam">Tam</span><span class="bo">bo</span><span class="dia">dia</span>
-            </span>
-        </h1>
-      </div>
-      <ul class="nav flex-column px-1">
-        <li class="nav-item mb-1">
+  <nav class="sidebar">
+    <div class="sidebar-header d-flex align-items-center gap-2">
+      <img src="{{ asset('img/Desain tanpa judul.svg') }}" alt="Logo Tambodia" />
+      <h1 class="sidebar-title">
+        <span class="title-text">
+          <span class="tam">Tam</span><span class="bo">bo</span><span class="dia">dia</span>
+        </span>
+      </h1>
+    </div>
+    
+    <div class="sidebar-content">
+      <ul class="nav flex-column">
+        <li class="nav-item">
           <a class="nav-link active" href="{{ route('dashboard.pegawai') }}">
-            <i class="bi bi-speedometer2"></i> Dashboard
+            <i class="bi bi-speedometer2"></i> <span>Dashboard</span>
           </a>
         </li>
-        <li class="nav-item mb-1">
+        <li class="nav-item">
           <a class="nav-link" href="{{ route('media.input') }}">
-            <i class="bi bi-pencil-square"></i> Input Media
+            <i class="bi bi-pencil-square"></i> <span>Input Media</span>
           </a>
         </li>
-        <li class="nav-item mb-1">
+        <li class="nav-item">
+          <a class="nav-link" href="{{ route('layout.index') }}">
+            <i class="bi bi-grid-3x3-gap"></i> <span>Layout Manager</span>
+          </a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" href="{{ route('schedule.index') }}">
-            <i class="bi bi-calendar3"></i> Penjadwalan
+            <i class="bi bi-calendar3"></i> <span>Penjadwalan</span>
           </a>
         </li>
-        <li class="nav-item mt-1">
+        <li class="nav-item">
           <form action="{{ route('logout') }}" method="POST" id="logout-form" style="display:none;">
             @csrf
           </form>
           <a class="nav-link" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <i class="bi bi-box-arrow-left"></i> Log Out
+            <i class="bi bi-box-arrow-left"></i> <span>Log Out</span>
           </a>
         </li>
       </ul>
@@ -652,10 +754,10 @@
 
   <main class="content-area">
     <div class="header-top">
-        <h2><i class="bi bi-speedometer2 me-2"></i>Dashboard Overview</h2>
-        <div class="user-badge" title="Logged in as Admin">
+        <h2>Dashboard</h2>
+        <div class="user-badge" title="Logged in as {{ Auth::user()->name ?? 'Admin' }}">
             <span class="status-indicator" aria-label="online status"></span>
-            <span>{{ Auth::user()->name ?? 'Username Admin' }}</span>
+            <span>{{ Auth::user()->name ?? 'Admin' }}</span>
         </div>
     </div>
     
@@ -791,6 +893,10 @@
   <script>
     // ===== Dashboard JS: Fetch from backend and wire interactions =====
     const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    // Optional shared media origin (set in config/app.php via MEDIA_ORIGIN)
+    const MEDIA_ORIGIN = "{{ config('app.media_origin') }}";
+    // Normalize base origin for media serving
+    const __mediaOrigin = (MEDIA_ORIGIN && MEDIA_ORIGIN.trim()) ? MEDIA_ORIGIN.replace(/\/$/, '') : window.location.origin;
     const API = {
       filter: `${window.location.origin}/api/media/filter`,
       search: `${window.location.origin}/api/media/search`,
@@ -819,10 +925,25 @@
       // - strip optional 'public/' prefix if present
       // - avoid duplicate 'storage/public/...'
       let p = String(path || '');
+      if (/^(?:https?:)?\/\//i.test(p)) return p; // external URL (e.g., YouTube, CDN)
+      // strip leading slashes
       p = p.replace(/^\/+/, '');
+      // broader legacy prefixes to strip
+      p = p.replace(/^storage\/app\/public\//, '');
+      p = p.replace(/^app\/public\//, '');
       p = p.replace(/^public\//, '');
-      // Route through Laravel streaming endpoint to avoid symlink 403
-      return `${window.location.origin}/media/${p}`;
+      p = p.replace(/^storage\//, '');
+      // ensure it points under media/ on public disk
+      if (!p.startsWith('media/')) {
+        // if path is only a filename (no slash), prepend media/
+        if (!p.includes('/')) {
+          p = `media/${p}`;
+        }
+      }
+      // collapse duplicated media/ prefixes e.g., media/media/file -> media/file
+      p = p.replace(/^media\/(?:media\/)+/, 'media/');
+      // Build final URL from configured media origin (shared) or current origin
+      return `${__mediaOrigin}/${p}`;
     }
 
     function guessMimeFromPath(path, fallback) {
@@ -845,14 +966,28 @@
     async function fetchMedia(params = {}) {
       try {
         showLoading(true);
-        const jenisSelect = document.getElementById('jenisMedia');
-        const typeVal = (params.type ?? (jenisSelect ? jenisSelect.value : '')).trim();
+        const filterType = params.type || '';
+        const isAll = !filterType || filterType === 'all';
         const q = new URLSearchParams();
-        if (typeVal && typeVal !== 'Semua Jenis') q.set('type', typeVal);
-        const url = `${API.filter}?${q.toString()}`;
-        const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        if (!isAll) {
+          q.set('type', filterType);
+        } else {
+          q.set('type', 'all');
+        }
+        console.log('Fetching media with filter:', filterType, 'URL:', API.filter + '?' + q.toString());
+        const res = await fetch(API.filter + '?' + q.toString(), {
+          headers: {
+            'X-CSRF-TOKEN': CSRF_TOKEN,
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+        });
+        const contentType = res.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+          throw new Error('Unexpected response');
+        }
         const json = await res.json();
-        if (!json.success) throw new Error(json.message || 'Gagal memuat media');
+        console.log('API Response:', json);
+        if (!json.success) throw new Error(json.message || 'Failed to load media');
         state.media = Array.isArray(json.data) ? json.data : [];
         renderAll();
       } catch (e) {
@@ -869,6 +1004,8 @@
       updateSelectedCount();
       initPlyrPlayers();
       wireMediaErrorHandlers();
+      // Run animations after content is rendered
+      animateCards();
     }
 
     function initFilterButtons() {
@@ -922,11 +1059,12 @@
       container.querySelectorAll('.media-checkbox').forEach(cb => {
         cb.addEventListener('change', updateSelectedCount);
       });
-      container.querySelectorAll('[data-action="toggle"]').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-          const id = e.currentTarget.dataset.id;
-          await toggleLanding([id]);
-          await refreshMedia();
+      container.querySelectorAll('[data-action="preview"]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const src = e.currentTarget.dataset.src;
+          const name = e.currentTarget.dataset.name;
+          const type = e.currentTarget.dataset.type;
+          showPreviewModal(src, name, type);
         });
       });
       container.querySelectorAll('[data-action="delete"]').forEach(btn => {
@@ -968,7 +1106,7 @@
           </div>
           <div class="media-card-body">
             <div class="media-date"><i class="bi bi-calendar3 me-1"></i>${created || '-'}</div>
-            <div class="media-preview">${preview}</div>
+            <div class="media-preview" data-action="preview" data-id="${m.id}" data-src="${fileUrl(m.file_path)}" data-name="${escapeHtml(m.name)}" data-type="${m.type}">${preview}</div>
             <div class="d-flex align-items-center justify-content-between">
               <div class="form-check">
                 <input class="form-check-input checkbox-enhanced media-checkbox" type="checkbox" value="${m.id}" data-id="${m.id}">
@@ -979,11 +1117,7 @@
                 <button class="btn-enhanced btn-play" data-action="play" data-id="${m.id}" data-src="${fileUrl(m.file_path)}" data-name="${escapeHtml(m.name)}">
                   <i class="bi bi-play-circle"></i> Play
                 </button>
-                ` : `
-                <button class="btn-enhanced btn-toggle" data-action="toggle" data-id="${m.id}">
-                  <i class="bi bi-shuffle"></i> Toggle
-                </button>
-                `}
+                ` : ''}
                 <button class="btn-enhanced btn-delete" data-action="delete" data-id="${m.id}">
                   <i class="bi bi-trash"></i> Hapus
                 </button>
@@ -1122,11 +1256,34 @@
     }
 
     function wireMediaErrorHandlers() {
+      // audio & video
       document.querySelectorAll('audio, video').forEach(m => {
         m.addEventListener('error', () => {
           const src = (m.currentSrc || (m.querySelector('source')?.src) || '');
           console.error('Media load error:', src, m.error);
-          toast('Gagal memuat media: ' + (src || 'unknown'), 'error');
+          // Silent fallback: replace with placeholder without showing popup
+          try {
+            const ph = Object.assign(document.createElement('div'), {
+              className: 'border rounded d-flex align-items-center justify-content-center',
+              style: 'height:150px;background:#f8fafc;color:#64748b;font-weight:600;',
+              innerText: 'Preview unavailable'
+            });
+            m.replaceWith(ph);
+          } catch (_) {}
+        }, { once: true });
+      });
+      // images
+      document.querySelectorAll('.media-card img').forEach(img => {
+        img.addEventListener('error', () => {
+          const src = img.currentSrc || img.src || '';
+          console.error('Image load error:', src);
+          // Simple visible fallback
+          img.replaceWith(Object.assign(document.createElement('div'), {
+            className: 'border rounded d-flex align-items-center justify-content-center',
+            style: 'height:150px;background:#f8fafc;color:#64748b;font-weight:600;',
+            innerText: 'Preview unavailable',
+            title: src
+          }));
         }, { once: true });
       });
     }
@@ -1144,50 +1301,66 @@
       await fetchMedia({});
     });
 
-    // ====== Simple Audio Modal ======
-    // Modal markup
-    (function ensureAudioModal() {
-      if (document.getElementById('playAudioModal')) return;
+    // ====== Media Preview Modal ======
+    (function ensurePreviewModal() {
+      if (document.getElementById('previewModal')) return;
       const modal = document.createElement('div');
-      modal.id = 'playAudioModal';
-      modal.style.cssText = 'position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:1055;';
+      modal.id = 'previewModal';
+      modal.style.cssText = 'position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);z-index:1055;';
       modal.innerHTML = `
-        <div style="background:#fff;border-radius:12px;max-width:520px;width:92%;box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+        <div style="background:#fff;border-radius:12px;max-width:90vw;max-height:90vh;width:auto;box-shadow:0 10px 30px rgba(0,0,0,0.3);overflow:hidden;">
           <div style="padding:12px 16px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;">
-            <div class="fw-semibold" id="playAudioTitle">Putar Audio</div>
-            <button type="button" id="closePlayAudio" class="btn btn-sm btn-outline-secondary"><i class="bi bi-x"></i></button>
+            <div class="fw-semibold" id="previewTitle">Media Preview</div>
+            <button type="button" id="closePreview" class="btn btn-sm btn-outline-secondary"><i class="bi bi-x"></i></button>
           </div>
-          <div style="padding:16px;">
-            <audio id="playAudioElement" controls preload="metadata" style="width:100%" playsinline></audio>
+          <div style="padding:16px;text-align:center;max-height:80vh;overflow:auto;" id="previewContent">
+            <!-- Content will be inserted here -->
           </div>
         </div>`;
       document.body.appendChild(modal);
       // close handlers
-      modal.addEventListener('click', (e) => { if (e.target === modal) hidePlayModal(); });
-      document.getElementById('closePlayAudio').addEventListener('click', hidePlayModal);
+      modal.addEventListener('click', (e) => { if (e.target === modal) hidePreviewModal(); });
+      document.getElementById('closePreview').addEventListener('click', hidePreviewModal);
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hidePreviewModal(); });
     })();
 
-    function showPlayModal(src, title) {
-      const modal = document.getElementById('playAudioModal');
-      const audio = document.getElementById('playAudioElement');
-      const ttl = document.getElementById('playAudioTitle');
-      if (!modal || !audio) return;
-      ttl && (ttl.textContent = title || 'Putar Audio');
-      // set source fresh each time
-      audio.src = src;
-      audio.muted = false; audio.volume = 1.0;
+    function showPreviewModal(src, title, type) {
+      const modal = document.getElementById('previewModal');
+      const content = document.getElementById('previewContent');
+      const ttl = document.getElementById('previewTitle');
+      if (!modal || !content) return;
+      
+      ttl && (ttl.textContent = title || 'Media Preview');
+      
+      let previewHtml = '';
+      if (type === 'Gambar') {
+        previewHtml = `<img src="${src}" alt="${escapeHtml(title)}" style="max-width:100%;max-height:70vh;object-fit:contain;"/>`;
+      } else if (type === 'Video') {
+        const yt = String(src).match(/^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/i);
+        if (yt) {
+          const vid = yt[1];
+          previewHtml = `<div style="position:relative;width:100%;max-width:800px;aspect-ratio:16/9;"><iframe src="https://www.youtube.com/embed/${vid}?autoplay=1" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+        } else {
+          previewHtml = `<video controls autoplay style="max-width:100%;max-height:70vh;"><source src="${src}" type="video/mp4">Browser tidak mendukung video.</video>`;
+        }
+      } else if (type === 'Audio') {
+        previewHtml = `<div style="padding:2rem;"><audio controls autoplay style="width:100%;max-width:500px;"><source src="${src}" type="audio/mpeg">Browser tidak mendukung audio.</audio></div>`;
+      }
+      
+      content.innerHTML = previewHtml;
       modal.style.display = 'flex';
-      // try play on user gesture
-      audio.play().catch(() => {/* user can press play */});
     }
 
-    function hidePlayModal() {
-      const modal = document.getElementById('playAudioModal');
-      const audio = document.getElementById('playAudioElement');
-      if (!modal || !audio) return;
-      audio.pause();
-      audio.removeAttribute('src');
-      audio.load();
+    function hidePreviewModal() {
+      const modal = document.getElementById('previewModal');
+      const content = document.getElementById('previewContent');
+      if (!modal || !content) return;
+      
+      // Stop any playing media
+      const videos = content.querySelectorAll('video, audio');
+      videos.forEach(v => { v.pause(); v.currentTime = 0; });
+      
+      content.innerHTML = '';
       modal.style.display = 'none';
     }
 
@@ -1197,6 +1370,96 @@
       if (!btn) return;
       const src = btn.getAttribute('data-src');
       const name = btn.getAttribute('data-name') || 'Audio';
-      if (src) showPlayModal(src, name);
+      if (src) showPreviewModal(src, name, 'Audio');
     });
+
+    // Page transition functionality
+    function showPageTransition() {
+      const transition = document.getElementById('pageTransition');
+      if (transition) {
+        transition.classList.add('active');
+      }
+    }
+
+    function hidePageTransition() {
+      const transition = document.getElementById('pageTransition');
+      if (transition) {
+        transition.classList.remove('active');
+      }
+    }
+
+    // Add smooth page transitions to navigation links
+    document.addEventListener('DOMContentLoaded', function() {
+      const navLinks = document.querySelectorAll('.nav-link[href]');
+      
+      navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          const href = this.getAttribute('href');
+          
+          // Skip if it's the current page or a form submission
+          if (href === '#' || this.closest('form')) return;
+          
+          e.preventDefault();
+          showPageTransition();
+          
+          // Navigate after transition starts
+          setTimeout(() => {
+            window.location.href = href;
+          }, 200);
+        });
+      });
+
+      // Hide transition on page load
+      setTimeout(hidePageTransition, 100);
+    });
+
+    // Add staggered animation to cards
+    function animateCards() {
+      const cards = document.querySelectorAll('.stats-card, .media-card');
+      cards.forEach((card, index) => {
+        try {
+          card.style.opacity = '0';
+          card.style.animationDelay = `${index * 0.1}s`;
+          card.style.animation = 'slideInUp 0.6s ease-out forwards';
+          card.addEventListener('animationend', () => {
+            card.style.opacity = '1';
+          }, { once: true });
+        } catch (e) {}
+      });
+    }
+
+    // Call animation when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(animateCards, 300);
+    });
+
+    // Add CSS for card animations
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      .stats-card, .media-card { }
+      
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      }
+      
+      .media-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      }
+    `;
+    document.head.appendChild(style);
   </script>
+</body>
+</html>
