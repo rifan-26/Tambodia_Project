@@ -26,7 +26,7 @@ class MediaController extends Controller
             @ini_set('max_input_time', '300');
             if (function_exists('set_time_limit')) { @set_time_limit(300); }
             // Start with a base query and eager load any relationships if needed
-            $query = Media::where('user_id', Auth::id());
+            $query = Media::query();
             
             // Apply filters
             // Filter by type if provided
@@ -369,7 +369,7 @@ class MediaController extends Controller
             }
 
             // Get the first media to check its current status
-            $media = Media::where('id', $mediaIds[0])->where('user_id', Auth::id())->first();
+            $media = Media::where('id', $mediaIds[0])->first();
             
             if (!$media) {
                 return response()->json(['success' => false, 'message' => 'Media tidak ditemukan']);
@@ -381,7 +381,6 @@ class MediaController extends Controller
             // Use a transaction to ensure data integrity
             $count = \Illuminate\Support\Facades\DB::transaction(function() use ($mediaIds, $newStatus) {
                 return Media::whereIn('id', $mediaIds)
-                    ->where('user_id', Auth::id())
                     ->update(['show_on_landing' => $newStatus]);
             });
 
@@ -416,8 +415,8 @@ class MediaController extends Controller
                 return response()->json(['success' => false, 'message' => 'ID media tidak valid']);
             }
             
-            // Find media with authorization check
-            $media = Media::where('id', $id)->where('user_id', Auth::id())->first();
+            // Find media
+            $media = Media::where('id', $id)->first();
             
             if (!$media) {
                 return response()->json(['success' => false, 'message' => 'Media tidak ditemukan']);
@@ -461,7 +460,7 @@ class MediaController extends Controller
     public function search(Request $request)
     {
         try {
-            $query = Media::where('user_id', Auth::id());
+            $query = Media::query();
             
             // Optional type filter (ensure same formatting as other endpoints)
             if ($request->filled('type') && $request->type !== 'all') {
@@ -503,7 +502,7 @@ class MediaController extends Controller
     public function filter(Request $request)
     {
         try {
-            $query = Media::where('user_id', Auth::id());
+            $query = Media::query();
             
             if ($request->filled('type') && $request->type !== 'all') {
                 // Map frontend filter values to database values

@@ -99,6 +99,29 @@
         0 0 25px rgba(0, 0, 0, 0.4);    /* glow tambahan */
     }
 
+    /* Right section with images grid */
+    .right-section {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 30%;   /* sesuaikan lebar gallery */
+      height: 100%;
+      flex: 1.5;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      z-index: 2;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.3); /* semi transparan */
+      backdrop-filter: blur(12px);    /* blur area di belakang */
+      -webkit-backdrop-filter: blur(12px); /* untuk Safari */
+      border-left: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .right-section::before {
+      display: none;
+    }
+
     /* Layout Images Grid */
     .layout-images {
       position: relative;
@@ -430,39 +453,41 @@
 
       <!-- Layout Images Grid -->
       @if(isset($layoutImages) && $layoutImages->count() > 0)
-        <div class="layout-images">
-          <div class="images-grid">
-            @foreach($layoutImages->take(6) as $image)
-              @php
-                $path = $image->file_path;
-                $isExternal = \Illuminate\Support\Str::startsWith($path, ['http://', 'https://']);
-                $src = $isExternal ? $path : asset('storage/' . $path);
-                $ytId = null;
-                if ($image->type === 'Video') {
-                  // Use ~ delimiter to avoid escaping slashes
-                  if (preg_match('~(?:youtube\.com/(?:watch\?v=|embed/)|youtu\.be/)([\w-]{11})~i', $src, $m)) {
-                    $ytId = $m[1];
+        <div class="right-section">
+          <div class="layout-images">
+            <div class="images-grid">
+              @foreach($layoutImages->take(6) as $image)
+                @php
+                  $path = $image->file_path;
+                  $isExternal = \Illuminate\Support\Str::startsWith($path, ['http://', 'https://']);
+                  $src = $isExternal ? $path : asset('storage/' . $path);
+                  $ytId = null;
+                  if ($image->type === 'Video') {
+                    // Use ~ delimiter to avoid escaping slashes
+                    if (preg_match('~(?:youtube\.com/(?:watch\?v=|embed/)|youtu\.be/)([\w-]{11})~i', $src, $m)) {
+                      $ytId = $m[1];
+                    }
                   }
-                }
-              @endphp
-              @if($image->type === 'Video')
-                <div class="layout-image" data-media="video" data-src="{{ $src }}" @if($ytId) data-ytid="{{ $ytId }}" @endif data-name="{{ e($image->name) }}">
-                  @if($ytId)
-                    <div class="ratio ratio-16x9" style="width:100%; height:100%;">
-                      <iframe src="https://www.youtube.com/embed/{{ $ytId }}?autoplay=1&mute=1&playsinline=1" title="{{ $image->name }}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                    </div>
-                  @else
-                    <video src="{{ $src }}" autoplay muted playsinline controls preload="metadata" style="width:100%; height:100%; object-fit:contain;">
-                      Browser Anda tidak mendukung pemutar video.
-                    </video>
-                  @endif
-                </div>
-              @else
-                <div class="layout-image" data-media="image" data-src="{{ asset('storage/' . $image->file_path) }}" data-name="{{ e($image->name) }}">
-                  <img src="{{ asset('storage/' . $image->file_path) }}" alt="{{ $image->name }}">
-                </div>
-              @endif
-            @endforeach
+                @endphp
+                @if($image->type === 'Video')
+                  <div class="layout-image" data-media="video" data-src="{{ $src }}" @if($ytId) data-ytid="{{ $ytId }}" @endif data-name="{{ e($image->name) }}">
+                    @if($ytId)
+                      <div class="ratio ratio-16x9" style="width:100%; height:100%;">
+                        <iframe src="https://www.youtube.com/embed/{{ $ytId }}?autoplay=1&mute=1&playsinline=1" title="{{ $image->name }}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                      </div>
+                    @else
+                      <video src="{{ $src }}" autoplay muted playsinline controls preload="metadata" style="width:100%; height:100%; object-fit:contain;">
+                        Browser Anda tidak mendukung pemutar video.
+                      </video>
+                    @endif
+                  </div>
+                @else
+                  <div class="layout-image" data-media="image" data-src="{{ asset('storage/' . $image->file_path) }}" data-name="{{ e($image->name) }}">
+                    <img src="{{ asset('storage/' . $image->file_path) }}" alt="{{ $image->name }}">
+                  </div>
+                @endif
+              @endforeach
+            </div>
           </div>
         </div>
       @endif
