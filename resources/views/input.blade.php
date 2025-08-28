@@ -83,14 +83,13 @@
     .sidebar {
       background: linear-gradient(180deg, #E7FFEA 0%, #ffffff 50%, #dcedff 100%);
       border-right: none;
-      min-height: 100vh;
+      height: 100vh;
       width: 250px;
       display: flex;
       flex-direction: column;
       position: fixed;
       left: 0;
       top: 0;
-      bottom: 0;
       z-index: 1000;
       overflow: hidden;
     }
@@ -125,8 +124,9 @@
 
     .sidebar-content {
       flex: 1;
-      overflow-y: auto;
+      overflow-y: visible;
       padding: 1rem 0;
+      height: auto;
     }
 
     .nav-link.active {
@@ -150,9 +150,11 @@
     }
     
     .nav-link:hover:not(.active) {
-      background-color: #f8f9fa;
+      background-color: #bcddc9;
       color: #1f9e76;
-      text-decoration: none;
+      cursor: pointer;
+      transform: translateX(5px);
+      box-shadow: 0 4px 12px rgba(31, 158, 118, 0.2);
     }
 
     main.content-area {
@@ -161,6 +163,8 @@
       min-height: 100vh;
       background: #f8f9fa;
       position: relative;
+      overflow-y: auto;
+      height: 100vh;
     }
     
     .header-top {

@@ -34,7 +34,7 @@
   }
 
   .sidebar {
-    background: linear-gradient(180deg, #E7FFEA 0%, #ffffff 50%, #dcedff 100%);
+    background: linear-gradient( 180deg,#E7FFEA 0%,#ffffff 50%,#dcedff 100%);
     border-right: none;
     min-height: 100vh;
     width: 250px;
@@ -103,9 +103,11 @@
   }
   
   .nav-link:hover:not(.active) {
-    background-color: #f8f9fa;
+    background-color: #bcddc9;
     color: #1f9e76;
-    text-decoration: none;
+    cursor: pointer;
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(31, 158, 118, 0.2);
   }
 
   /* Main Content */
