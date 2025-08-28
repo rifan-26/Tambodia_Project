@@ -105,7 +105,8 @@
       top: 0;
       right: 0;
       width: 32%;
-      height: 100vh;
+      height: auto;
+      min-height: 100vh;
       padding: 15px;
       display: flex;
       flex-direction: column;
@@ -372,87 +373,88 @@
       }
     }
 
-    /* Responsive untuk layar medium ke bawah */
-    @media (max-width: 1200px) {
+    @media screen and (max-width: 476px) {
       .hero {
-        min-height: 100vh;
-        padding: 0;
-      }
-      .hero-container {
-        flex-direction: column;
-        justify-content: center;
-        padding: 2rem;
-      }
-      .text-content {
-        max-width: 100%;
-        margin: 0;
-        padding: 1rem;
-        text-align: center;
-        flex: none;
-      }
-      .layout-images {
-        position: relative;
-        right: auto;
-        top: auto;
-        transform: none;
-        width: 100%;
-        margin-top: 2rem;
-      }
-    }
-    @media (max-width: 992px) {
-      .hero {
-        min-height: 100vh;
-        padding: 0;
+        height: auto;
+        min-height: 100vh ;
+        padding: 1rem 0;
       }
 
       .hero-container {
         flex-direction: column;
-        justify-content: center;
-        padding: 2rem;
-      }
-
-      .text-content {
-        max-width: 100%;
-        margin: 0;
+        height: auto;
+        min-height: 100vh;
         padding: 1rem;
-        text-align: center;
-        flex: none;
+        align-items: center;
       }
 
-      .layout-images {
-        position: relative;
-        right: auto;
-        top: auto;
-        transform: none;
+      .right-section {
+        margin-top: 50px;
         width: 100%;
-        margin-top: 2rem;
-      }
-      /* Keep the same areas on mobile/tablet but the container will be narrower */
-    }
-
-    @media (max-width: 768px) {
-      .text-content h1 {
-        font-size: 2rem;
-      }
-
-      .bps-word {
-        font-size: 2.5rem;
+        height: auto;
+        padding: 1rem;
+        margin: 0 auto;
+        background:
+          linear-gradient(to top, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 0.8) 100%);
+        backdrop-filter: blur(8px);
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.15);
       }
 
-      .provinsi-word {
-        font-size: 2rem;
+      .images-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        width: 100%;
+        max-width: 360px;
+        margin: 0 auto;
+        align-items: start;
       }
 
-      .text-content h3 {
-        font-size: 1.8rem;
+      .layout-image:nth-child(1) { aspect-ratio: 1 / 1; }
+      .layout-image:nth-child(2) { aspect-ratio: 9 / 16; }
+      .layout-image:nth-child(3) { aspect-ratio: 9 / 16; }
+      .layout-image:nth-child(4) { aspect-ratio: 1 / 1; }
+      .layout-image:nth-child(5) { aspect-ratio: 16 / 9; }
+      .layout-image:nth-child(6) { aspect-ratio: 16 / 9; }
+
+      .layout-image {
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
       }
 
-      .text-content p {
-        font-size: 1rem;
+      .layout-image img,
+      .layout-image video,
+      .layout-image iframe {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;  /* isi penuh tapi tetap proporsional */
       }
 
-      .layout-images {
-        height: 300px;
+       .text-content h1 { font-size: 1.5rem; }
+        .bps-word { font-size: 1.8rem; }
+        .provinsi-word { font-size: 1.5rem; }
+        .text-content h3 { font-size: 1.4rem; }
+        .text-content p { font-size: 0.95rem; }
+
+      /* Adjust body overflow for mobile */
+      html, body {
+        overflow-y: auto;
+        height: auto;
+      }
+
+      .hero {
+        height: auto;
+        min-height: 100vh;
+        padding: 2rem 0;
+      }
+
+      .hero-container {
+        height: auto;
+        min-height: 100vh;
       }
     }
   </style>
