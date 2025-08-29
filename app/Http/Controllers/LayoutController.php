@@ -35,8 +35,9 @@ class LayoutController extends Controller
     public function updateBackground(Request $request)
     {
         try {
+            // Allow null background_image_id for clearing background
             $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
-                'background_image_id' => 'required|integer|exists:media,id'
+                'background_image_id' => 'nullable|integer|exists:media,id'
             ]);
 
             if ($validator->fails()) {
@@ -49,11 +50,12 @@ class LayoutController extends Controller
                 ['description' => 'Default description']
             );
 
-            // Update background image
+            // Update background image (can be null to clear)
             $layoutSetting->background_image_id = $request->background_image_id;
             $layoutSetting->save();
 
-            return response()->json(['success' => true, 'message' => 'Background berhasil diperbarui']);
+            $message = $request->background_image_id ? 'Background berhasil diperbarui' : 'Background berhasil dihapus';
+            return response()->json(['success' => true, 'message' => $message]);
 
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
@@ -65,15 +67,13 @@ class LayoutController extends Controller
         try {
             $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
                 'description' => 'nullable|string|max:1000',
-                'images' => 'required|array|min:1',
+                'images' => 'nullable|array', // Allow empty array
                 'images.*.position' => 'required|integer|min:1|max:6',
                 'images.*.image_id' => 'required|integer|exists:media,id',
                 'images.*.order' => 'required|integer|min:1'
             ], [
                 'description.max' => 'Deskripsi maksimal 1000 karakter',
-                'images.required' => 'Minimal pilih satu gambar untuk layout',
                 'images.array' => 'Data gambar harus berupa array',
-                'images.min' => 'Minimal pilih satu gambar untuk layout',
                 'images.*.position.required' => 'Posisi gambar harus disediakan',
                 'images.*.position.integer' => 'Posisi gambar harus berupa angka',
                 'images.*.position.min' => 'Posisi gambar minimal 1',
@@ -95,7 +95,7 @@ class LayoutController extends Controller
             }
 
             $description = $request->input('description', '');
-            $images = $request->input('images');
+            $images = $request->input('images', []); // Default to empty array
             
             // Use transaction to ensure data integrity
             DB::transaction(function() use ($description, $images) {
@@ -106,14 +106,16 @@ class LayoutController extends Controller
                         'layout_order' => null
                     ]);
                 
-                // Then update the selected images
-                foreach ($images as $imageData) {
-                    Media::where('id', $imageData['image_id'])
-                        ->where('user_id', Auth::id())
-                        ->update([
-                            'show_on_landing' => true,
-                            'layout_order' => $imageData['order']
-                        ]);
+                // Then update the selected images (if any)
+                if (!empty($images)) {
+                    foreach ($images as $imageData) {
+                        Media::where('id', $imageData['image_id'])
+                            ->where('user_id', Auth::id())
+                            ->update([
+                                'show_on_landing' => true,
+                                'layout_order' => $imageData['order']
+                            ]);
+                    }
                 }
                 
                 // Store layout description in layout_settings table
@@ -124,11 +126,19 @@ class LayoutController extends Controller
             });
 
             // Log the action
-            Log::createLog(Auth::id(), 'Update Layout', 'Updated landing page layout with ' . count($images) . ' images');
+            $imageCount = count($images);
+            $logMessage = $imageCount > 0 
+                ? "Updated landing page layout with {$imageCount} images" 
+                : 'Updated landing page layout (no media)';
+            Log::createLog(Auth::id(), 'Update Layout', $logMessage);
 
+            $responseMessage = $imageCount > 0 
+                ? 'Layout berhasil disimpan dan diterapkan ke landing page!' 
+                : 'Layout berhasil disimpan (tanpa media)!';
+            
             return response()->json([
                 'success' => true,
-                'message' => 'Layout berhasil disimpan dan diterapkan ke landing page!'
+                'message' => $responseMessage
             ]);
 
         } catch (\Exception $e) {
