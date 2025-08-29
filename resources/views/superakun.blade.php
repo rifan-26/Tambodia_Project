@@ -523,9 +523,9 @@
   <main class="content-area">
     <div class="header-top">
       <h2>Selamat Datang, Super Admin!</h2>
-      <div class="user-badge">
+      <div class="user-badge" title="Logged in">
         <span class="status-indicator" aria-label="online status"></span>
-        <span>{{ $currentUser->name ?? 'Super Admin' }}</span>
+        <span>{{ Auth::user()->name ?? 'User' }}</span>
       </div>
     </div>
 

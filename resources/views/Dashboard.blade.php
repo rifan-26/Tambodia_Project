@@ -202,22 +202,25 @@
     }
     
     .user-badge {
-      background: var(--primary);
-      padding: 0.5rem 1rem;
-      border-radius: 0.5rem;
+      background: linear-gradient(90deg, #58cbaa, #7cb8f4);
+      padding: 0.35rem 1rem;
+      border-radius: 2rem;
       color: white;
-      font-weight: 500;
+      font-weight: 600;
       font-size: 0.9rem;
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      box-shadow: 0 2px 8px rgb(0 0 0 / 0.15);
+      user-select: none;
     }
     
     .user-badge .status-indicator {
-      width: 8px;
-      height: 8px;
-      background-color: #4ade80;
+      width: 16px;
+      height: 16px;
+      background-color: #44d69e;
       border-radius: 50%;
+      box-shadow: 0 0 6px #44d69eaa;
     }
 
     /* Stats Cards */
@@ -295,18 +298,18 @@
       gap: 0.5rem;
     }
 
-    .section-content {
-      padding: 0;
-    }
-
     /* Media Grid */
     .media-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
       gap: 1.5rem;
       padding: 1.5rem;
     }
 
+    /* Responsive columns: 2 on md, 1 on sm */
+    @media (max-width: 992px) {
+      .media-grid { grid-template-columns: repeat(2, 1fr); }
+    }
     @media (max-width: 768px) {
       .media-grid {
         grid-template-columns: 1fr;
@@ -438,12 +441,12 @@
       white-space: nowrap;
     }
 
-    .btn-toggle {
+    .btn-preview {
       background: var(--primary);
       color: white;
     }
 
-    .btn-toggle:hover {
+    .btn-preview:hover {
       background: var(--primary-light);
     }
 
@@ -679,7 +682,65 @@
         justify-content: center;
       }
     }
-</style>
+
+    /* Filter Section Styling */
+    .filter-section {
+      background: white;
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .filter-section .filter-btn {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      color: #495057;
+      padding: 0.5rem 1rem;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .filter-section .filter-btn:hover {
+      background: #e9ecef;
+      border-color: #adb5bd;
+      transform: translateY(-1px);
+    }
+
+    .filter-section .filter-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+      box-shadow: 0 2px 8px rgba(31, 158, 118, 0.3);
+    }
+
+    .filter-section #resetFilter {
+      background: #6c757d;
+      border-color: #6c757d;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .filter-section #resetFilter:hover {
+      background: #5a6268;
+      border-color: #545b62;
+      transform: translateY(-1px);
+    }
+  </style>
 
 <body>
   <!-- Page Transition Overlay -->
@@ -748,9 +809,9 @@
   <main class="content-area">
     <div class="header-top">
         <h2>Dashboard</h2>
-        <div class="user-badge">
-            <span class="status-indicator"></span>
-            <span>{{ Auth::user()->name ?? 'Admin' }}</span>
+        <div class="user-badge" title="Logged in">
+            <span class="status-indicator" aria-label="online status"></span>
+            <span>{{ Auth::user()->name ?? 'User' }}</span>
         </div>
     </div>
     
@@ -796,43 +857,29 @@
           <i class="bi bi-folder2-open"></i>
           Media Management
         </h3>
-        <div class="d-flex gap-2">
-          <button type="button" class="btn btn-outline-primary btn-sm" onclick="refreshMedia()">
-            <i class="bi bi-arrow-clockwise"></i> Refresh
-          </button>
-          <a href="{{ route('layout.index') }}" class="btn btn-outline-success btn-sm" data-bs-toggle="tooltip" title="Atur tata letak gambar pada landing page">
-            <i class="bi bi-grid-3x3-gap"></i> Layout Manager
-          </a>
-          <a href="{{ url('/input') }}" class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-circle"></i> Tambah Media
-          </a>
-        </div>
       </div>
 
       <!-- Filter Section -->
-      <div class="px-4 py-3 border-bottom" id="filterSection">
-        <select id="jenisMedia" class="form-select form-select-sm d-none" aria-hidden="true">
-          <option value="Semua Jenis" selected>All Types</option>
-          <option value="Gambar">Images</option>
-          <option value="Video">Videos</option>
-          <option value="Audio">Audio</option>
-        </select>
-        <div class="d-flex flex-wrap gap-2 align-items-center">
-          <span class="text-muted fw-semibold">Filter:</span>
-          <div class="btn-group" role="group">
-            <button type="button" class="btn btn-outline-secondary btn-sm filter-btn active" data-type="">
-              <i class="bi bi-grid me-1"></i> All
-            </button>
-            <button type="button" class="btn btn-outline-secondary btn-sm filter-btn" data-type="Gambar">
-              <i class="bi bi-image me-1"></i> Images
-            </button>
-            <button type="button" class="btn btn-outline-secondary btn-sm filter-btn" data-type="Video">
-              <i class="bi bi-play-circle me-1"></i> Videos
-            </button>
-            <button type="button" class="btn btn-outline-secondary btn-sm filter-btn" data-type="Audio">
-              <i class="bi bi-music-note me-1"></i> Audio
-            </button>
-          </div>
+      <div class="filter-section">
+        <div class="d-flex align-items-center mb-3">
+          <h6 class="mb-0 me-3"><i class="bi bi-funnel me-2"></i>Filter Media:</h6>
+          <button id="resetFilter" class="btn btn-sm">
+            <i class="bi bi-arrow-clockwise me-1"></i>Reset
+          </button>
+        </div>
+        <div class="filter-buttons">
+          <button class="filter-btn active" data-type="all">
+            <i class="bi bi-grid-3x3-gap me-1"></i>Semua
+          </button>
+          <button class="filter-btn" data-type="image">
+            <i class="bi bi-image me-1"></i>Gambar
+          </button>
+          <button class="filter-btn" data-type="video">
+            <i class="bi bi-play-circle me-1"></i>Video
+          </button>
+          <button class="filter-btn" data-type="audio">
+            <i class="bi bi-music-note me-1"></i>Audio
+          </button>
         </div>
       </div>
 
@@ -925,28 +972,50 @@
     async function fetchMedia(params = {}) {
       try {
         showLoading(true);
-        const jenisSelect = document.getElementById('jenisMedia');
-        const rawVal = (params.type ?? (jenisSelect ? jenisSelect.value : '')).trim();
-        const isAll = !rawVal || rawVal === 'Semua Jenis' || rawVal.toLowerCase() === 'all';
+        const rawVal = String(params.type ?? 'all').trim();
+        const mapToApi = (v) => {
+          const t = (v || '').toLowerCase();
+          if (!t || t === 'all') return 'all';
+          if (t === 'image') return 'image';
+          if (t === 'video') return 'video';
+          if (t === 'audio') return 'audio';
+          return 'all'; // fallback to all
+        };
+        const apiType = mapToApi(rawVal);
         const q = new URLSearchParams();
-        if (!isAll) {
-          q.set('type', rawVal);
-        } else {
-          q.set('type', 'all');
-        }
-        const res = await fetch(API.filter + '?' + q.toString(), {
+        q.set('type', apiType);
+        const url = API.filter + '?' + q.toString();
+        try { console.debug('[fetchMedia] GET', url); } catch (_) {}
+        const res = await fetch(url, {
           headers: {
             'X-CSRF-TOKEN': CSRF_TOKEN,
             'X-Requested-With': 'XMLHttpRequest',
           },
+          credentials: 'same-origin',
         });
-        const contentType = res.headers.get('content-type') || '';
-        if (!contentType.includes('application/json')) {
-          throw new Error('Unexpected response');
+        let json;
+        try {
+          json = await res.clone().json();
+        } catch (e) {
+          // Likely redirected to login or HTML error; surface a toast
+          const text = await res.text();
+          console.error('Non-JSON response from', url, res.status, text.slice(0, 300));
+          throw new Error('Gagal memuat data (non-JSON response)');
         }
-        const json = await res.json();
-        if (!json.success) throw new Error(json.message || 'Failed to load media');
-        state.media = Array.isArray(json.data) ? json.data : [];
+        if (json.success === false) throw new Error(json.message || 'Failed to load media');
+        // Support array or paginated structure { data: [...] }
+        let items = [];
+        if (Array.isArray(json)) {
+          items = json;
+        } else if (Array.isArray(json.data)) {
+          items = json.data;
+        } else if (json.data && Array.isArray(json.data.data)) {
+          items = json.data.data; // paginated
+        } else if (json.items && Array.isArray(json.items)) {
+          items = json.items;
+        }
+        try { console.debug('[fetchMedia] items parsed:', Array.isArray(items) ? items.length : 'non-array'); } catch (_) {}
+        state.media = Array.isArray(items) ? items : [];
         renderAll();
       } catch (e) {
         console.error(e);
@@ -965,20 +1034,41 @@
     }
 
     function initFilterButtons() {
-      const select = document.getElementById('jenisMedia');
-      const buttons = document.querySelectorAll('.filter-btn');
-      if (!select || !buttons.length) return;
-      buttons.forEach(btn => {
+      const filterBtns = document.querySelectorAll('.filter-btn');
+      const resetBtn = document.getElementById('resetFilter');
+      
+      filterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-          // toggle active state
-          buttons.forEach(b => b.classList.remove('active'));
+          // Update active state
+          filterBtns.forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
-          // set select value expected by backend and fetch
-          const type = (btn.dataset.type || '').trim();
-          select.value = type ? type : 'Semua Jenis';
-          filterMedia();
+          
+          // Get filter type
+          const filterType = btn.dataset.type;
+          
+          // Clear selections when filtering
+          document.querySelectorAll('.media-checkbox').forEach(cb => cb.checked = false);
+          updateSelectedCount();
+          
+          // Fetch filtered media
+          fetchMedia({ type: filterType });
         });
       });
+      
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          // Reset to "Semua" filter
+          filterBtns.forEach(b => b.classList.remove('active'));
+          document.querySelector('.filter-btn[data-type="all"]').classList.add('active');
+          
+          // Clear selections
+          document.querySelectorAll('.media-checkbox').forEach(cb => cb.checked = false);
+          updateSelectedCount();
+          
+          // Fetch all media
+          fetchMedia({ type: 'all' });
+        });
+      }
     }
 
     function updateStats(items) {
@@ -1002,24 +1092,36 @@
     function renderMediaGrid(items) {
       const container = document.getElementById('mediaContainer');
       if (!container) return;
+      try { console.debug('[renderMediaGrid] items:', Array.isArray(items) ? items.length : 'non-array'); } catch (_) {}
       if (!items.length) {
         container.innerHTML = `
           <div class="empty-state w-100">
             <i class="bi bi-folder-x"></i>
             <div>No media found.</div>
           </div>`;
+        // Ensure container is visible even when empty
+        container.style.display = 'grid';
         return;
       }
       container.innerHTML = items.map(m => mediaCardTemplate(m)).join('');
+      // Ensure the grid is visible after re-render
+      container.style.display = 'grid';
+      try { console.debug('[renderMediaGrid] rendered cards:', container.children.length); } catch (_) {}
+      // Make sure cards are visible (animation CSS sets opacity:0 by default)
+      container.querySelectorAll('.media-card').forEach(card => { card.style.opacity = '1'; });
+      // Trigger entrance animation for newly inserted cards
+      try { requestAnimationFrame(() => animateCards()); } catch (_) {}
       // Bind card controls
       container.querySelectorAll('.media-checkbox').forEach(cb => {
         cb.addEventListener('change', updateSelectedCount);
       });
-      container.querySelectorAll('[data-action="toggle"]').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-          const id = e.currentTarget.dataset.id;
-          await toggleLanding([id]);
-          await refreshMedia();
+      container.querySelectorAll('[data-action="preview"]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const button = e.currentTarget;
+          const type = button.dataset.type;
+          const src = button.dataset.src;
+          const name = button.dataset.name;
+          openMediaPreview(type, src, name);
         });
       });
       container.querySelectorAll('[data-action="delete"]').forEach(btn => {
@@ -1059,6 +1161,18 @@
           <source src="${src}" type="${mime}">
           Your browser does not support audio playback.
         </audio></div>`;
+      } else {
+        // Fallback: unknown type from API (e.g., 'image', 'video', 'audio')
+        const src = fileUrl(m.file_path || '');
+        const niceType = (m.type || 'Media');
+        const name = escapeHtml(m.name || 'Untitled');
+        const link = src ? `<a href="${src}" target="_blank" rel="noopener">Open file</a>` : '';
+        preview = `<div class="p-3 text-center text-muted">
+          <div class="mb-2"><i class="bi bi-file-earmark"></i></div>
+          <div class="small">${niceType} preview not available</div>
+          <div class="small">${name}</div>
+          <div>${link}</div>
+        </div>`;
       }
       return `
         <div class="media-card">
@@ -1075,15 +1189,9 @@
                 <label class="form-check-label">Select</label>
               </div>
               <div class="media-actions">
-                ${m.type === 'Audio' ? `
-                <button class="btn-enhanced btn-play" data-action="play" data-id="${m.id}" data-src="${fileUrl(m.file_path)}" data-name="${escapeHtml(m.name)}">
-                  <i class="bi bi-play-circle"></i> Play
+                <button class="btn-enhanced btn-preview" data-action="preview" data-id="${m.id}" data-type="${m.type}" data-src="${fileUrl(m.file_path)}" data-name="${escapeHtml(m.name)}">
+                  <i class="bi bi-eye"></i> Preview
                 </button>
-                ` : `
-                <button class="btn-enhanced btn-toggle" data-action="toggle" data-id="${m.id}">
-                  <i class="bi bi-shuffle"></i> Toggle
-                </button>
-                `}
                 <button class="btn-enhanced btn-delete" data-action="delete" data-id="${m.id}">
                   <i class="bi bi-trash"></i> Delete
                 </button>
@@ -1115,15 +1223,6 @@
     }
 
     async function refreshMedia() { return fetchMedia({}); }
-    function filterMedia() { 
-      const activeButton = document.querySelector('.filter-btn.active');
-      if (activeButton) {
-        const filterType = activeButton.dataset.type || '';
-        fetchMedia({ type: filterType });
-      } else {
-        fetchMedia({});
-      }
-    }
     function applyAdvancedFilters() { fetchMedia({}); }
 
     async function toggleLanding(mediaIds, desiredStatus = null) {
@@ -1253,6 +1352,77 @@
 
     function escapeHtml(str) {
       return String(str || '').replace(/[&<>"]+/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[s] || s));
+    }
+
+    function openMediaPreview(type, src, name) {
+      // Create modal if it doesn't exist
+      let modal = document.getElementById('mediaPreviewModal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'mediaPreviewModal';
+        modal.className = 'modal fade';
+        modal.setAttribute('tabindex', '-1');
+        modal.innerHTML = `
+          <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="previewModalTitle">Preview Media</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body" id="previewModalBody" style="min-height: 300px;">
+                <!-- Content will be inserted here -->
+              </div>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+      }
+
+      const modalTitle = modal.querySelector('#previewModalTitle');
+      const modalBody = modal.querySelector('#previewModalBody');
+      
+      modalTitle.textContent = `Preview: ${name}`;
+      modalBody.innerHTML = '';
+
+      if (type === 'Gambar') {
+        const img = document.createElement('img');
+        img.src = src;
+        img.className = 'img-fluid rounded';
+        img.style.maxHeight = '500px';
+        img.style.width = '100%';
+        img.style.objectFit = 'contain';
+        modalBody.appendChild(img);
+      } else if (type === 'Video') {
+        // Check if it's a YouTube URL
+        const ytMatch = src.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
+        if (ytMatch) {
+          const iframe = document.createElement('iframe');
+          iframe.width = '100%';
+          iframe.height = '400';
+          iframe.src = `https://www.youtube.com/embed/${ytMatch[1]}`;
+          iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+          iframe.allowFullscreen = true;
+          iframe.className = 'rounded';
+          modalBody.appendChild(iframe);
+        } else {
+          const video = document.createElement('video');
+          video.src = src;
+          video.controls = true;
+          video.className = 'w-100 rounded';
+          video.style.maxHeight = '500px';
+          modalBody.appendChild(video);
+        }
+      } else if (type === 'Audio') {
+        const audio = document.createElement('audio');
+        audio.src = src;
+        audio.controls = true;
+        audio.className = 'w-100';
+        modalBody.appendChild(audio);
+      }
+
+      // Show modal using Bootstrap
+      const bsModal = new bootstrap.Modal(modal);
+      bsModal.show();
     }
 
     document.addEventListener('DOMContentLoaded', async () => {

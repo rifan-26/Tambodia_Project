@@ -660,9 +660,9 @@
     <main class="content-area">
       <div class="header-top">
       <h2 class="section-header">Atur Jadwal Media </h2>
-      <div class="user-badge" title="Logged in as {{ Auth::user()->name }}">
+      <div class="user-badge" title="Logged in">
         <span class="status-indicator" aria-label="online status"></span>
-        <span>{{ Auth::user()->name }}</span>
+        <span>{{ Auth::user()->name ?? 'User' }}</span>
       </div>
     </div>
     <div class="container-fluid">
