@@ -2,95 +2,63 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Selamat Datang di BPS Sumatera Utara</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Marcellus+SC&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Marcellus&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.plyr.io/3.7.8/plyr.css" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BPS Sumatera Utara</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
   <style>
- @import url('https://fonts.googleapis.com/css2?family=Playfair+Display&family=Open+Sans&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display&family=Open+Sans&display=swap');
 
     * {
-      margin: 0;
-      padding: 0;
       box-sizing: border-box;
     }
 
-    html, body {
-      height: 100%;
-      overflow: hidden;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: 'Open Sans', sans-serif;
+      background-color: #0b0b0b;
       color: white;
+      height: 100vh;
+      overflow-x: hidden;
     }
 
-    .hero {
+    .container-left {
+      display: relative;
       height: 100vh;
       width: 100vw;
-      display: flex;
-      align-items: center;
-      position: relative;
       overflow: hidden;
+      background: #0b0b0b;
     }
 
-    .hero-container {
-      width: 100%;
-      height: 100vh;
-      overflow: hidden;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 2rem;
-      gap: 2rem;
-      flex-wrap: wrap; /* allow wrapping to prevent collision at mid widths */
-    }
-
-    /* Background image with dynamic content */
-    .bg-image {
+    /* Left section with background image and text */
+    .left-section {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
+      background-image: 
+        linear-gradient(to bottom, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 0.8) 100%),
+        @if($backgroundImage)
+          url('{{ asset("storage/" . $backgroundImage->file_path) }}')
+        @else
+          url('img/danau toba img1.svg')
+        @endif;
       background-size: cover;
       background-position: center;
-      z-index: 1;
-      transition: opacity 1s ease-in-out;
+      padding: 60px 80px;
+      color: white;
+      z-index: 1; /* biar di bawah gallery */
     }
 
-    /* Gradient overlay */
-    .gradient-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(
-        to right,
-        rgba(0, 0, 0, 0.7) 0%,
-        rgba(0, 0, 0, 0.4) 50%,
-        rgba(0, 0, 0, 0.7) 100%
-      );
-      z-index: 2;
-    }
-
-    /* Konten teks */
-    .text-content {
-      position: relative;
-      z-index: 2;
+    .left-section h1 {
       font-family: 'Playfair Display', serif;
       font-weight: 450px;
       font-size: 70px; /* sedikit lebih besar */
       line-height: 1.2;
       letter-spacing: 1px; /* spasi antar huruf */
-      margin-top: 380px; /* sedikit lebih rapat ke atas */
+      margin-top: 220px; /* sedikit lebih rapat ke atas */
       margin-bottom: 20px;
       max-width: 650px;
       color: #fff;
@@ -99,185 +67,76 @@
         0 0 25px rgba(0, 0, 0, 0.4);    /* glow tambahan */
     }
 
+    .left-section p {
+      max-width: 620px;
+      font-size: 1.25rem;
+      line-height: 1.7;
+      letter-spacing: 0.3px;
+      color: #f5f5f5;
+      text-shadow:
+      0 4px 8px rgba(0, 0, 0, 0.7),   /* shadow utama lebih tebal */
+      0 0 12px rgba(0, 0, 0, 0.5),    /* glow sedang */
+      0 0 30px rgba(0, 0, 0, 0.4);    /* glow lebar */
+    }
+
+    /* Highlight for BPS letters */
+    .bps {
+      font-weight: 700;
+      font-family: 'Playfair Display', serif;
+      font-size: 3.5rem;
+      line-height: 1.2;
+    }
+    .bps .b {
+      color: #0c77d2; /* Blue shade */
+    }
+    .bps .p {
+      color: #1cd03d; /* Mustard/Gold shade */
+    }
+    .bps .s {
+      color: #f8bc08; /* Orange shade */
+    }
+
     /* Right section with images grid */
     .right-section {
       position: absolute;
       top: 0;
       right: 0;
-      width: 32%;
-      height: 100vh;
-      padding: 15px;
+      width: 30%;   /* sesuaikan lebar gallery */
+      height: 100%;
+      flex: 1.5;
+      padding: 20px;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      align-items: center;
       z-index: 2;
       overflow: hidden;
-      background: rgba(0, 0, 0, 0.3);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(0, 0, 0, 0.3); /* semi transparan */
+      backdrop-filter: blur(12px);    /* blur area di belakang */
+      -webkit-backdrop-filter: blur(12px); /* untuk Safari */
       border-left: 1px solid rgba(255,255,255,0.1);
     }
 
-    .layout-images {
+    .right-section::before {
+      display: none;
+    }
+
+    .row {
+      margin-top: 5px;
+      margin-bottom: 20px;
+    }
+
+    .img-potrait-1 {
       position: relative;
-      z-index: 3;
-      width: 100%;
-      max-width: 400px;
-      height: auto;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      overflow: visible;
-    }
-
-    .images-grid { 
-      display: grid; 
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: auto auto auto auto;
-      grid-template-areas: 
-        "img1 img2"
-        "img3 img2" 
-        "img3 img4" 
-        "img5 img6"; 
-      gap: 0.8rem; 
-      width: 100%; 
-      max-height: 80vh;
-      align-items: stretch;
-      justify-items: stretch;
-    }
-
-    .layout-image {
-      border-radius: 8px;
+      border: 4px solid #ffffff;
+      border-radius: 4px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
       overflow: hidden;
-      background: #111;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-      cursor: pointer;
-    }
-
-    .layout-image img,
-    .layout-image video,
-    .layout-image iframe {
-      width: 100%;
-      height: 100%;
-      object-fit: cover; /* isi penuh, sesuai rasio grid */
-      display: block;
-    }
-
-    .layout-image:hover img {
-      transform: scale(1.04);
-      filter: brightness(0.95);
-    }
-
-    .layout-image:nth-child(1) { 
-      grid-area: img1; 
-      aspect-ratio: 1 / 1; 
-      min-height: 120px;
-    }
-    .layout-image:nth-child(2) { 
-      grid-area: img2; 
-      aspect-ratio: 9 / 16; 
-      min-height: 200px;
-    }
-    .layout-image:nth-child(3) {
-      grid-area: img3; 
-      aspect-ratio: 9 / 16; 
-      min-height: 200px;
-    }
-    .layout-image:nth-child(4) { 
-      grid-area: img4; 
-      aspect-ratio: 1 / 1; 
-      min-height: 120px;
-    }
-    .layout-image:nth-child(5) { 
-      grid-area: img5; 
-      aspect-ratio: 16 / 9; 
-      min-height: 80px;
-    }
-    .layout-image:nth-child(6) { 
-      grid-area: img6; 
-      aspect-ratio: 16 / 9; 
-      min-height: 80px;
-    }
-
-    .text-content h1 {
-      font-size: 2.8rem;
-      font-weight: bold;
-      margin-bottom: 0.1rem;
-      text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.8);
-    }
-
-    .bps-word {
-       font-weight: 700;
-      font-family: 'Playfair Display', serif;
-      font-size: 3.5rem;
-      line-height: 1.2;
-    }
-
-    .provinsi-word {
-      font-size: 3.1rem;
-      font-weight: 500;
-      color: white;
-      text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.8);
-    }
-
-    .text-content h3 {
-      font-size: 3rem;
-      font-weight: 700;
-      margin-bottom: 0.4rem;
-      text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.8);
-    }
-
-    .text-content p {
-      font-size: 1.4rem;
-      line-height: 1.6;
-      font-family: "Marcellus", serif;
-      text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.8);
-    }
-
-    /* Media section */
-    .media-section {
-      background-color: #f8f9fa;
-      padding: 5rem 0;
-      color: #333;
-    }
-
-    .media-section h2 {
-      font-size: 2.5rem;
-      text-align: center;
-      margin-bottom: 3rem;
-      color: #2c3a67;
-    }
-
-    .media-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 2rem;
-      padding: 0 2rem;
-    }
-
-    .media-card {
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease;
-      background-color: white;
-    }
-
-    .media-card:hover {
-      transform: translateY(-5px);
-    }
-
-    .media-content {
-      position: relative;
+      cursor: default;
       width: 100%;
       height: 0;
-      padding-bottom: 56.25%; /* 16:9 aspect ratio */
-      overflow: hidden;
+      padding-bottom: 177.78%; /* 16/9 * 100 = 177.78% → portrait 9:16 */
     }
 
-    .media-content img, 
-    .media-content video {
+    .img-potrait-1 img {
       position: absolute;
       top: 0;
       left: 0;
@@ -286,315 +145,570 @@
       object-fit: cover;
     }
 
-    .media-info {
-      padding: 1.5rem;
+    .img-1-1 {
+      position: relative;
+      border: 4px solid #ffffff;
+      border-radius: 4px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      cursor: default;
+      width: 100%;
+      height: 50%; 
+      padding-bottom: 100%;
     }
 
-    .media-info h3 {
-      font-size: 1.25rem;
-      margin-bottom: 0.5rem;
-      color: #2c3a67;
+    .img-1-1 img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
-    .media-info p {
-      font-size: 0.9rem;
-      color: #666;
-      margin-bottom: 0.5rem;
+    .img-potrait-2 {
+      position: relative;
+      border: 4px solid #ffffff;
+      border-radius: 4px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      cursor: default;
+      width: 100%;
+      height: 0;
+      padding-bottom: 177.78%; /* 16/9 * 100 = 177.78% → portrait 9:16 */
+      margin-top: -140px; /* naik ke atas biar nyelip */
+      z-index: 2;        /* pastikan tampil di atas */
     }
 
-    .media-type {
-      display: inline-block;
-      padding: 0.25rem 0.75rem;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
+    .img-potrait-2 img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
-    .media-type.image {
-      background-color: #e3f2fd;
-      color: #1976d2;
+    .img-1-1-2 {
+      position: relative;
+      border: 4px solid #ffffff;
+      border-radius: 4px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      cursor: default;
+      width: 100%;
+      height: 50%; 
+      padding-bottom: 100%;
     }
 
-    .media-type.video {
-      background-color: #fce4ec;
-      color: #c2185b;
+    .img-1-1-2 img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
-    .media-type.audio {
-      background-color: #e8f5e9;
-      color: #388e3c;
+    .img-1-1-3 {
+      position: relative;
+      border: 4px solid #ffffff;
+      border-radius: 4px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      cursor: default;
+      width: 100%;
+      height: 0;
+      padding-bottom: 56.25%; /* 9/16 = 0.5625 */
     }
 
-    /* Audio player styling */
-    .audio-container {
-      padding: 1rem;
-      background-color: #f5f5f5;
+    .img-1-1-3 img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .right-section img {
+      transition: transform 0.4s ease, box-shadow 0.4s ease, filter 0.4s ease;
+    }
+
+    .right-section img:hover {
+      transform: scale(1.05); /* zoom sedikit */
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* shadow lebih tebal saat hover */
+      filter: brightness(1.05) contrast(1.05); /* sedikit lebih terang & kontras */
+    }
+
+    /* ===== LAYOUT GRID SYSTEM ===== */
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: repeat(4, 1fr);
+      gap: 1rem;
+      height: 100%;
+    }
+
+    /* ===== GRID POSITIONING & ASPECT RATIOS ===== */
+    /* Position 1: Top Left - Square (1:1) */
+    .layout-item:nth-child(1) {
+      grid-column: 1;
+      grid-row: 1;
+      aspect-ratio: 1/1;
+      height: auto;
+    }
+
+    /* Position 2: Top Right - Portrait (9:16) */
+    .layout-item:nth-child(2) {
+      grid-column: 2;
+      grid-row: 1 / 3;
+      aspect-ratio: 9/16;
+      height: auto;
+    }
+
+    /* Position 3: Middle Left - Portrait (9:16) */
+    .layout-item:nth-child(3) {
+      grid-column: 1;
+      grid-row: 2 / 4;
+      aspect-ratio: 9/16;
+      height: auto;
+    }
+
+    /* Position 4: Middle Right - Square (1:1) */
+    .layout-item:nth-child(4) {
+      grid-column: 2;
+      grid-row: 3;
+      aspect-ratio: 1/1;
+      height: auto;
+    }
+
+    /* Position 5: Bottom Left - Landscape (16:9) */
+    .layout-item:nth-child(5) {
+      grid-column: 1;
+      grid-row: 4;
+      aspect-ratio: 16/9;
+      height: auto;
+    }
+
+    /* Position 6: Bottom Right - Landscape (16:9) */
+    .layout-item:nth-child(6) {
+      grid-column: 2;
+      grid-row: 4;
+      aspect-ratio: 16/9;
+      height: auto;
+    }
+
+    /* ===== LAYOUT ITEM STYLING ===== */
+    .layout-item {
+      position: relative;
+      background: white;
+      border: 3px solid #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 120px;
+    }
+
+    .layout-item:hover {
+      border-color: #1f9e76;
+      box-shadow: 0 6px 20px rgba(31, 158, 118, 0.2);
+      transform: translateY(-2px);
+    }
+
+    /* ===== MODAL STYLING ===== */
+    .modal-xl {
+      max-width: 90%;
+    }
+
+    .youtube-modal-container {
+      position: relative;
+      width: 100%;
+      height: 500px;
+    }
+
+    .youtube-modal-container iframe {
+      width: 100%;
+      height: 100%;
       border-radius: 8px;
     }
 
-    .plyr--audio .plyr__control.plyr__tab-focus,
-    .plyr--audio .plyr__control:hover,
-    .plyr--audio .plyr__control[aria-expanded=true] {
-      background: #1F9E76;
+    #modalMediaContent img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
-    .plyr--audio .plyr__control.plyr__tab-focus {
-      box-shadow: 0 0 0 5px rgba(31, 158, 118, 0.5);
+    #modalMediaContent video {
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
-    .plyr--audio .plyr__progress__buffer {
-      color: rgba(31, 158, 118, 0.5);
+    /* ===== MEDIA CONTENT STYLING ===== */
+    .layout-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
-    .plyr--full-ui input[type=range] {
-      color: #1F9E76;
+    .layout-item video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
-    /* Footer */
-    footer {
-      background-color: #2c3a67;
+    .layout-item .youtube-video {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 8px;
+    }
+
+    /* ===== ASPECT RATIO CONTROL ===== */
+    /* Square Content (1:1) - Positions 1 & 4 */
+    .layout-item:nth-child(1) img,
+    .layout-item:nth-child(1) video,
+    .layout-item:nth-child(1) .youtube-video,
+    .layout-item:nth-child(4) img,
+    .layout-item:nth-child(4) video,
+    .layout-item:nth-child(4) .youtube-video {
+      aspect-ratio: 1/1;
+      object-fit: cover;
+    }
+
+    /* Portrait Content (9:16) - Positions 2 & 3 */
+    .layout-item:nth-child(2) img,
+    .layout-item:nth-child(2) video,
+    .layout-item:nth-child(2) .youtube-video,
+    .layout-item:nth-child(3) img,
+    .layout-item:nth-child(3) video,
+    .layout-item:nth-child(3) .youtube-video {
+      aspect-ratio: 9/16;
+      object-fit: cover;
+    }
+
+    /* Landscape Content (16:9) - Positions 5 & 6 */
+    .layout-item:nth-child(5) img,
+    .layout-item:nth-child(5) video,
+    .layout-item:nth-child(5) .youtube-video,
+    .layout-item:nth-child(6) img,
+    .layout-item:nth-child(6) video,
+    .layout-item:nth-child(6) .youtube-video {
+      aspect-ratio: 16/9;
+      object-fit: cover;
+    }
+
+    /* ===== OVERLAY ELEMENTS ===== */
+    .layout-item .video-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.8);
       color: white;
-      padding: 2rem 0;
-      text-align: center;
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      z-index: 2;
     }
 
-    /* Responsive untuk full screen */
-    @media (min-width: 1600px) {
-      .images-grid {
-        gap: 1.2rem;
-      }
+    .layout-item .layout-order {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: #1f9e76;
+      color: white;
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      z-index: 2;
     }
 
-    @media (min-width: 1400px) and (max-width: 1599px) {
-      .images-grid {
-        gap: 1.1rem;
-      }
-    }
-
-    /* Responsive untuk layar medium ke bawah */
-    @media (max-width: 1200px) {
-      .hero {
-        min-height: 100vh;
-        padding: 0;
-      }
-      .hero-container {
+    @media (max-width: 900px) {
+      .container {
         flex-direction: column;
-        justify-content: center;
-        padding: 2rem;
       }
-      .text-content {
-        max-width: 100%;
-        margin: 0;
-        padding: 1rem;
-        text-align: center;
+      .left-section, .right-section {
         flex: none;
-      }
-      .layout-images {
-        position: relative;
-        right: auto;
-        top: auto;
-        transform: none;
         width: 100%;
-        margin-top: 2rem;
+        height: auto;
+        padding: 30px 20px;
       }
-    }
-    @media (max-width: 992px) {
-      .hero {
-        min-height: 100vh;
-        padding: 0;
-      }
-
-      .hero-container {
-        flex-direction: column;
-        justify-content: center;
-        padding: 2rem;
-      }
-
-      .text-content {
-        max-width: 100%;
-        margin: 0;
-        padding: 1rem;
-        text-align: center;
-        flex: none;
-      }
-
-      .layout-images {
-        position: relative;
-        right: auto;
-        top: auto;
-        transform: none;
-        width: 100%;
-        margin-top: 2rem;
-      }
-      /* Keep the same areas on mobile/tablet but the container will be narrower */
-    }
-
-    @media (max-width: 768px) {
-      .text-content h1 {
-        font-size: 2rem;
-      }
-
-      .bps-word {
+      .left-section h1 {
         font-size: 2.5rem;
       }
+      .right-section {
+        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-gap: 12px;
+        padding: 20px;
+        max-height: none;
+      }
+      .img-large-blue {
+        grid-column: span 3;
+        height: 250px;
+      }
+      .img-large-blue img {
+        height: 100%;
+      }
+      .right-column-small, .small-image-row, .bottom-row {
+        grid-column: span 3;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+      .right-column-small img,
+      .small-image-row img,
+      .bottom-row img {
+        height: 150px;
+        border: none;
+        box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        border-radius: 6px;
+      }
+    }
 
-      .provinsi-word {
-        font-size: 2rem;
+    /* ===== RESPONSIVE DESIGN ===== */
+    @media (max-width: 768px) {
+      .layout-grid {
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: auto;
+        height: auto;
+        gap: 12px;
+      }
+      
+      .layout-item {
+        min-height: 100px;
+      }
+      
+      /* Reset grid positioning for mobile */
+      .layout-item:nth-child(1),
+      .layout-item:nth-child(2),
+      .layout-item:nth-child(3),
+      .layout-item:nth-child(4),
+      .layout-item:nth-child(5),
+      .layout-item:nth-child(6) {
+        grid-column: span 1;
+        grid-row: auto;
       }
 
-      .text-content h3 {
-        font-size: 1.8rem;
+      /* Maintain aspect ratios on mobile */
+      .layout-item:nth-child(1),
+      .layout-item:nth-child(4) {
+        aspect-ratio: 1/1;
+        height: auto;
       }
-
-      .text-content p {
-        font-size: 1rem;
+      
+      .layout-item:nth-child(2),
+      .layout-item:nth-child(3) {
+        aspect-ratio: 9/16;
+        height: auto;
       }
-
-      .layout-images {
-        height: 300px;
+      
+      .layout-item:nth-child(5),
+      .layout-item:nth-child(6) {
+        aspect-ratio: 16/9;
+        height: auto;
       }
     }
   </style>
 </head>
 <body>
-  <!-- Hero Section -->
-  <div class="hero">
-    <div class="hero-container">
-      @if(isset($backgroundImage) && $backgroundImage)
-        <div class="bg-image" style="background-image: url('{{ asset('storage/' . $backgroundImage->file_path) }}');"></div>
-      @else
-        <div class="bg-image" style="background-image: url('{{ asset('img/danau_toba.svg') }}');"></div>
-      @endif
-      <div class="gradient-overlay"></div>
-      <div class="text-content">
-        <h1>Selamat Datang Di</h1>
-        <h2>
-          <span class="bps-word">
-            <span style="color:#0071BC;">B</span><span style="color:#8CC63F;">P</span><span style="color:#F7931E;">S</span>
-          </span>
-          <span class="provinsi-word">Provinsi</span>
-        </h2>
-        <h3>Sumatera Utara</h3>
-        <p>
+  <div class="container-left" role="main" aria-label="Welcome page for BPS Sumatera Utara">
+
+    <section class="left-section" aria-labelledby="welcome-title" aria-describedby="welcome-description">
+        <h1 id="welcome-title">Selamat Datang Di <span class="bps"><span class="b">B</span><span class="p">P</span><span class="s">S</span></span> Provinsi Sumatera Utara</h1>
+        <p id="welcome-description">
           {{ $description }}
         </p>
-      </div>
+    </section>
 
-      <!-- Layout Images Grid -->
-      @if(isset($layoutImages) && $layoutImages->count() > 0)
-        <div class="right-section">
-          <div class="layout-images">
-            <div class="images-grid">
-              @foreach($layoutImages->take(6) as $image)
-                @php
-                  $path = $image->file_path;
-                  $isExternal = \Illuminate\Support\Str::startsWith($path, ['http://', 'https://']);
-                  $src = $isExternal ? $path : asset('storage/' . $path);
-                  $ytId = null;
-                  if ($image->type === 'Video') {
-                    // Use ~ delimiter to avoid escaping slashes
-                    if (preg_match('~(?:youtube\.com/(?:watch\?v=|embed/)|youtu\.be/)([\w-]{11})~i', $src, $m)) {
-                      $ytId = $m[1];
-                    }
-                  }
-                @endphp
-                @if($image->type === 'Video')
-                  <div class="layout-image" data-media="video" data-src="{{ $src }}" @if($ytId) data-ytid="{{ $ytId }}" @endif data-name="{{ e($image->name) }}">
-                    @if($ytId)
-                      <div class="ratio ratio-16x9" style="width:100%; height:100%;">
-                        <iframe src="https://www.youtube.com/embed/{{ $ytId }}?autoplay=1&mute=1&playsinline=1" title="{{ $image->name }}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                      </div>
-                    @else
-                      <video src="{{ $src }}" autoplay muted playsinline controls preload="metadata" style="width:100%; height:100%; object-fit:contain;">
-                        Browser Anda tidak mendukung pemutar video.
-                      </video>
-                    @endif
+    <aside class="right-section" aria-label="Gallery of images representing Sumatera Utara and cultural elements">
+      @if($layoutImages && $layoutImages->count() > 0)
+        <!-- Dynamic layout grid from layout manager -->
+        <div class="layout-grid">
+          @foreach($layoutImages as $media)
+            @php
+              $videoPath = $media->file_path;
+              $isYouTube = str_contains($videoPath, 'youtube.com') || str_contains($videoPath, 'youtu.be');
+              $videoId = '';
+              if ($isYouTube) {
+                preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $videoPath, $matches);
+                $videoId = $matches[1] ?? '';
+              }
+            @endphp
+            <div class="layout-item" 
+                 data-order="{{ $media->layout_order }}"
+                 data-media-type="{{ $media->type }}"
+                 data-media-path="{{ $media->file_path }}"
+                 data-media-name="{{ $media->name }}"
+                 data-youtube-id="{{ $videoId }}"
+                 style="cursor: pointer;">
+              <div class="layout-order">{{ $media->layout_order }}</div>
+              @if($media->type === 'Gambar')
+                <img src="{{ asset('storage/' . $media->file_path) }}" alt="{{ $media->name }}" title="{{ $media->name }}">
+              @elseif($media->type === 'Video')
+                @if($isYouTube && $videoId)
+                  <div class="video-overlay">
+                    <i class="bi bi-play-circle"></i>
+                    YouTube Video
                   </div>
+                  <iframe 
+                    src="https://www.youtube.com/embed/{{ $videoId }}?autoplay=1&mute=1&loop=1&playlist={{ $videoId }}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1" 
+                    title="{{ $media->name }}"
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen
+                    class="youtube-video">
+                  </iframe>
                 @else
-                  <div class="layout-image" data-media="image" data-src="{{ asset('storage/' . $image->file_path) }}" data-name="{{ e($image->name) }}">
-                    <img src="{{ asset('storage/' . $image->file_path) }}" alt="{{ $image->name }}">
-                  </div>
+                  <video autoplay muted loop>
+                    <source src="{{ asset('storage/' . $media->file_path) }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                  </video>
                 @endif
-              @endforeach
+              @endif
+            </div>
+          @endforeach
+        </div>
+      @else
+        <!-- Fallback static layout when no media is configured -->
+        <div class="container">
+          <div class="row">
+            <div class="col">
+              <div class="img-1-1">
+                <img src="{{ asset('img/img 1.1.svg') }}" alt="Gambar2">
+              </div>
+            </div>
+
+            <div class="col">
+              <div class="img-potrait-1">
+                <img src="{{ asset('img/img potrait.svg') }}" alt="Gambar1">
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col">
+              <div class="img-potrait-2">
+                <img src="{{ asset('img/img potrait 2.svg') }}" alt="Gambar2">
+              </div>
+            </div>
+
+            <div class="col">
+              <div class="img-1-1-2">
+                <img src="{{ asset('img/img 1.1 2.svg') }}" alt="Gambar1">
+              </div>
+            </div>
+          </div>
+
+           <div class="row">
+            <div class="col">
+              <div class="img-1-1-3">
+                <img src="{{ asset('img/img 1.1 3.svg') }}" alt="Gambar2">
+              </div>
+            </div>
+
+            <div class="col">
+              <div class="img-1-1-3">
+                <img src="{{ asset('img/img 1.1 4.svg') }}" alt="Gambar1">
+              </div>
             </div>
           </div>
         </div>
       @endif
-    </div>
+    </aside>
   </div>
 
-  <!-- Media Preview Modal (Image / Video) -->
-  <div class="modal fade" id="mediaPreviewModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl">
-      <div class="modal-content bg-transparent border-0">
-        <button type="button" class="btn-close btn-close-white ms-auto me-2 mt-2" data-bs-dismiss="modal" aria-label="Close"></button>
-        <div class="modal-body p-0 d-flex justify-content-center align-items-center">
-          <div id="mediaPreviewContainer" style="width:100%; max-width: 90vw; max-height: 85vh; display:flex; align-items:center; justify-content:center;"></div>
+  <!-- ===== MEDIA MODAL ===== -->
+  <div class="modal fade" id="mediaModal" tabindex="-1" aria-labelledby="mediaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="mediaModalLabel">Media Preview</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+          <div id="modalMediaContent">
+            <!-- Media content will be loaded here -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Signage mode: remove gallery and footer to keep single screen -->
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+  
+  <!-- ===== MEDIA CLICK HANDLER ===== -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Initialize audio players
-      const audioPlayers = document.querySelectorAll('.audio-player');
-      if (audioPlayers.length > 0) {
-        audioPlayers.forEach(player => {
-          new Plyr(player, {
-            controls: ['play','progress','current-time','mute','volume']
-          });
-        });
-      }
-
-      // Media preview modal logic (image + video)
-      const modalEl = document.getElementById('mediaPreviewModal');
-      const container = document.getElementById('mediaPreviewContainer');
-      const bsModal = modalEl ? new bootstrap.Modal(modalEl) : null;
-
-      function escapeHtml(text){
-        const div = document.createElement('div');
-        div.textContent = text || '';
-        return div.innerHTML;
-      }
-
-      function openMediaModal(el){
-        if(!bsModal || !container) return;
-        const type = el.getAttribute('data-media');
-        const src = el.getAttribute('data-src');
-        const name = el.getAttribute('data-name') || '';
-        const ytid = el.getAttribute('data-ytid');
-
-        let html = '';
-        if(type === 'image'){
-          html = `<img src="${src}" alt="${escapeHtml(name)}" style="max-width:100%; max-height:85vh; object-fit:contain;"/>`;
-        } else if(type === 'video'){
-          if(ytid){
-            html = `<div class="ratio ratio-16x9" style="width:100%; max-width:1000px;"><iframe src="https://www.youtube.com/embed/${ytid}?autoplay=1" title="${escapeHtml(name)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
-          } else {
-            html = `<video controls autoplay playsinline style="width:100%; max-width:1000px; max-height:85vh;"><source src="${src}">Browser Anda tidak mendukung pemutar video.</video>`;
+      const mediaModal = new bootstrap.Modal(document.getElementById('mediaModal'));
+      const modalContent = document.getElementById('modalMediaContent');
+      const modalTitle = document.getElementById('mediaModalLabel');
+      
+      // Add click event to all layout items
+      document.querySelectorAll('.layout-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+          const mediaType = this.getAttribute('data-media-type');
+          const mediaPath = this.getAttribute('data-media-path');
+          const mediaName = this.getAttribute('data-media-name');
+          const isYouTube = this.getAttribute('data-youtube-id');
+          
+          if (mediaType && mediaPath) {
+            modalTitle.textContent = mediaName || 'Media Preview';
+            
+            if (mediaType === 'Video' && isYouTube) {
+              // YouTube video
+              modalContent.innerHTML = `
+                <div class="youtube-modal-container">
+                  <iframe 
+                    src="https://www.youtube.com/embed/${isYouTube}?autoplay=1&mute=1&loop=1&playlist=${isYouTube}&controls=1&showinfo=1&rel=0&modestbranding=1&playsinline=1" 
+                    width="100%" 
+                    height="500" 
+                    frameborder="0" 
+                    allowfullscreen>
+                  </iframe>
+                </div>
+              `;
+            } else if (mediaType === 'Video') {
+              // Local video
+              modalContent.innerHTML = `
+                <video controls autoplay muted loop width="100%" height="500">
+                  <source src="/storage/${mediaPath}" type="video/mp4">
+                  Your browser does not support the video tag.
+                </video>
+              `;
+            } else {
+              // Image
+              modalContent.innerHTML = `
+                <img src="/storage/${mediaPath}" alt="${mediaName}" class="img-fluid" style="max-height: 70vh; object-fit: contain;">
+              `;
+            }
+            
+            mediaModal.show();
           }
-        }
-        container.innerHTML = html;
-        bsModal.show();
-      }
-
-      document.querySelectorAll('.layout-image').forEach(el => {
-        el.addEventListener('click', () => openMediaModal(el));
-      });
-
-      // Clear modal content on hide to stop playback
-      if (modalEl) {
-        modalEl.addEventListener('hidden.bs.modal', () => {
-          if(container) container.innerHTML = '';
         });
-      }
+      });
     });
   </script>
 </body>
 </html>
+

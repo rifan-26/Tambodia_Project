@@ -257,6 +257,7 @@
     text-align: center;
   }
 
+  /* ===== LAYOUT GRID SYSTEM ===== */
   .layout-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -266,34 +267,53 @@
     height: 600px;
   }
 
+  /* ===== GRID POSITIONING & ASPECT RATIOS ===== */
+  /* Position 1: Top Left - Square (1:1) */
   .layout-box:nth-child(1) {
     grid-column: 1;
     grid-row: 1;
+    aspect-ratio: 1/1;
+    height: auto;
   }
 
+  /* Position 2: Top Right - Portrait (9:16) */
   .layout-box:nth-child(2) {
     grid-column: 2;
     grid-row: 1 / 3;
+    aspect-ratio: 9/16;
+    height: auto;
   }
 
+  /* Position 3: Middle Left - Portrait (9:16) */
   .layout-box:nth-child(3) {
     grid-column: 1;
     grid-row: 2 / 4;
+    aspect-ratio: 9/16;
+    height: auto;
   }
 
+  /* Position 4: Middle Right - Square (1:1) */
   .layout-box:nth-child(4) {
     grid-column: 2;
     grid-row: 3;
+    aspect-ratio: 1/1;
+    height: auto;
   }
 
+  /* Position 5: Bottom Left - Landscape (16:9) */
   .layout-box:nth-child(5) {
     grid-column: 1;
     grid-row: 4;
+    aspect-ratio: 16/9;
+    height: auto;
   }
 
+  /* Position 6: Bottom Right - Landscape (16:9) */
   .layout-box:nth-child(6) {
     grid-column: 2;
     grid-row: 4;
+    aspect-ratio: 16/9;
+    height: auto;
   }
 
   .section-header {
@@ -327,6 +347,7 @@
     margin-left: auto;
   }
 
+  /* ===== LAYOUT BOX STYLING ===== */
   .layout-box {
     background: white;
     border: 3px solid var(--border-soft);
@@ -352,10 +373,128 @@
     padding: 0;
   }
 
+  .layout-box-current-media {
+    transition: all 0.3s ease;
+  }
+
+  .layout-box-current-media:hover {
+    transform: scale(1.02);
+    filter: brightness(1.05);
+  }
+
+  /* ===== MEDIA CONTENT STYLING ===== */
   .layout-box-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  .layout-box-image.youtube-video {
+    border: none;
+    border-radius: 8px;
+  }
+
+  /* ===== ASPECT RATIO CONTROL ===== */
+  /* Square Content (1:1) - Positions 1 & 4 */
+  .layout-box:nth-child(1) .layout-box-image,
+  .layout-box:nth-child(1) video,
+  .layout-box:nth-child(1) .youtube-video,
+  .layout-box:nth-child(4) .layout-box-image,
+  .layout-box:nth-child(4) video,
+  .layout-box:nth-child(4) .youtube-video {
+    aspect-ratio: 1/1;
+    object-fit: cover;
+  }
+
+  /* Portrait Content (9:16) - Positions 2 & 3 */
+  .layout-box:nth-child(2) .layout-box-image,
+  .layout-box:nth-child(2) video,
+  .layout-box:nth-child(2) .youtube-video,
+  .layout-box:nth-child(3) .layout-box-image,
+  .layout-box:nth-child(3) video,
+  .layout-box:nth-child(3) .youtube-video {
+    aspect-ratio: 9/16;
+    object-fit: cover;
+  }
+
+  /* Landscape Content (16:9) - Positions 5 & 6 */
+  .layout-box:nth-child(5) .layout-box-image,
+  .layout-box:nth-child(5) video,
+  .layout-box:nth-child(5) .youtube-video,
+  .layout-box:nth-child(6) .layout-box-image,
+  .layout-box:nth-child(6) video,
+  .layout-box:nth-child(6) .youtube-video {
+    aspect-ratio: 16/9;
+    object-fit: cover;
+  }
+
+  .layout-box-current-media {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .layout-box-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px;
+    font-size: 0.75rem;
+  }
+
+  .layout-box-name {
+    font-weight: 600;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .layout-box-user {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.7rem;
+    opacity: 0.9;
+  }
+
+  .layout-box-user.own-media {
+    color: #28a745;
+  }
+
+  .layout-box-user.other-admin-media {
+    color: #ffc107;
+  }
+
+  .layout-box-user i {
+    font-size: 0.8rem;
+  }
+
+  .video-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    z-index: 2;
+  }
+
+  .layout-box .video-overlay {
+    background: rgba(0, 0, 0, 0.9);
+    font-size: 0.65rem;
+    padding: 4px 10px;
   }
 
   .layout-box-placeholder {
@@ -599,6 +738,7 @@
     opacity: 0.5;
   }
 
+  /* ===== RESPONSIVE DESIGN ===== */
   @media (max-width: 768px) {
     .layout-container {
       flex-direction: column;
@@ -610,6 +750,25 @@
     
     .layout-grid {
       grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* Maintain aspect ratios on mobile */
+    .layout-box:nth-child(1),
+    .layout-box:nth-child(4) {
+      aspect-ratio: 1/1;
+      height: auto;
+    }
+    
+    .layout-box:nth-child(2),
+    .layout-box:nth-child(3) {
+      aspect-ratio: 9/16;
+      height: auto;
+    }
+    
+    .layout-box:nth-child(5),
+    .layout-box:nth-child(6) {
+      aspect-ratio: 16/9;
+      height: auto;
     }
   }
 </style>
@@ -673,15 +832,19 @@
       <div class="layout-body">
         <div class="layout-container">
           <div class="layout-left">
-            <div class="upload-area" onclick="showBackgroundSelector()">
-              <div class="upload-icon">
+            <div class="upload-area" id="backgroundUploadArea" onclick="showBackgroundSelector()">
+              <div class="upload-icon" id="backgroundUploadIcon">
                 <i class="bi bi-cloud-upload"></i>
               </div>
-              <div>
+              <div id="backgroundUploadText">
                 <strong>Klik area lalu pilih media yang ingin ditampilkan</strong>
               </div>
-              <div class="upload-subtitle">
+              <div class="upload-subtitle" id="backgroundUploadSubtitle">
                 <small>Untuk menambahkan gambar background</small>
+              </div>
+              <div class="background-preview" id="backgroundPreview" style="display: none; margin-top: 1rem;">
+                <img id="backgroundPreviewImg" style="max-width: 100%; max-height: 200px; border-radius: 8px; object-fit: cover;">
+                <div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--primary); font-weight: 500;" id="backgroundPreviewName"></div>
               </div>
             </div>
             
@@ -708,9 +871,70 @@
             </div>
             <div class="layout-grid" id="layoutGrid">
               @for($i = 1; $i <= 6; $i++)
-                <div class="layout-box" data-position="{{ $i }}" onclick="selectLayoutBox({{ $i }})">
+                @php
+                  $currentMedia = isset($positionMap[$i]) ? $positionMap[$i] : null;
+                  $isOwnMedia = $currentMedia && $currentMedia->user_id == Auth::id();
+                  $videoPath = $currentMedia ? $currentMedia->file_path : '';
+                  $isYouTube = $currentMedia && (str_contains($videoPath, 'youtube.com') || str_contains($videoPath, 'youtu.be'));
+                  $videoId = '';
+                  if ($isYouTube) {
+                    preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $videoPath, $matches);
+                    $videoId = $matches[1] ?? '';
+                  }
+                @endphp
+                <div class="layout-box" 
+                     data-position="{{ $i }}" 
+                     onclick="selectLayoutBox({{ $i }})"
+                     @if($currentMedia)
+                       data-media-type="{{ $currentMedia->type }}"
+                       data-media-path="{{ $currentMedia->file_path }}"
+                       data-media-name="{{ $currentMedia->name }}"
+                       data-youtube-id="{{ $videoId }}"
+                       style="cursor: pointer;"
+                     @endif>
                   <div class="layout-box-number">{{ $i }}</div>
-                  <div class="layout-box-placeholder">Klik untuk pilih media</div>
+                  @if($currentMedia)
+                    <div class="layout-box-current-media" 
+                         @if($currentMedia)
+                           onclick="previewLayoutMedia(event, {{ $i }})"
+                           style="cursor: pointer;"
+                         @endif>
+                      @if($currentMedia->type === 'Gambar')
+                        <img src="{{ asset('storage/' . $currentMedia->file_path) }}" alt="{{ $currentMedia->name }}" class="layout-box-image">
+                      @elseif($currentMedia->type === 'Video')
+                        @if($isYouTube && $videoId)
+                          <div class="video-overlay">
+                            <i class="bi bi-play-circle"></i>
+                            YouTube
+                          </div>
+                          <iframe 
+                            src="https://www.youtube.com/embed/{{ $videoId }}?autoplay=1&mute=1&loop=1&playlist={{ $videoId }}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1" 
+                            title="{{ $currentMedia->name }}"
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen
+                            class="layout-box-image youtube-video">
+                          </iframe>
+                        @else
+                          <video autoplay muted loop class="layout-box-image">
+                            <source src="{{ asset('storage/' . $currentMedia->file_path) }}" type="video/mp4">
+                          </video>
+                        @endif
+                      @endif
+                      <div class="layout-box-info">
+                        <div class="layout-box-name">{{ Str::limit($currentMedia->name, 20) }}</div>
+                        <div class="layout-box-user {{ $isOwnMedia ? 'own-media' : 'other-admin-media' }}">
+                          @if($isOwnMedia)
+                            <i class="bi bi-person-check-fill"></i> Media Anda
+                          @else
+                            <i class="bi bi-person-x-fill"></i> Admin Lain
+                          @endif
+                        </div>
+                      </div>
+                    </div>
+                  @else
+                    <div class="layout-box-placeholder">Klik untuk pilih media</div>
+                  @endif
                 </div>
               @endfor
             </div>
@@ -721,7 +945,16 @@
       <div class="layout-controls">
         <div class="layout-info">
           <i class="bi bi-info-circle"></i>
-          Gambar akan ditampilkan secara berurutan pada landing page sebagai background yang berganti-ganti
+          <div>
+            <div><strong>Media akan ditampilkan di gallery landing page.</strong></div>
+            <div style="font-size: 0.9rem; margin-top: 4px;">
+              <span class="text-success"><i class="bi bi-person-check-fill"></i> Media Anda</span> | 
+              <span class="text-warning"><i class="bi bi-person-x-fill"></i> Admin Lain</span>
+            </div>
+            <div style="font-size: 0.85rem; margin-top: 4px; color: #6c757d;">
+              Foto yang ditambahkan akan menggantikan foto yang sudah ada di posisi yang sama.
+            </div>
+          </div>
         </div>
         <div class="layout-actions">
           <button class="btn-layout btn-layout-preview" onclick="previewLayout()">
@@ -749,6 +982,14 @@
       </div>
       <div id="imageGrid" class="image-grid">
         <!-- Images will be populated here -->
+      </div>
+      <div class="modal-footer" id="backgroundModalFooter" style="display: none; padding: 1rem; border-top: 1px solid var(--border-soft); background: var(--bg-soft);">
+        <button class="btn btn-outline-danger" onclick="clearBackground()">
+          <i class="bi bi-trash"></i> Hapus Background
+        </button>
+        <button class="btn btn-secondary" onclick="closeImageSelector()">
+          <i class="bi bi-x"></i> Batal
+        </button>
       </div>
     </div>
   </div>
@@ -783,14 +1024,29 @@
     // Initialize layout on page load
     document.addEventListener('DOMContentLoaded', function() {
       loadExistingLayout();
+      loadExistingBackground();
     });
+
+    function loadExistingBackground() {
+      // Check if there's an existing background image
+      fetch('/api/layout/background')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.background) {
+            updateBackgroundPreview(data.background);
+          }
+        })
+        .catch(error => {
+          console.log('No existing background or error loading:', error);
+        });
+    }
 
     function loadExistingLayout() {
       // Load existing layout images into boxes
       layoutImages.forEach(img => {
         if (img.layout_order && img.layout_order >= 1 && img.layout_order <= 6) {
           layoutState.layoutBoxes[img.layout_order] = img;
-          updateLayoutBox(img.layout_order, img);
+          // Don't call updateLayoutBox here since the layout is already rendered in PHP
         }
       });
     }
@@ -811,9 +1067,17 @@
       layoutState.isBackgroundMode = true;
       
       // Update modal title for background selection
-      const modalTitle = document.querySelector('#imageSelectorModal .modal-title');
+      const modalTitle = document.querySelector('#imageSelectorModal .layout-title');
       if (modalTitle) {
         modalTitle.innerHTML = '<i class="bi bi-image-fill"></i> Pilih Gambar Background';
+      }
+      
+      // Show background modal footer
+      const footer = document.getElementById('backgroundModalFooter');
+      if (footer) {
+        footer.style.display = 'flex';
+        footer.style.justifyContent = 'space-between';
+        footer.style.alignItems = 'center';
       }
       
       renderImageSelector();
@@ -828,9 +1092,15 @@
       layoutState.isBackgroundMode = false;
       
       // Reset modal title
-      const modalTitle = document.querySelector('#imageSelectorModal .modal-title');
+      const modalTitle = document.querySelector('#imageSelectorModal .layout-title');
       if (modalTitle) {
-        modalTitle.innerHTML = '<i class="bi bi-palette"></i> Pilih Gambar untuk Layout';
+        modalTitle.innerHTML = '<i class="bi bi-images"></i> Pilih Gambar untuk Layout';
+      }
+      
+      // Hide background modal footer
+      const footer = document.getElementById('backgroundModalFooter');
+      if (footer) {
+        footer.style.display = 'none';
       }
     }
 
@@ -838,7 +1108,13 @@
       const grid = document.getElementById('imageGrid');
       
       if (layoutState.images.length === 0) {
-        grid.innerHTML = '<div class="no-images">Tidak ada media yang tersedia</div>';
+        grid.innerHTML = `
+          <div class="empty-state">
+            <i class="bi bi-images"></i>
+            <h5>Tidak ada media yang tersedia</h5>
+            <p>Silakan tambahkan media terlebih dahulu di halaman Input Media</p>
+          </div>
+        `;
         return;
       }
       
@@ -908,6 +1184,7 @@
       .then(data => {
         if (data.success) {
           toast(`Background "${image.name}" berhasil disimpan`, 'success');
+          updateBackgroundPreview(image);
         } else {
           toast(data.message || 'Gagal menyimpan background', 'error');
         }
@@ -916,6 +1193,72 @@
         console.error('Error:', error);
         toast('Terjadi kesalahan saat menyimpan background', 'error');
       });
+    }
+
+    function clearBackground() {
+      // Clear preview immediately for better UX
+      clearBackgroundPreview();
+      
+      // Send AJAX request to clear background image
+      fetch('/api/layout/background', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': CSRF_TOKEN
+        },
+        body: JSON.stringify({
+          background_image_id: null
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          toast('Background berhasil dihapus', 'success');
+          closeImageSelector();
+        } else {
+          toast(data.message || 'Gagal menghapus background', 'error');
+          // If API fails, we might want to restore the preview
+          // But for now, keep it cleared since user wanted to delete
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        toast('Terjadi kesalahan saat menghapus background', 'error');
+      });
+    }
+
+    function updateBackgroundPreview(image) {
+      const preview = document.getElementById('backgroundPreview');
+      const previewImg = document.getElementById('backgroundPreviewImg');
+      const previewName = document.getElementById('backgroundPreviewName');
+      const uploadIcon = document.getElementById('backgroundUploadIcon');
+      const uploadText = document.getElementById('backgroundUploadText');
+      const uploadSubtitle = document.getElementById('backgroundUploadSubtitle');
+      
+      if (preview && previewImg && previewName) {
+        previewImg.src = fileUrl(image.file_path);
+        previewName.textContent = image.name;
+        preview.style.display = 'block';
+        
+        // Hide upload elements
+        if (uploadIcon) uploadIcon.style.display = 'none';
+        if (uploadText) uploadText.style.display = 'none';
+        if (uploadSubtitle) uploadSubtitle.style.display = 'none';
+      }
+    }
+
+    function clearBackgroundPreview() {
+      const preview = document.getElementById('backgroundPreview');
+      const uploadIcon = document.getElementById('backgroundUploadIcon');
+      const uploadText = document.getElementById('backgroundUploadText');
+      const uploadSubtitle = document.getElementById('backgroundUploadSubtitle');
+      
+      if (preview) preview.style.display = 'none';
+      
+      // Show upload elements
+      if (uploadIcon) uploadIcon.style.display = 'block';
+      if (uploadText) uploadText.style.display = 'block';
+      if (uploadSubtitle) uploadSubtitle.style.display = 'block';
     }
 
     function updateLayoutBox(position, image) {
@@ -935,10 +1278,38 @@
         return;
       }
       const src = fileUrl(image.file_path);
-      const thumb = videoThumb(src);
-      const content = thumb
-        ? `<img src="${thumb}" alt="${escapeHtml(image.name)}" class="layout-box-image">`
-        : `<div class="layout-box-image d-flex align-items-center justify-content-center" style="background:#000;color:#fff;"><i class=\"bi bi-play-btn\" style=\"font-size:48px;\"></i></div>`;
+      const isYouTube = src.includes('youtube.com') || src.includes('youtu.be');
+      
+      let content;
+      if (isYouTube) {
+        // Extract YouTube video ID
+        const videoId = src.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/)?.[1];
+        if (videoId) {
+          content = `
+            <div class="video-overlay">
+              <i class="bi bi-play-circle"></i>
+              YouTube
+            </div>
+            <iframe 
+              src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1" 
+              title="${escapeHtml(image.name)}"
+              frameborder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowfullscreen
+              class="layout-box-image youtube-video">
+            </iframe>
+          `;
+        } else {
+          content = `<div class="layout-box-image d-flex align-items-center justify-content-center" style="background:#000;color:#fff;"><i class="bi bi-play-btn" style="font-size:48px;"></i></div>`;
+        }
+      } else {
+        // Local video
+        const thumb = videoThumb(src);
+        content = thumb
+          ? `<video autoplay muted loop class="layout-box-image"><source src="${src}" type="video/mp4"></video>`
+          : `<div class="layout-box-image d-flex align-items-center justify-content-center" style="background:#000;color:#fff;"><i class="bi bi-play-btn" style="font-size:48px;"></i></div>`;
+      }
+      
       box.innerHTML = `
         <div class="layout-box-number">${position}</div>
         <div class="layout-box-remove" onclick="removeImageFromBox(${position}, event)">
@@ -967,10 +1338,8 @@
       const description = document.getElementById('layoutDescription')?.value || '';
       const layoutImages = Object.values(layoutState.layoutBoxes);
       
-      if (layoutImages.length === 0) {
-        toast('Pilih minimal satu gambar untuk preview', 'error');
-        return;
-      }
+      // Allow preview even without images
+      toast('Membuka preview landing page...', 'success');
       
       // Open landing page in new tab for preview
       window.open('{{ url("/") }}', '_blank');
@@ -988,9 +1357,9 @@
           }))
         };
         
+        // Allow saving even without images
         if (layoutData.images.length === 0) {
-          toast('Pilih minimal satu gambar untuk layout', 'error');
-          return;
+          toast('Menyimpan layout tanpa media...', 'info');
         }
         
         const response = await fetch('/api/layout/update', {
@@ -1006,7 +1375,10 @@
         const result = await response.json();
         
         if (result.success) {
-          toast('Layout berhasil disimpan dan diterapkan ke landing page!');
+          const message = layoutData.images.length === 0 
+            ? 'Layout berhasil disimpan (tanpa media)!' 
+            : 'Layout berhasil disimpan dan diterapkan ke landing page!';
+          toast(message);
           setTimeout(() => {
             window.location.href = '{{ route("dashboard.pegawai") }}';
           }, 2000);
@@ -1047,13 +1419,20 @@
     }
 
     function toast(message, type = 'success') {
+      const colors = {
+        'success': '#1f9e76',
+        'error': '#dc3545',
+        'info': '#0071BC',
+        'warning': '#F7931E'
+      };
+      
       Toastify({
         text: message,
         duration: 3000,
         close: true,
         gravity: 'top',
         position: 'right',
-        backgroundColor: type === 'success' ? '#1f9e76' : '#dc3545',
+        backgroundColor: colors[type] || colors.success,
       }).showToast();
     }
 
@@ -1099,6 +1478,30 @@
       if(!m){ return; }
       if(!lmPreview.bsModal){ lmPreview.init(); }
       lmPreview.open(m);
+    }
+
+    // Preview media in layout boxes
+    function previewLayoutMedia(e, position) {
+      e.stopPropagation();
+      const box = document.querySelector(`[data-position="${position}"]`);
+      if (!box) return;
+      
+      const mediaType = box.getAttribute('data-media-type');
+      const mediaPath = box.getAttribute('data-media-path');
+      const mediaName = box.getAttribute('data-media-name');
+      const isYouTube = box.getAttribute('data-youtube-id');
+      
+      if (mediaType && mediaPath) {
+        if (!lmPreview.bsModal) { lmPreview.init(); }
+        
+        const media = {
+          type: mediaType,
+          file_path: mediaPath,
+          name: mediaName
+        };
+        
+        lmPreview.open(media);
+      }
     }
 
     // Close modal when clicking outside
