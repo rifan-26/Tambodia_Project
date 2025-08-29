@@ -94,29 +94,29 @@
       border-right: none;
       min-height: 100vh;
       width: 250px;
+      display: flex;
+      flex-direction: column;
       position: fixed;
       left: 0;
       top: 0;
       bottom: 0;
       z-index: 1000;
-      padding: 0;
       overflow: hidden;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
     }
 
     .sidebar-header {
-      padding: 1.5rem 1.5rem 0;
-      margin-bottom: 2rem;
-      user-select: none;
+      padding: 1.5rem 1.5rem 1rem;
+      border-bottom: 1px solid #f1f3f4;
       flex-shrink: 0;
     }
 
     .sidebar-content {
       flex: 1;
       overflow-y: auto;
-      padding: 0 0 1rem 0;
+      padding: 1rem 0;
+      -webkit-overflow-scrolling: touch;
+      height: calc(100vh - 120px);
+      overflow-x: hidden;
     }
 
     .sidebar-header img {
@@ -126,14 +126,17 @@
 
     .sidebar-title {
       font-weight: 600;
-      font-size: 1.2rem;
+      font-size: 1.25rem;
       margin: 0;
-      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
     }
 
+    
     .tam { color: #0084d6; }
     .bo { color: #a0d5d2; }
-    .dia { color: var(--primary); }
+    .dia { color: #1f9e76; }
 
     .nav-link.active {
       background-color: var(--primary);
@@ -169,54 +172,17 @@
       text-align: center;
     }
 
-    /* Sidebar Footer */
-    .sidebar-footer {
-      padding: 1rem 1.5rem;
-      border-top: 1px solid var(--border-light);
-      flex-shrink: 0;
-      background: white;
-    }
 
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.75rem;
-      background: var(--bg-light);
-      border-radius: 0.5rem;
-    }
-
-    .user-avatar {
-      font-size: 2rem;
-      color: var(--primary);
-    }
-
-    .user-details {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .user-name {
-      font-weight: 600;
-      font-size: 0.9rem;
-      color: var(--text-dark);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .user-role {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    main.content-area {
+    .content-area {
       margin-left: 250px;
       padding: 2rem;
       min-height: 100vh;
-      background: white;
+      background-color: #f5f5f5;
+      position: relative;
+      z-index: 1;
+      overflow-x: hidden;
+      overflow-y: auto;
+      height: 100vh;
     }
     
     .header-top {
@@ -777,18 +743,6 @@
       </ul>
     </div>
     
-    <!-- User Info Section -->
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="user-avatar">
-          <i class="bi bi-person-circle"></i>
-        </div>
-        <div class="user-details">
-          <div class="user-name">{{ Auth::user()->name ?? 'Admin' }}</div>
-          <div class="user-role">{{ Auth::user()->role ?? 'Staff' }}</div>
-        </div>
-      </div>
-    </div>
   </nav>
 
   <main class="content-area">

@@ -16,6 +16,7 @@ class Media extends Model
         'original_filename',
         'date',
         'show_on_landing',
+        'layout_order',
     ];
 
     protected $casts = [
