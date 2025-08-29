@@ -671,15 +671,19 @@
       <div class="layout-body">
         <div class="layout-container">
           <div class="layout-left">
-            <div class="upload-area" onclick="showBackgroundSelector()">
-              <div class="upload-icon">
+            <div class="upload-area" id="backgroundUploadArea" onclick="showBackgroundSelector()">
+              <div class="upload-icon" id="backgroundUploadIcon">
                 <i class="bi bi-cloud-upload"></i>
               </div>
-              <div>
+              <div id="backgroundUploadText">
                 <strong>Klik area lalu pilih media yang ingin ditampilkan</strong>
               </div>
-              <div class="upload-subtitle">
+              <div class="upload-subtitle" id="backgroundUploadSubtitle">
                 <small>Untuk menambahkan gambar background</small>
+              </div>
+              <div class="background-preview" id="backgroundPreview" style="display: none; margin-top: 1rem;">
+                <img id="backgroundPreviewImg" style="max-width: 100%; max-height: 200px; border-radius: 8px; object-fit: cover;">
+                <div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--primary); font-weight: 500;" id="backgroundPreviewName"></div>
               </div>
             </div>
             
@@ -719,7 +723,7 @@
       <div class="layout-controls">
         <div class="layout-info">
           <i class="bi bi-info-circle"></i>
-          Gambar akan ditampilkan secara berurutan pada landing page sebagai background yang berganti-ganti
+          Media akan ditampilkan di gallery landing page. Landing page dapat ditampilkan meskipun tanpa media.
         </div>
         <div class="layout-actions">
           <button class="btn-layout btn-layout-preview" onclick="previewLayout()">
@@ -747,6 +751,14 @@
       </div>
       <div id="imageGrid" class="image-grid">
         <!-- Images will be populated here -->
+      </div>
+      <div class="modal-footer" id="backgroundModalFooter" style="display: none; padding: 1rem; border-top: 1px solid var(--border-soft); background: var(--bg-soft);">
+        <button class="btn btn-outline-danger" onclick="clearBackground()">
+          <i class="bi bi-trash"></i> Hapus Background
+        </button>
+        <button class="btn btn-secondary" onclick="closeImageSelector()">
+          <i class="bi bi-x"></i> Batal
+        </button>
       </div>
     </div>
   </div>
@@ -781,7 +793,22 @@
     // Initialize layout on page load
     document.addEventListener('DOMContentLoaded', function() {
       loadExistingLayout();
+      loadExistingBackground();
     });
+
+    function loadExistingBackground() {
+      // Check if there's an existing background image
+      fetch('/api/layout/background')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.background) {
+            updateBackgroundPreview(data.background);
+          }
+        })
+        .catch(error => {
+          console.log('No existing background or error loading:', error);
+        });
+    }
 
     function loadExistingLayout() {
       // Load existing layout images into boxes
@@ -809,9 +836,17 @@
       layoutState.isBackgroundMode = true;
       
       // Update modal title for background selection
-      const modalTitle = document.querySelector('#imageSelectorModal .modal-title');
+      const modalTitle = document.querySelector('#imageSelectorModal .layout-title');
       if (modalTitle) {
         modalTitle.innerHTML = '<i class="bi bi-image-fill"></i> Pilih Gambar Background';
+      }
+      
+      // Show background modal footer
+      const footer = document.getElementById('backgroundModalFooter');
+      if (footer) {
+        footer.style.display = 'flex';
+        footer.style.justifyContent = 'space-between';
+        footer.style.alignItems = 'center';
       }
       
       renderImageSelector();
@@ -826,9 +861,15 @@
       layoutState.isBackgroundMode = false;
       
       // Reset modal title
-      const modalTitle = document.querySelector('#imageSelectorModal .modal-title');
+      const modalTitle = document.querySelector('#imageSelectorModal .layout-title');
       if (modalTitle) {
-        modalTitle.innerHTML = '<i class="bi bi-palette"></i> Pilih Gambar untuk Layout';
+        modalTitle.innerHTML = '<i class="bi bi-images"></i> Pilih Gambar untuk Layout';
+      }
+      
+      // Hide background modal footer
+      const footer = document.getElementById('backgroundModalFooter');
+      if (footer) {
+        footer.style.display = 'none';
       }
     }
 
@@ -836,7 +877,13 @@
       const grid = document.getElementById('imageGrid');
       
       if (layoutState.images.length === 0) {
-        grid.innerHTML = '<div class="no-images">Tidak ada media yang tersedia</div>';
+        grid.innerHTML = `
+          <div class="empty-state">
+            <i class="bi bi-images"></i>
+            <h5>Tidak ada media yang tersedia</h5>
+            <p>Silakan tambahkan media terlebih dahulu di halaman Input Media</p>
+          </div>
+        `;
         return;
       }
       
@@ -906,6 +953,7 @@
       .then(data => {
         if (data.success) {
           toast(`Background "${image.name}" berhasil disimpan`, 'success');
+          updateBackgroundPreview(image);
         } else {
           toast(data.message || 'Gagal menyimpan background', 'error');
         }
@@ -914,6 +962,72 @@
         console.error('Error:', error);
         toast('Terjadi kesalahan saat menyimpan background', 'error');
       });
+    }
+
+    function clearBackground() {
+      // Clear preview immediately for better UX
+      clearBackgroundPreview();
+      
+      // Send AJAX request to clear background image
+      fetch('/api/layout/background', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': CSRF_TOKEN
+        },
+        body: JSON.stringify({
+          background_image_id: null
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          toast('Background berhasil dihapus', 'success');
+          closeImageSelector();
+        } else {
+          toast(data.message || 'Gagal menghapus background', 'error');
+          // If API fails, we might want to restore the preview
+          // But for now, keep it cleared since user wanted to delete
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        toast('Terjadi kesalahan saat menghapus background', 'error');
+      });
+    }
+
+    function updateBackgroundPreview(image) {
+      const preview = document.getElementById('backgroundPreview');
+      const previewImg = document.getElementById('backgroundPreviewImg');
+      const previewName = document.getElementById('backgroundPreviewName');
+      const uploadIcon = document.getElementById('backgroundUploadIcon');
+      const uploadText = document.getElementById('backgroundUploadText');
+      const uploadSubtitle = document.getElementById('backgroundUploadSubtitle');
+      
+      if (preview && previewImg && previewName) {
+        previewImg.src = fileUrl(image.file_path);
+        previewName.textContent = image.name;
+        preview.style.display = 'block';
+        
+        // Hide upload elements
+        if (uploadIcon) uploadIcon.style.display = 'none';
+        if (uploadText) uploadText.style.display = 'none';
+        if (uploadSubtitle) uploadSubtitle.style.display = 'none';
+      }
+    }
+
+    function clearBackgroundPreview() {
+      const preview = document.getElementById('backgroundPreview');
+      const uploadIcon = document.getElementById('backgroundUploadIcon');
+      const uploadText = document.getElementById('backgroundUploadText');
+      const uploadSubtitle = document.getElementById('backgroundUploadSubtitle');
+      
+      if (preview) preview.style.display = 'none';
+      
+      // Show upload elements
+      if (uploadIcon) uploadIcon.style.display = 'block';
+      if (uploadText) uploadText.style.display = 'block';
+      if (uploadSubtitle) uploadSubtitle.style.display = 'block';
     }
 
     function updateLayoutBox(position, image) {
@@ -965,10 +1079,8 @@
       const description = document.getElementById('layoutDescription')?.value || '';
       const layoutImages = Object.values(layoutState.layoutBoxes);
       
-      if (layoutImages.length === 0) {
-        toast('Pilih minimal satu gambar untuk preview', 'error');
-        return;
-      }
+      // Allow preview even without images
+      toast('Membuka preview landing page...', 'success');
       
       // Open landing page in new tab for preview
       window.open('{{ url("/") }}', '_blank');
@@ -986,9 +1098,9 @@
           }))
         };
         
+        // Allow saving even without images
         if (layoutData.images.length === 0) {
-          toast('Pilih minimal satu gambar untuk layout', 'error');
-          return;
+          toast('Menyimpan layout tanpa media...', 'info');
         }
         
         const response = await fetch('/api/layout/update', {
@@ -1004,7 +1116,10 @@
         const result = await response.json();
         
         if (result.success) {
-          toast('Layout berhasil disimpan dan diterapkan ke landing page!');
+          const message = layoutData.images.length === 0 
+            ? 'Layout berhasil disimpan (tanpa media)!' 
+            : 'Layout berhasil disimpan dan diterapkan ke landing page!';
+          toast(message);
           setTimeout(() => {
             window.location.href = '{{ route("dashboard.pegawai") }}';
           }, 2000);
@@ -1045,13 +1160,20 @@
     }
 
     function toast(message, type = 'success') {
+      const colors = {
+        'success': '#1f9e76',
+        'error': '#dc3545',
+        'info': '#0071BC',
+        'warning': '#F7931E'
+      };
+      
       Toastify({
         text: message,
         duration: 3000,
         close: true,
         gravity: 'top',
         position: 'right',
-        backgroundColor: type === 'success' ? '#1f9e76' : '#dc3545',
+        backgroundColor: colors[type] || colors.success,
       }).showToast();
     }
 

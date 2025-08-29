@@ -2,95 +2,58 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Selamat Datang di BPS Sumatera Utara</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Marcellus+SC&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Marcellus&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.plyr.io/3.7.8/plyr.css" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BPS Sumatera Utara</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
   <style>
- @import url('https://fonts.googleapis.com/css2?family=Playfair+Display&family=Open+Sans&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display&family=Open+Sans&display=swap');
 
     * {
-      margin: 0;
-      padding: 0;
       box-sizing: border-box;
     }
 
-    html, body {
-      height: 100%;
-      overflow: hidden;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: 'Open Sans', sans-serif;
+      background-color: #0b0b0b;
       color: white;
+      height: 100vh;
+      overflow-x: hidden;
     }
 
-    .hero {
+    .container-left {
+      display: relative;
       height: 100vh;
       width: 100vw;
-      display: flex;
-      align-items: center;
-      position: relative;
       overflow: hidden;
+      background: #0b0b0b;
     }
 
-    .hero-container {
-      width: 100%;
-      height: 100vh;
-      overflow: hidden;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 2rem;
-      gap: 2rem;
-      flex-wrap: wrap; /* allow wrapping to prevent collision at mid widths */
-    }
-
-    /* Background image with dynamic content */
-    .bg-image {
+    /* Left section with background image and text */
+    .left-section {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
+      background-image: 
+        linear-gradient(to bottom, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 0.8) 100%),
+        url('img/danau toba img1.svg');
       background-size: cover;
       background-position: center;
-      z-index: 1;
-      transition: opacity 1s ease-in-out;
+      padding: 60px 80px;
+      color: white;
+      z-index: 1; /* biar di bawah gallery */
     }
 
-    /* Gradient overlay */
-    .gradient-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(
-        to right,
-        rgba(0, 0, 0, 0.7) 0%,
-        rgba(0, 0, 0, 0.4) 50%,
-        rgba(0, 0, 0, 0.7) 100%
-      );
-      z-index: 2;
-    }
-
-    /* Konten teks */
-    .text-content {
-      position: relative;
-      z-index: 2;
+    .left-section h1 {
       font-family: 'Playfair Display', serif;
       font-weight: 450px;
       font-size: 70px; /* sedikit lebih besar */
       line-height: 1.2;
       letter-spacing: 1px; /* spasi antar huruf */
-      margin-top: 380px; /* sedikit lebih rapat ke atas */
+      margin-top: 220px; /* sedikit lebih rapat ke atas */
       margin-bottom: 20px;
       max-width: 650px;
       color: #fff;
@@ -99,186 +62,79 @@
         0 0 25px rgba(0, 0, 0, 0.4);    /* glow tambahan */
     }
 
+    .left-section p {
+      max-width: 620px;
+      font-size: 1.25rem;
+      line-height: 1.7;
+      letter-spacing: 0.3px;
+      color: #f5f5f5;
+      text-shadow:
+      0 4px 8px rgba(0, 0, 0, 0.7),   /* shadow utama lebih tebal */
+      0 0 12px rgba(0, 0, 0, 0.5),    /* glow sedang */
+      0 0 30px rgba(0, 0, 0, 0.4);    /* glow lebar */
+    }
+
+
+    /* Highlight for BPS letters */
+    .bps {
+      font-weight: 700;
+      font-family: 'Playfair Display', serif;
+      font-size: 3.5rem;
+      line-height: 1.2;
+    }
+    .bps .b {
+      color: #0c77d2; /* Blue shade */
+    }
+    .bps .p {
+      color: #1cd03d; /* Mustard/Gold shade */
+    }
+    .bps .s {
+      color: #f8bc08; /* Orange shade */
+    }
+
     /* Right section with images grid */
     .right-section {
       position: absolute;
       top: 0;
       right: 0;
-      width: 32%;
-      height: auto;
-      min-height: 100vh;
-      padding: 15px;
+      width: 30%;   /* sesuaikan lebar gallery */
+      height: 100%;
+      flex: 1.5;
+      padding: 20px;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      align-items: center;
       z-index: 2;
       overflow: hidden;
-      background: rgba(0, 0, 0, 0.3);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(0, 0, 0, 0.3); /* semi transparan */
+      backdrop-filter: blur(12px);    /* blur area di belakang */
+      -webkit-backdrop-filter: blur(12px); /* untuk Safari */
       border-left: 1px solid rgba(255,255,255,0.1);
     }
 
-    .layout-images {
+    .right-section::before {
+      display: none;
+    }
+
+
+
+    .row {
+      margin-top: 5px;
+      margin-bottom: 20px;
+    }
+
+    .img-potrait-1 {
       position: relative;
-      z-index: 3;
-      width: 100%;
-      max-width: 400px;
-      height: auto;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      overflow: visible;
-    }
-
-    .images-grid { 
-      display: grid; 
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: auto auto auto auto;
-      grid-template-areas: 
-        "img1 img2"
-        "img3 img2" 
-        "img3 img4" 
-        "img5 img6"; 
-      gap: 0.8rem; 
-      width: 100%; 
-      max-height: 80vh;
-      align-items: stretch;
-      justify-items: stretch;
-    }
-
-    .layout-image {
-      border-radius: 8px;
+      border: 4px solid #ffffff;
+      border-radius: 4px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
       overflow: hidden;
-      background: #111;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-      cursor: pointer;
-    }
-
-    .layout-image img,
-    .layout-image video,
-    .layout-image iframe {
-      width: 100%;
-      height: 100%;
-      object-fit: cover; /* isi penuh, sesuai rasio grid */
-      display: block;
-    }
-
-    .layout-image:hover img {
-      transform: scale(1.04);
-      filter: brightness(0.95);
-    }
-
-    .layout-image:nth-child(1) { 
-      grid-area: img1; 
-      aspect-ratio: 1 / 1; 
-      min-height: 120px;
-    }
-    .layout-image:nth-child(2) { 
-      grid-area: img2; 
-      aspect-ratio: 9 / 16; 
-      min-height: 200px;
-    }
-    .layout-image:nth-child(3) {
-      grid-area: img3; 
-      aspect-ratio: 9 / 16; 
-      min-height: 200px;
-    }
-    .layout-image:nth-child(4) { 
-      grid-area: img4; 
-      aspect-ratio: 1 / 1; 
-      min-height: 120px;
-    }
-    .layout-image:nth-child(5) { 
-      grid-area: img5; 
-      aspect-ratio: 16 / 9; 
-      min-height: 80px;
-    }
-    .layout-image:nth-child(6) { 
-      grid-area: img6; 
-      aspect-ratio: 16 / 9; 
-      min-height: 80px;
-    }
-
-    .text-content h1 {
-      font-size: 2.8rem;
-      font-weight: bold;
-      margin-bottom: 0.1rem;
-      text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.8);
-    }
-
-    .bps-word {
-       font-weight: 700;
-      font-family: 'Playfair Display', serif;
-      font-size: 3.5rem;
-      line-height: 1.2;
-    }
-
-    .provinsi-word {
-      font-size: 3.1rem;
-      font-weight: 500;
-      color: white;
-      text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.8);
-    }
-
-    .text-content h3 {
-      font-size: 3rem;
-      font-weight: 700;
-      margin-bottom: 0.4rem;
-      text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.8);
-    }
-
-    .text-content p {
-      font-size: 1.4rem;
-      line-height: 1.6;
-      font-family: "Marcellus", serif;
-      text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.8);
-    }
-
-    /* Media section */
-    .media-section {
-      background-color: #f8f9fa;
-      padding: 5rem 0;
-      color: #333;
-    }
-
-    .media-section h2 {
-      font-size: 2.5rem;
-      text-align: center;
-      margin-bottom: 3rem;
-      color: #2c3a67;
-    }
-
-    .media-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 2rem;
-      padding: 0 2rem;
-    }
-
-    .media-card {
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease;
-      background-color: white;
-    }
-
-    .media-card:hover {
-      transform: translateY(-5px);
-    }
-
-    .media-content {
-      position: relative;
+      cursor: default;
       width: 100%;
       height: 0;
-      padding-bottom: 56.25%; /* 16:9 aspect ratio */
-      overflow: hidden;
+      padding-bottom: 177.78%; /* 16/9 * 100 = 177.78% → portrait 9:16 */
     }
 
-    .media-content img, 
-    .media-content video {
+    .img-potrait-1 img {
       position: absolute;
       top: 0;
       left: 0;
@@ -287,316 +143,207 @@
       object-fit: cover;
     }
 
-    .media-info {
-      padding: 1.5rem;
+    .img-1-1 {
+      position: relative;
+      border: 4px solid #ffffff;
+      border-radius: 4px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      cursor: default;
+      width: 100%;
+      height: 50%; 
+      padding-bottom: 100%;
     }
 
-    .media-info h3 {
-      font-size: 1.25rem;
-      margin-bottom: 0.5rem;
-      color: #2c3a67;
+    .img-1-1 img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
-    .media-info p {
-      font-size: 0.9rem;
-      color: #666;
-      margin-bottom: 0.5rem;
+    .img-potrait-2 {
+      position: relative;
+      border: 4px solid #ffffff;
+      border-radius: 4px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      cursor: default;
+      width: 100%;
+      height: 0;
+      padding-bottom: 177.78%; /* 16/9 * 100 = 177.78% → portrait 9:16 */
+      margin-top: -140px; /* naik ke atas biar nyelip */
+      z-index: 2;        /* pastikan tampil di atas */
     }
 
-    .media-type {
-      display: inline-block;
-      padding: 0.25rem 0.75rem;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
+    .img-potrait-2 img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
-    .media-type.image {
-      background-color: #e3f2fd;
-      color: #1976d2;
+    .img-1-1-2 {
+      position: relative;
+      border: 4px solid #ffffff;
+      border-radius: 4px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      cursor: default;
+      width: 100%;
+      height: 50%; 
+      padding-bottom: 100%;
     }
 
-    .media-type.video {
-      background-color: #fce4ec;
-      color: #c2185b;
+    .img-1-1-2 img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
-    .media-type.audio {
-      background-color: #e8f5e9;
-      color: #388e3c;
+    .img-1-1-3 {
+      position: relative;
+      border: 4px solid #ffffff;
+      border-radius: 4px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      cursor: default;
+      width: 100%;
+      height: 0;
+      padding-bottom: 56.25%; /* 9/16 = 0.5625 */
     }
 
-    /* Audio player styling */
-    .audio-container {
-      padding: 1rem;
-      background-color: #f5f5f5;
-      border-radius: 8px;
+
+    .img-1-1-3 img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
-    .plyr--audio .plyr__control.plyr__tab-focus,
-    .plyr--audio .plyr__control:hover,
-    .plyr--audio .plyr__control[aria-expanded=true] {
-      background: #1F9E76;
+    .right-section img {
+      transition: transform 0.4s ease, box-shadow 0.4s ease, filter 0.4s ease;
     }
 
-    .plyr--audio .plyr__control.plyr__tab-focus {
-      box-shadow: 0 0 0 5px rgba(31, 158, 118, 0.5);
+    .right-section img:hover {
+      transform: scale(1.05); /* zoom sedikit */
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* shadow lebih tebal saat hover */
+      filter: brightness(1.05) contrast(1.05); /* sedikit lebih terang & kontras */
     }
 
-    .plyr--audio .plyr__progress__buffer {
-      color: rgba(31, 158, 118, 0.5);
-    }
-
-    .plyr--full-ui input[type=range] {
-      color: #1F9E76;
-    }
-
-    /* Footer */
-    footer {
-      background-color: #2c3a67;
-      color: white;
-      padding: 2rem 0;
-      text-align: center;
-    }
-
-    /* Responsive untuk full screen */
-    @media (min-width: 1600px) {
-      .images-grid {
-        gap: 1.2rem;
-      }
-    }
-
-    @media (min-width: 1400px) and (max-width: 1599px) {
-      .images-grid {
-        gap: 1.1rem;
-      }
-    }
-
-    @media screen and (max-width: 476px) {
-      .hero {
-        height: auto;
-        min-height: 100vh ;
-        padding: 1rem 0;
-      }
-
-      .hero-container {
+    @media (max-width: 900px) {
+      .container {
         flex-direction: column;
-        height: auto;
-        min-height: 100vh;
-        padding: 1rem;
-        align-items: center;
       }
-
+      .left-section, .right-section {
+        flex: none;
+        width: 100%;
+        height: auto;
+        padding: 30px 20px;
+      }
+      .left-section h1 {
+        font-size: 2.5rem;
+      }
       .right-section {
-        margin-top: 50px;
-        width: 100%;
-        height: auto;
-        padding: 1rem;
-        margin: 0 auto;
-        background:
-          linear-gradient(to top, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 0.8) 100%);
-        backdrop-filter: blur(8px);
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.15);
-      }
-
-      .images-grid {
+        flex-wrap: wrap;
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.5rem;
-        width: 100%;
-        max-width: 360px;
-        margin: 0 auto;
-        align-items: start;
+        grid-template-columns: repeat(3, 1fr);
+        grid-gap: 12px;
+        padding: 20px;
+        max-height: none;
       }
-
-      .layout-image:nth-child(1) { aspect-ratio: 1 / 1; }
-      .layout-image:nth-child(2) { aspect-ratio: 9 / 16; }
-      .layout-image:nth-child(3) { aspect-ratio: 9 / 16; }
-      .layout-image:nth-child(4) { aspect-ratio: 1 / 1; }
-      .layout-image:nth-child(5) { aspect-ratio: 16 / 9; }
-      .layout-image:nth-child(6) { aspect-ratio: 16 / 9; }
-
-      .layout-image {
-        width: 100%;
-        height: auto;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      .img-large-blue {
+        grid-column: span 3;
+        height: 250px;
       }
-
-      .layout-image img,
-      .layout-image video,
-      .layout-image iframe {
-        width: 100%;
+      .img-large-blue img {
         height: 100%;
-        object-fit: cover;  /* isi penuh tapi tetap proporsional */
       }
-
-       .text-content h1 { font-size: 1.5rem; }
-        .bps-word { font-size: 1.8rem; }
-        .provinsi-word { font-size: 1.5rem; }
-        .text-content h3 { font-size: 1.4rem; }
-        .text-content p { font-size: 0.95rem; }
-
-      /* Adjust body overflow for mobile */
-      html, body {
-        overflow-y: auto;
-        height: auto;
+      .right-column-small, .small-image-row, .bottom-row {
+        grid-column: span 3;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 12px;
       }
-
-      .hero {
-        height: auto;
-        min-height: 100vh;
-        padding: 2rem 0;
-      }
-
-      .hero-container {
-        height: auto;
-        min-height: 100vh;
+      .right-column-small img,
+      .small-image-row img,
+      .bottom-row img {
+        height: 150px;
+        border: none;
+        box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        border-radius: 6px;
       }
     }
   </style>
 </head>
 <body>
-  <!-- Hero Section -->
-  <div class="hero">
-    <div class="hero-container">
-      @if(isset($backgroundImage) && $backgroundImage)
-        <div class="bg-image" style="background-image: url('{{ asset('storage/' . $backgroundImage->file_path) }}');"></div>
-      @else
-        <div class="bg-image" style="background-image: url('{{ asset('img/danau_toba.svg') }}');"></div>
-      @endif
-      <div class="gradient-overlay"></div>
-      <div class="text-content">
-        <h1>Selamat Datang Di</h1>
-        <h2>
-          <span class="bps-word">
-            <span style="color:#0071BC;">B</span><span style="color:#8CC63F;">P</span><span style="color:#F7931E;">S</span>
-          </span>
-          <span class="provinsi-word">Provinsi</span>
-        </h2>
-        <h3>Sumatera Utara</h3>
-        <p>
-          {{ $description }}
-        </p>
-      </div>
+  <div class="container-left" role="main" aria-label="Welcome page for BPS Sumatera Utara">
 
-      <!-- Layout Images Grid -->
-      @if(isset($layoutImages) && $layoutImages->count() > 0)
-        <div class="right-section">
-          <div class="layout-images">
-            <div class="images-grid">
-              @foreach($layoutImages->take(6) as $image)
-                @php
-                  $path = $image->file_path;
-                  $isExternal = \Illuminate\Support\Str::startsWith($path, ['http://', 'https://']);
-                  $src = $isExternal ? $path : asset('storage/' . $path);
-                  $ytId = null;
-                  if ($image->type === 'Video') {
-                    // Use ~ delimiter to avoid escaping slashes
-                    if (preg_match('~(?:youtube\.com/(?:watch\?v=|embed/)|youtu\.be/)([\w-]{11})~i', $src, $m)) {
-                      $ytId = $m[1];
-                    }
-                  }
-                @endphp
-                @if($image->type === 'Video')
-                  <div class="layout-image" data-media="video" data-src="{{ $src }}" @if($ytId) data-ytid="{{ $ytId }}" @endif data-name="{{ e($image->name) }}">
-                    @if($ytId)
-                      <div class="ratio ratio-16x9" style="width:100%; height:100%;">
-                        <iframe src="https://www.youtube.com/embed/{{ $ytId }}?autoplay=1&mute=1&playsinline=1" title="{{ $image->name }}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                      </div>
-                    @else
-                      <video src="{{ $src }}" autoplay muted playsinline controls preload="metadata" style="width:100%; height:100%; object-fit:contain;">
-                        Browser Anda tidak mendukung pemutar video.
-                      </video>
-                    @endif
-                  </div>
-                @else
-                  <div class="layout-image" data-media="image" data-src="{{ asset('storage/' . $image->file_path) }}" data-name="{{ e($image->name) }}">
-                    <img src="{{ asset('storage/' . $image->file_path) }}" alt="{{ $image->name }}">
-                  </div>
-                @endif
-              @endforeach
+    <section class="left-section" aria-labelledby="welcome-title" aria-describedby="welcome-description">
+        <h1 id="welcome-title">Selamat Datang Di <span class="bps"><span class="b">B</span><span class="p">P</span><span class="s">S</span></span> Provinsi Sumatera Utara</h1>
+        <p id="welcome-description">
+          Kami adalah lembaga resmi pemerintah yang bertugas menyelenggarakan kegiatan statistik di wilayah Sumatera Utara. BPS hadir untuk memberikan data akurat, terpercaya, dan terkini.
+        </p>
+    </section>
+
+    <aside class="right-section" aria-label="Gallery of images representing Sumatera Utara and cultural elements">
+      <div class="container">
+        <div class="row">
+          <div class="col">
+            <div class="img-1-1">
+              <img src="{{ asset('img/img 1.1.svg') }}" alt="Gambar2">
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="img-potrait-1">
+              <img src="{{ asset('img/img potrait.svg') }}" alt="Gambar1">
             </div>
           </div>
         </div>
-      @endif
-    </div>
-  </div>
 
-  <!-- Media Preview Modal (Image / Video) -->
-  <div class="modal fade" id="mediaPreviewModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl">
-      <div class="modal-content bg-transparent border-0">
-        <button type="button" class="btn-close btn-close-white ms-auto me-2 mt-2" data-bs-dismiss="modal" aria-label="Close"></button>
-        <div class="modal-body p-0 d-flex justify-content-center align-items-center">
-          <div id="mediaPreviewContainer" style="width:100%; max-width: 90vw; max-height: 85vh; display:flex; align-items:center; justify-content:center;"></div>
+        <div class="row">
+          <div class="col">
+            <div class="img-potrait-2">
+              <img src="{{ asset('img/img potrait 2.svg') }}" alt="Gambar2">
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="img-1-1-2">
+              <img src="{{ asset('img/img 1.1 2.svg') }}" alt="Gambar1">
+            </div>
+          </div>
+        </div>
+
+         <div class="row">
+          <div class="col">
+            <div class="img-1-1-3">
+              <img src="{{ asset('img/img 1.1 3.svg') }}" alt="Gambar2">
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="img-1-1-3">
+              <img src="{{ asset('img/img 1.1 4.svg') }}" alt="Gambar1">
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </aside>
   </div>
 
-  <!-- Signage mode: remove gallery and footer to keep single screen -->
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Initialize audio players
-      const audioPlayers = document.querySelectorAll('.audio-player');
-      if (audioPlayers.length > 0) {
-        audioPlayers.forEach(player => {
-          new Plyr(player, {
-            controls: ['play','progress','current-time','mute','volume']
-          });
-        });
-      }
-
-      // Media preview modal logic (image + video)
-      const modalEl = document.getElementById('mediaPreviewModal');
-      const container = document.getElementById('mediaPreviewContainer');
-      const bsModal = modalEl ? new bootstrap.Modal(modalEl) : null;
-
-      function escapeHtml(text){
-        const div = document.createElement('div');
-        div.textContent = text || '';
-        return div.innerHTML;
-      }
-
-      function openMediaModal(el){
-        if(!bsModal || !container) return;
-        const type = el.getAttribute('data-media');
-        const src = el.getAttribute('data-src');
-        const name = el.getAttribute('data-name') || '';
-        const ytid = el.getAttribute('data-ytid');
-
-        let html = '';
-        if(type === 'image'){
-          html = `<img src="${src}" alt="${escapeHtml(name)}" style="max-width:100%; max-height:85vh; object-fit:contain;"/>`;
-        } else if(type === 'video'){
-          if(ytid){
-            html = `<div class="ratio ratio-16x9" style="width:100%; max-width:1000px;"><iframe src="https://www.youtube.com/embed/${ytid}?autoplay=1" title="${escapeHtml(name)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
-          } else {
-            html = `<video controls autoplay playsinline style="width:100%; max-width:1000px; max-height:85vh;"><source src="${src}">Browser Anda tidak mendukung pemutar video.</video>`;
-          }
-        }
-        container.innerHTML = html;
-        bsModal.show();
-      }
-
-      document.querySelectorAll('.layout-image').forEach(el => {
-        el.addEventListener('click', () => openMediaModal(el));
-      });
-
-      // Clear modal content on hide to stop playback
-      if (modalEl) {
-        modalEl.addEventListener('hidden.bs.modal', () => {
-          if(container) container.innerHTML = '';
-        });
-      }
-    });
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </body>
 </html>
+
