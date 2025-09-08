@@ -432,9 +432,9 @@
   <main class="content-area">
     <div class="header-top">
       <h2>Dashboard Super Admin</h2>
-      <div class="user-badge" title="Logged in as Admin">
+      <div class="user-badge" title="Logged in">
         <span class="status-indicator" aria-label="online status"></span>
-        <span>{{ Auth::user()->name ?? 'Super Admin' }}</span>
+        <span>{{ Auth::user()->name ?? 'User' }}</span>
       </div>
     </div>
 

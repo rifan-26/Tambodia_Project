@@ -415,11 +415,11 @@ class MediaController extends Controller
                 return response()->json(['success' => false, 'message' => 'ID media tidak valid']);
             }
             
-            // Find media
-            $media = Media::where('id', $id)->first();
+            // Find media and check ownership
+            $media = Media::where('id', $id)->where('user_id', Auth::id())->first();
             
             if (!$media) {
-                return response()->json(['success' => false, 'message' => 'Media tidak ditemukan']);
+                return response()->json(['success' => false, 'message' => 'Media tidak ditemukan atau tidak memiliki akses']);
             }
             
             // Store media info for logging before deletion
@@ -450,6 +450,29 @@ class MediaController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat menghapus media.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get user's media for layout manager (API endpoint)
+     */
+    public function getUserMedia()
+    {
+        try {
+            $media = Media::where('user_id', Auth::id())
+                ->whereIn('type', ['Gambar', 'Video'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'media' => $media
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil data media'
             ], 500);
         }
     }
@@ -552,5 +575,6 @@ class MediaController extends Controller
             return response()->json(['message' => 'Gagal memuat file'], 500);
         }
     }
+
 
 }

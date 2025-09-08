@@ -332,7 +332,7 @@
       box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
     }
 
-    /* Layout Preview Styles - Mirip Layout Asli */
+    /* Layout Preview Styles */
     .layout-preview-container {
       border: 2px dashed #d1d5db;
       border-radius: 8px;
@@ -362,7 +362,6 @@
       padding: 8px;
     }
 
-    /* Grid Layout Preview - Sesuai Layout Asli */
     .preview-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -397,38 +396,13 @@
       transform: scale(1.05);
     }
 
-    /* Position specific styling - Sesuai Layout Asli */
-    .preview-grid-item:nth-child(1) { 
-      grid-column: 1; 
-      grid-row: 1; 
-    }
-    
-    .preview-grid-item:nth-child(2) { 
-      grid-column: 2; 
-      grid-row: 1 / 3; 
-    }
-    
-    .preview-grid-item:nth-child(3) { 
-      grid-column: 1; 
-      grid-row: 2 / 4; 
-    }
-    
-    .preview-grid-item:nth-child(4) { 
-      grid-column: 2; 
-      grid-row: 3; 
-    }
-    
-    .preview-grid-item:nth-child(5) { 
-      grid-column: 1; 
-      grid-row: 4; 
-    }
-    
-    .preview-grid-item:nth-child(6) { 
-      grid-column: 2; 
-      grid-row: 4; 
-    }
+    .preview-grid-item:nth-child(1) { grid-column: 1; grid-row: 1; }
+    .preview-grid-item:nth-child(2) { grid-column: 2; grid-row: 1 / 3; }
+    .preview-grid-item:nth-child(3) { grid-column: 1; grid-row: 2 / 4; }
+    .preview-grid-item:nth-child(4) { grid-column: 2; grid-row: 3; }
+    .preview-grid-item:nth-child(5) { grid-column: 1; grid-row: 4; }
+    .preview-grid-item:nth-child(6) { grid-column: 2; grid-row: 4; }
 
-    /* Label untuk setiap posisi */
     .preview-position-label {
       position: absolute;
       top: 2px;
@@ -486,6 +460,49 @@
       margin-bottom: 1rem;
       opacity: 0.5;
     }
+
+    /* Media Type Badges */
+    .media-type-badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .media-type-badge.audio {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+
+    .media-type-badge.video {
+      background-color: #dbeafe;
+      color: #1e40af;
+    }
+
+    .media-type-badge.gambar {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+
+    /* Alert Styles */
+    .alert {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      border: none;
+      margin-bottom: 1rem;
+    }
+
+    .alert-info {
+      background-color: #e0f2fe;
+      color: #0c4a6e;
+      border-left: 4px solid #0ea5e9;
+    }
+
+    .alert-warning {
+      background-color: #fef3c7;
+      color: #92400e;
+      border-left: 4px solid #f59e0b;
+    }
 </style>
 
 <body>
@@ -535,7 +552,7 @@
 
   <main class="content-area">
     <div class="header-top">
-      <h2 class="section-header">Atur Jadwal Media dengan Posisi Layout</h2>
+      <h2 class="section-header">Atur Jadwal Media</h2>
       <div class="user-badge" title="Logged in">
         <span class="status-indicator" aria-label="online status"></span>
         <span>{{ Auth::user()->name ?? 'User' }}</span>
@@ -544,115 +561,9 @@
     
     <div class="container-fluid">
       <div class="row g-4">
-        <!-- Tabel Media yang Sudah Dijadwalkan -->
-        <div class="col-12 mb-4">
-          <div class="content-card">
-            <h5><i class="bi bi-calendar-check me-2"></i>Media yang Sudah Dijadwalkan</h5>
-            
-            <div class="table-container">
-              <table id="scheduledTable">
-                <thead>
-                  <tr>
-                    <th><i class="bi bi-file-earmark me-2"></i>Nama Media</th>
-                    <th><i class="bi bi-file-type me-2"></i>Tipe</th>
-                    <th><i class="bi bi-calendar-event me-2"></i>Tanggal Mulai</th>
-                    <th><i class="bi bi-calendar-week me-2"></i>Hari</th>
-                    <th><i class="bi bi-clock me-2"></i>Waktu</th>
-                    <th><i class="bi bi-grid-3x3-gap me-2"></i>Posisi</th>
-                    <th><i class="bi bi-toggle-on me-2"></i>Status</th>
-                    <th><i class="bi bi-gear me-2"></i>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @if(isset($media) && $media->count() > 0)
-                    @foreach($media as $item)
-                      @if($item->schedules && $item->schedules->count() > 0)
-                        @foreach($item->schedules as $schedule)
-                        <tr data-schedule-id="{{ $schedule->id }}">
-                          <td>
-                            <div class="d-flex align-items-center">
-                              @if($item->type === 'Audio')
-                                <i class="bi bi-music-note-beamed text-info me-2"></i>
-                              @elseif($item->type === 'Video')
-                                <i class="bi bi-play-circle text-danger me-2"></i>
-                              @else
-                                <i class="bi bi-image text-success me-2"></i>
-                              @endif
-                              <span>{{ $item->name }}</span>
-                            </div>
-                          </td>
-                          <td>
-                            <span class="badge bg-{{ $item->type === 'Audio' ? 'info' : ($item->type === 'Video' ? 'danger' : 'success') }}">
-                              {{ $item->type }}
-                            </span>
-                          </td>
-                          <td>{{ $schedule->start_date->format('d/m/Y') }}</td>
-                          <td>
-                            @if($schedule->day_of_week)
-                              <span class="badge bg-secondary">{{ ucfirst($schedule->day_of_week) }}</span>
-                            @else
-                              <span class="text-muted">Semua Hari</span>
-                            @endif
-                          </td>
-                          <td>
-                            @if($schedule->time)
-                              <span class="badge bg-primary">{{ $schedule->time->format('H:i') }}</span>
-                            @else
-                              <span class="text-muted">Sepanjang Hari</span>
-                            @endif
-                          </td>
-                          <td>
-                            @if($item->type === 'Audio')
-                              <span class="text-muted">Dashboard</span>
-                            @else
-                              @if($schedule->layout_positions && is_array($schedule->layout_positions))
-                                @foreach($schedule->layout_positions as $pos)
-                                  <span class="badge bg-warning text-dark me-1">{{ $pos }}</span>
-                                @endforeach
-                              @else
-                                <span class="text-muted">-</span>
-                              @endif
-                            @endif
-                          </td>
-                          <td>
-                            @if($schedule->is_active)
-                              <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Aktif</span>
-                            @else
-                              <span class="badge bg-secondary"><i class="bi bi-pause-circle me-1"></i>Nonaktif</span>
-                            @endif
-                          </td>
-                          <td>
-                            <div class="btn-group btn-group-sm">
-                              <button class="btn btn-outline-primary btn-sm" onclick="editSchedule({{ $schedule->id }})" title="Edit">
-                                <i class="bi bi-pencil"></i>
-                              </button>
-                              <button class="btn btn-outline-danger btn-sm" onclick="deleteSchedule({{ $schedule->id }})" title="Hapus">
-                                <i class="bi bi-trash"></i>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                        @endforeach
-                      @endif
-                    @endforeach
-                  @else
-                    <tr>
-                      <td colspan="8" class="empty-state">
-                        <i class="bi bi-calendar-x"></i>
-                        <div>Belum ada media yang dijadwalkan</div>
-                        <small>Buat jadwal baru untuk media Anda</small>
-                      </td>
-                    </tr>
-                  @endif
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
         <div class="col-lg-7">
           <div class="content-card">
-            <h5><i class="bi bi-table me-2"></i>Pilih Media untuk Dijadwalkan</h5>
+            <h5><i class="bi bi-table me-2"></i>Pilih Media</h5>
             
             <div class="search-container">
               <i class="bi bi-search search-icon"></i>
@@ -666,25 +577,23 @@
                     <th class="icon-cell"><i class="bi bi-check-square"></i></th>
                     <th><i class="bi bi-file-earmark me-2"></i>Nama Media</th>
                     <th><i class="bi bi-file-type me-2"></i>Tipe File</th>
-                    <th><i class="bi bi-calendar-check me-2"></i>Status Jadwal</th>
+                    <th><i class="bi bi-calendar-date me-2"></i>Tanggal</th>
                   </tr>
                 </thead>
                 <tbody>
                   @if(isset($media) && $media->count() > 0)
                     @foreach($media as $item)
-                    <tr data-id="{{ $item->id }}" class="media-row">
+                    <tr data-id="{{ $item->id }}" data-type="{{ $item->type }}" class="media-row">
                       <td class="icon-cell">
                         <input type="checkbox" name="select_row" value="{{ $item->id }}" class="checkbox-custom">
                       </td>
                       <td>{{ $item->name }}</td>
-                      <td>{{ $item->type }}</td>
                       <td>
-                        @if($item->schedules && $item->schedules->count() > 0)
-                          <span class="badge bg-success"><i class="bi bi-calendar-check me-1"></i>Terjadwal ({{ $item->schedules->count() }})</span>
-                        @else
-                          <span class="badge bg-secondary"><i class="bi bi-calendar-x me-1"></i>Belum Dijadwal</span>
-                        @endif
+                        <span class="media-type-badge {{ strtolower($item->type) }}">
+                          {{ $item->type }}
+                        </span>
                       </td>
+                      <td>{{ $item->date->format('Y-m-d') }}</td>
                     </tr>
                     @endforeach
                   @else
@@ -704,13 +613,14 @@
         
         <div class="col-lg-5">
           <div class="content-card">
-            <h5><i class="bi bi-calendar-plus me-2"></i>Atur Jadwal & Posisi</h5>
+            <h5><i class="bi bi-calendar-plus me-2"></i>Atur Jadwal</h5>
             
             <div id="alertContainer"></div>
             
             <form id="scheduleForm" action="{{ route('schedule.store') }}" method="POST">
               @csrf
               <input type="hidden" id="media_id" name="media_id">
+              <input type="hidden" id="media_type" name="media_type">
               
               <div class="form-section">
                 <label for="namaFile" class="form-label">
@@ -718,14 +628,30 @@
                 </label>
                 <input type="text" class="form-control" id="namaFile" readonly placeholder="Pilih media dari tabel">
               </div>
+
+              <!-- Media Type Info -->
+              <div class="form-section" id="mediaTypeInfo" style="display: none;">
+                <div class="alert" id="mediaTypeAlert">
+                  <i class="bi bi-info-circle me-2"></i>
+                  <span id="mediaTypeMessage"></span>
+                </div>
+              </div>
               
               <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-6">
                   <div class="form-section">
                     <label for="start_date" class="form-label">
                       <i class="bi bi-calendar-event me-2"></i>Tanggal Mulai
                     </label>
                     <input type="date" class="form-control" id="start_date" name="start_date" required>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-section">
+                    <label for="end_date" class="form-label">
+                      <i class="bi bi-calendar-check me-2"></i>Tanggal Selesai
+                    </label>
+                    <input type="date" class="form-control" id="end_date" name="end_date" required>
                   </div>
                 </div>
               </div>
@@ -753,12 +679,12 @@
                 <input type="time" class="form-control" id="time" name="time">
               </div>
 
-              <!-- Layout Position Section -->
-              <div class="form-section">
+              <!-- Layout Position Section - Only for Gambar & Video -->
+              <div class="form-section" id="layoutPositionSection" style="display: none;">
                 <label for="layout_position" class="form-label">
-                  <i class="bi bi-grid-3x3-gap me-2"></i>Posisi di Layout
+                  <i class="bi bi-grid-3x3-gap me-2"></i>Posisi di Layout Landing Page
                 </label>
-                <select class="form-select" id="layout_position" name="layout_position" required>
+                <select class="form-select" id="layout_position" name="layout_position">
                   <option value="">Pilih Posisi Layout</option>
                   <option value="1">Posisi 1 - Kiri Atas (Square 1:1)</option>
                   <option value="2">Posisi 2 - Kanan Atas (Portrait 9:16)</option>
@@ -769,13 +695,14 @@
                 </select>
               </div>
 
+              <!-- Duration Section - Only for Audio -->
               <div class="form-section" id="durationSection" style="display: none;">
                 <label for="display_duration" class="form-label">
-                  <i class="bi bi-stopwatch me-2"></i>Durasi Tampil (detik)
+                  <i class="bi bi-stopwatch me-2"></i>Durasi Putar Audio (detik)
                 </label>
                 <input type="number" class="form-control" id="display_duration" name="display_duration" 
-                       min="1" max="300" value="10" placeholder="10">
-                <small class="form-text text-muted">Durasi audio akan diputar (1-300 detik)</small>
+                       min="1" max="300" value="30" placeholder="30">
+                <small class="text-muted">Audio akan diputar di dashboard sesuai durasi ini</small>
               </div>
 
               <div class="form-section">
@@ -787,8 +714,8 @@
                 </div>
               </div>
 
-              <!-- Layout Preview Section -->
-              <div class="form-section" id="layoutPreview">
+              <!-- Layout Preview Section - Only for Visual Media -->
+              <div class="form-section" id="layoutPreview" style="display: none;">
                 <label class="form-label">
                   <i class="bi bi-eye me-2"></i>Preview Posisi Layout
                 </label>
@@ -818,13 +745,23 @@ document.addEventListener("DOMContentLoaded", function () {
     const tableRows = document.querySelectorAll("table tbody tr");
     const checkboxes = document.querySelectorAll('input[name="select_row"]');
     const mediaIdInput = document.getElementById('media_id');
+    const mediaTypeInput = document.getElementById('media_type');
     const namaFileInput = document.getElementById('namaFile');
     const scheduleForm = document.getElementById('scheduleForm');
     const layoutPositionSelect = document.getElementById('layout_position');
     
-    // Set today as default for date input
+    // Sections
+    const layoutPositionSection = document.getElementById('layoutPositionSection');
+    const durationSection = document.getElementById('durationSection');
+    const layoutPreview = document.getElementById('layoutPreview');
+    const mediaTypeInfo = document.getElementById('mediaTypeInfo');
+    const mediaTypeAlert = document.getElementById('mediaTypeAlert');
+    const mediaTypeMessage = document.getElementById('mediaTypeMessage');
+    
+    // Set today as default for date inputs
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('start_date').value = today;
+    document.getElementById('end_date').value = today;
 
     // Search functionality
     searchInput.addEventListener("input", function () {
@@ -851,24 +788,65 @@ document.addEventListener("DOMContentLoaded", function () {
             if (checkbox.checked) {
                 const row = checkbox.closest('tr');
                 const mediaId = row.getAttribute('data-id');
+                const mediaType = row.getAttribute('data-type');
                 const mediaName = row.cells[1].textContent;
-                const mediaType = row.cells[2].textContent;
                 
                 // Set values in the form
                 mediaIdInput.value = mediaId;
+                mediaTypeInput.value = mediaType;
                 namaFileInput.value = mediaName;
                 
-                // Show/hide fields based on media type
-                updateFormFieldsForMediaType(mediaType);
+                // Show/hide sections based on media type
+                updateFormForMediaType(mediaType);
             } else {
                 // Clear form if unchecked
                 mediaIdInput.value = '';
+                mediaTypeInput.value = '';
                 namaFileInput.value = '';
-                // Reset form fields visibility
-                updateFormFieldsForMediaType('');
+                hideAllSections();
             }
         });
     });
+
+    function updateFormForMediaType(mediaType) {
+        hideAllSections();
+        
+        if (mediaType === 'Audio') {
+            // Show duration section for audio
+            durationSection.style.display = 'block';
+            document.getElementById('display_duration').required = true;
+            
+            // Show info message
+            mediaTypeInfo.style.display = 'block';
+            mediaTypeAlert.className = 'alert alert-warning';
+            mediaTypeMessage.textContent = 'Audio akan diputar di dashboard sesuai jadwal dan durasi yang ditentukan.';
+            
+        } else if (mediaType === 'Gambar' || mediaType === 'Video') {
+            // Show layout position and preview for visual media
+            layoutPositionSection.style.display = 'block';
+            layoutPreview.style.display = 'block';
+            document.getElementById('layout_position').required = true;
+            
+            // Show info message
+            mediaTypeInfo.style.display = 'block';
+            mediaTypeAlert.className = 'alert alert-info';
+            mediaTypeMessage.textContent = mediaType + ' akan ditampilkan di landing page sesuai posisi layout yang dipilih.';
+        }
+    }
+
+    function hideAllSections() {
+        layoutPositionSection.style.display = 'none';
+        durationSection.style.display = 'none';
+        layoutPreview.style.display = 'none';
+        mediaTypeInfo.style.display = 'none';
+        
+        // Remove required attributes
+        document.getElementById('layout_position').required = false;
+        document.getElementById('display_duration').required = false;
+        
+        // Reset preview
+        updateLayoutPreview('');
+    }
 
     // Layout position change handler
     layoutPositionSelect.addEventListener('change', function() {
@@ -925,28 +903,27 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        // Get selected media type
-        const selectedRow = document.querySelector('input[name="select_row"]:checked')?.closest('tr');
-        const mediaType = selectedRow ? selectedRow.cells[2].textContent : '';
-
-        // Validate based on media type
+        const mediaType = mediaTypeInput.value;
+        
+        // Validation based on media type
         if (mediaType === 'Audio') {
-            const durationInput = document.getElementById('display_duration');
-            if (!durationInput.value || durationInput.value < 1 || durationInput.value > 300) {
-                alert('Silakan masukkan durasi audio yang valid (1-300 detik)');
+            if (!document.getElementById('display_duration').value) {
+                alert('Silakan isi durasi putar audio');
                 return;
             }
-        } else {
+        } else if (mediaType === 'Gambar' || mediaType === 'Video') {
             if (!layoutPositionSelect.value) {
                 alert('Silakan pilih posisi layout');
                 return;
             }
         }
         
-        // Validate start date
+        // Validate dates
         const startDate = document.getElementById('start_date').value;
-        if (!startDate) {
-            alert('Silakan pilih tanggal mulai');
+        const endDate = document.getElementById('end_date').value;
+        
+        if (new Date(startDate) > new Date(endDate)) {
+            alert('Tanggal mulai tidak boleh lebih besar dari tanggal selesai');
             return;
         }
         
@@ -972,20 +949,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Reset form
                 scheduleForm.reset();
                 mediaIdInput.value = '';
+                mediaTypeInput.value = '';
                 namaFileInput.value = '';
                 // Uncheck all checkboxes
                 checkboxes.forEach(cb => {
                     cb.checked = false;
                 });
-                // Set today as default for date input
+                // Set today as default for date inputs
                 document.getElementById('start_date').value = today;
-                // Reset preview
-                updateLayoutPreview('');
-                
-                // Refresh current schedule page after successful save
-                setTimeout(() => {
-                    location.reload();
-                }, 1000);
+                document.getElementById('end_date').value = today;
+                // Hide all sections
+                hideAllSections();
             } else {
                 alert(data.message || 'Terjadi kesalahan saat menyimpan jadwal');
             }
@@ -999,108 +973,16 @@ document.addEventListener("DOMContentLoaded", function () {
     // Reset button
     document.getElementById('resetButton').addEventListener('click', function() {
         mediaIdInput.value = '';
+        mediaTypeInput.value = '';
         namaFileInput.value = '';
         // Uncheck all checkboxes
         checkboxes.forEach(cb => {
             cb.checked = false;
         });
-        // Reset layout preview
-        updateLayoutPreview('');
-        // Reset form fields visibility
-        updateFormFieldsForMediaType('');
+        // Hide all sections
+        hideAllSections();
     });
-
-    // Function to update form fields based on media type
-    function updateFormFieldsForMediaType(mediaType) {
-        const layoutPositionSection = document.getElementById('layout_position').closest('.form-section');
-        const durationSection = document.getElementById('durationSection');
-        const layoutPreviewSection = document.getElementById('layoutPreview');
-        const layoutPositionSelect = document.getElementById('layout_position');
-        const durationInput = document.getElementById('display_duration');
-
-        if (mediaType === 'Audio') {
-            // For Audio: Hide layout position and preview, show duration
-            layoutPositionSection.style.display = 'none';
-            layoutPreviewSection.style.display = 'none';
-            durationSection.style.display = 'block';
-            
-            // Make duration required and layout position not required
-            durationInput.required = true;
-            layoutPositionSelect.required = false;
-            layoutPositionSelect.value = '';
-            
-            // Clear layout preview
-            updateLayoutPreview('');
-            
-        } else if (mediaType === 'Gambar' || mediaType === 'Video') {
-            // For Visual media: Show layout position and preview, hide duration
-            layoutPositionSection.style.display = 'block';
-            layoutPreviewSection.style.display = 'block';
-            durationSection.style.display = 'none';
-            
-            // Make layout position required and duration not required
-            layoutPositionSelect.required = true;
-            durationInput.required = false;
-            durationInput.value = '10'; // Default value
-            
-        } else {
-            // Default state: hide all optional fields
-            layoutPositionSection.style.display = 'block';
-            layoutPreviewSection.style.display = 'block';
-            durationSection.style.display = 'none';
-            
-            // Reset requirements
-            layoutPositionSelect.required = true;
-            durationInput.required = false;
-            layoutPositionSelect.value = '';
-            durationInput.value = '10';
-            
-            // Clear layout preview
-            updateLayoutPreview('');
-        }
-    }
 });
-
-// Functions for schedule management
-function editSchedule(scheduleId) {
-    // TODO: Implement edit functionality
-    alert('Edit jadwal ID: ' + scheduleId + ' (akan diimplementasikan)');
-}
-
-function deleteSchedule(scheduleId) {
-    if (confirm('Apakah Anda yakin ingin menghapus jadwal ini?')) {
-        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        
-        fetch(`/schedule/${scheduleId}`, {
-            method: 'DELETE',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': token,
-                'Content-Type': 'application/json'
-            },
-            credentials: 'same-origin'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                // Remove row from table
-                const row = document.querySelector(`tr[data-schedule-id="${scheduleId}"]`);
-                if (row) {
-                    row.remove();
-                }
-                // Refresh page to update status
-                window.location.reload();
-            } else {
-                alert(data.message || 'Gagal menghapus jadwal');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan saat menghapus jadwal');
-        });
-    }
-}
 </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

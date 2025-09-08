@@ -31,6 +31,17 @@
       background: #0b0b0b;
     }
 
+    /* Background video */
+    .background-video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+
     /* Left section with background image and text */
     .left-section {
       position: absolute;
@@ -38,18 +49,48 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-image: 
-        linear-gradient(to bottom, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 0.8) 100%),
-        @if($backgroundImage)
-          url('{{ asset("storage/" . $backgroundImage->file_path) }}')
+      @if($backgroundImage && $backgroundImage->type === 'Video')
+        @php
+          $isYouTube = strpos($backgroundImage->file_path, 'youtube.com') !== false || strpos($backgroundImage->file_path, 'youtu.be') !== false;
+        @endphp
+        @if(!$isYouTube)
+          background: none;
         @else
-          url('img/danau toba img1.svg')
-        @endif;
-      background-size: cover;
-      background-position: center;
+          background-image: 
+            linear-gradient(to bottom, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 0.8) 100%),
+            @php
+              preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $backgroundImage->file_path, $matches);
+              $videoId = $matches[1] ?? '';
+            @endphp
+            url('https://img.youtube.com/vi/{{ $videoId }}/maxresdefault.jpg');
+          background-size: cover;
+          background-position: center;
+        @endif
+      @else
+        background-image: 
+          linear-gradient(to bottom, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 0.8) 100%),
+          @if($backgroundImage)
+            url('{{ asset("storage/" . $backgroundImage->file_path) }}')
+          @else
+            url('img/danau toba img1.svg')
+          @endif;
+        background-size: cover;
+        background-position: center;
+      @endif
       padding: 60px 80px;
       color: white;
       z-index: 1; /* biar di bawah gallery */
+    }
+
+    /* Video overlay */
+    .video-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 0.8) 100%);
+      z-index: 1;
     }
 
     .left-section h1 {
@@ -529,7 +570,33 @@
   </style>
 </head>
 <body>
+  <script>
+    // Force video autoplay on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const backgroundVideo = document.querySelector('.background-video');
+      if (backgroundVideo) {
+        backgroundVideo.play().catch(function(error) {
+          console.log('Video autoplay failed:', error);
+        });
+      }
+    });
+  </script>
   <div class="container-left" role="main" aria-label="Welcome page for BPS Sumatera Utara">
+    
+    @if($backgroundImage && $backgroundImage->type === 'Video')
+      @php
+        $isYouTube = strpos($backgroundImage->file_path, 'youtube.com') !== false || strpos($backgroundImage->file_path, 'youtu.be') !== false;
+      @endphp
+      @if(!$isYouTube)
+        <!-- Background video for local files -->
+        <video class="background-video" autoplay muted loop playsinline preload="auto">
+          <source src="{{ asset('storage/' . $backgroundImage->file_path) }}" type="video/mp4">
+          <source src="{{ asset('storage/' . $backgroundImage->file_path) }}" type="video/webm">
+          <source src="{{ asset('storage/' . $backgroundImage->file_path) }}" type="video/ogg">
+        </video>
+        <div class="video-overlay"></div>
+      @endif
+    @endif
 
     <section class="left-section" aria-labelledby="welcome-title" aria-describedby="welcome-description">
         <h1 id="welcome-title">Selamat Datang Di <span class="bps"><span class="b">B</span><span class="p">P</span><span class="s">S</span></span> Provinsi Sumatera Utara</h1>
@@ -564,10 +631,6 @@
                 <img src="{{ asset('storage/' . $media->file_path) }}" alt="{{ $media->name }}" title="{{ $media->name }}">
               @elseif($media->type === 'Video')
                 @if($isYouTube && $videoId)
-                  <div class="video-overlay">
-                    <i class="bi bi-play-circle"></i>
-                    YouTube Video
-                  </div>
                   <iframe 
                     src="https://www.youtube.com/embed/{{ $videoId }}?autoplay=1&mute=1&loop=1&playlist={{ $videoId }}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1" 
                     title="{{ $media->name }}"
@@ -657,8 +720,13 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
   
-  <!-- ===== MEDIA CLICK HANDLER ===== -->
+  <!-- ===== MEDIA CLICK HANDLER & SCHEDULE SYSTEM ===== -->
   <script>
+    // Schedule management system
+    let scheduleCheckInterval;
+    let currentScheduleData = null;
+    let isScheduleActive = {{ $activeSchedule ? 'true' : 'false' }};
+
     document.addEventListener('DOMContentLoaded', function() {
       const mediaModal = new bootstrap.Modal(document.getElementById('mediaModal'));
       const modalContent = document.getElementById('modalMediaContent');
@@ -707,7 +775,82 @@
           }
         });
       });
+
+      // Initialize schedule checking system
+      initScheduleSystem();
     });
+
+    // Schedule System Functions - DISABLED TO PREVENT REFRESH LOOPS
+    function initScheduleSystem() {
+      console.log('🕐 Schedule system disabled to prevent refresh loops');
+      
+      // All schedule checking disabled
+      // checkScheduleUpdates();
+      // scheduleCheckInterval = setInterval(checkScheduleUpdates, 60000);
+      // document.addEventListener('visibilitychange', function() {
+      //   if (!document.hidden) {
+      //     checkScheduleUpdates();
+      //   }
+      // });
+    }
+
+    // DISABLED - Function that was causing refresh loops
+    async function checkScheduleUpdates() {
+      console.log('⏸️ Schedule checking disabled to prevent refresh loops');
+      return;
+    }
+
+    // Auto-rotation system for scheduled media
+    @if($activeSchedule && $layoutConfig['auto_rotate'])
+    let rotationInterval;
+    let currentMediaIndex = 0;
+    const rotationDuration = {{ $layoutConfig['duration'] ?? 10 }} * 1000; // Convert to milliseconds
+
+    function startMediaRotation() {
+      const mediaItems = document.querySelectorAll('.layout-item');
+      if (mediaItems.length <= 1) return; // No need to rotate if only one item
+
+      console.log(`🔄 Starting media rotation every ${rotationDuration/1000} seconds`);
+      
+      rotationInterval = setInterval(() => {
+        // Hide current media
+        mediaItems.forEach(item => item.style.opacity = '0.7');
+        
+        // Show next media
+        currentMediaIndex = (currentMediaIndex + 1) % mediaItems.length;
+        mediaItems[currentMediaIndex].style.opacity = '1';
+        mediaItems[currentMediaIndex].style.transform = 'scale(1.02)';
+        
+        // Reset transform after animation
+        setTimeout(() => {
+          mediaItems[currentMediaIndex].style.transform = 'scale(1)';
+        }, 500);
+        
+      }, rotationDuration);
+    }
+
+    // Start rotation when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(startMediaRotation, 2000); // Start after 2 seconds
+    });
+
+    // Clean up on page unload
+    window.addEventListener('beforeunload', function() {
+      if (rotationInterval) {
+        clearInterval(rotationInterval);
+      }
+    });
+    @endif
+
+    // Clean up intervals when page unloads
+    window.addEventListener('beforeunload', function() {
+      if (scheduleCheckInterval) {
+        clearInterval(scheduleCheckInterval);
+      }
+    });
+
+    // Debug function to manually check schedule
+    window.checkSchedule = checkScheduleUpdates;
   </script>
 </body>
 </html>

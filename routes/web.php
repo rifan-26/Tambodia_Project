@@ -17,6 +17,10 @@ Route::get('/test', function () {
 Route::get('/', [LandingController::class, 'index'])->name('landing');
 Route::get('/landing', [LandingController::class, 'index']);
 
+// ===== PUBLIC API ROUTES (untuk landing page) =====
+Route::get('/api/public/landing/current-schedule', [LandingController::class, 'getCurrentSchedule'])->name('api.public.landing.schedule');
+Route::get('/api/public/landing/visual-schedules', [LandingController::class, 'getActiveVisualSchedules'])->name('api.public.landing.visual');
+
 // ===== AUTH ROUTES =====
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -57,11 +61,22 @@ Route::middleware(['auth'])->group(function () {
 // ===== API ROUTES (untuk AJAX calls) =====
 Route::middleware('auth')->group(function () {
     Route::post('/api/layout/update', [LayoutController::class, 'updateLayout'])->name('layout.update');
+    Route::get('/api/layout/background', [LayoutController::class, 'getBackground'])->name('layout.background.get');
     Route::post('/api/layout/background', [LayoutController::class, 'updateBackground'])->name('layout.background');
     
     // Media AJAX endpoints
     Route::get('/api/media/search', [MediaController::class, 'search'])->name('api.media.search');
     Route::get('/api/media/filter', [MediaController::class, 'filter'])->name('api.media.filter');
+    Route::get('/api/media/user', [MediaController::class, 'getUserMedia'])->name('api.media.user');
+    
+    // Schedule API endpoints
+    Route::get('/api/schedule/active', [ScheduleController::class, 'getActiveSchedules'])->name('api.schedule.active');
+    Route::get('/api/schedule/audio', [ScheduleController::class, 'getActiveAudioSchedules'])->name('api.schedule.audio');
+    Route::get('/api/dashboard/audio-schedules', [DashboardController::class, 'getActiveAudioSchedulesApi'])->name('api.dashboard.audio');
+    
+    // Landing page API endpoints
+    Route::get('/api/landing/current-schedule', [LandingController::class, 'getCurrentSchedule'])->name('api.landing.schedule');
+    Route::get('/api/landing/visual-schedules', [LandingController::class, 'getActiveVisualSchedules'])->name('api.landing.visual');
 });
 
 // ===== MEDIA STREAM ROUTE (avoid symlink issues) =====

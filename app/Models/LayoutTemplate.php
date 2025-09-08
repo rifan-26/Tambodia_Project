@@ -5,14 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class LayoutSetting extends Model
+class LayoutTemplate extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'user_id',
+        'name',
         'description',
-        'background_image_id'
+        'template_data',
+        'background_image_id',
+        'is_public'
+    ];
+
+    protected $casts = [
+        'template_data' => 'array',
+        'is_public' => 'boolean'
     ];
 
     public function user()
