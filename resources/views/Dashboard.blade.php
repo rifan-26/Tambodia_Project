@@ -29,6 +29,7 @@
       padding: 0;
       opacity: 0;
       animation: pageLoad 0.6s ease-out forwards;
+      overflow-x: hidden;
     }
 
     @keyframes pageLoad {
@@ -92,11 +93,11 @@
     .sidebar {
       background: linear-gradient(180deg, #E7FFEA 0%, #ffffff 50%, #dcedff 100%);
       border-right: none;
-      min-height: 100vh;
+      height: 100vh;
       width: 250px;
       display: flex;
       flex-direction: column;
-      position: fixed;
+      position: fixed !important;
       left: 0;
       top: 0;
       bottom: 0;
@@ -784,16 +785,16 @@
           </a>
         </li>
         <li class="nav-item mb-1">
-          <a class="nav-link" href="{{ route('layout.index') }}">
-            <i class="bi bi-grid-3x3-gap"></i> Layout Manager
-          </a>
-        </li>
-        <li class="nav-item mb-1">
           <a class="nav-link" href="{{ route('schedule.index') }}">
             <i class="bi bi-calendar3"></i> Penjadwalan
           </a>
         </li>
-        <li class="nav-item mt-1">
+        <li class="nav-item mb-1">
+          <a class="nav-link" href="{{ route('layout') }}">
+            <i class="bi bi-grid-3x3"></i> Layout Manager
+          </a>
+        </li>
+        <li class="nav-item mt-auto">
           <form action="{{ route('logout') }}" method="POST" id="logout-form" style="display:none;">
             @csrf
           </form>
@@ -903,7 +904,7 @@
                   <audio class="scheduled-audio" controls preload="metadata" 
                          data-schedule-id="{{ $schedule->id }}"
                          data-duration="{{ $schedule->display_duration }}"
-                         data-auto-rotate="{{ $schedule->auto_rotate ? 'true' : 'false' }}">
+                         data-auto-rotate="false">
                     <source src="{{ asset('storage/' . $schedule->media->file_path) }}" type="audio/mpeg">
                     Your browser does not support audio playback.
                   </audio>
@@ -1682,86 +1683,104 @@
 
     async function checkAudioSchedules() {
       try {
+        console.log('🎵 Dashboard: Checking for audio schedules...');
         const response = await fetch('/api/dashboard/audio-schedules', {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': CSRF_TOKEN
-          }
+            'X-CSRF-TOKEN': CSRF_TOKEN,
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          credentials: 'same-origin'
         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        if (data.success && data.schedules) {
-          // Check for currently active schedules
-          const activeSchedules = data.schedules.filter(schedule => schedule.is_currently_active);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('🎵 Dashboard: API Response:', data);
           
-          if (activeSchedules.length > 0) {
-            console.log(`🎵 Found ${activeSchedules.length} active audio schedules`);
-            handleActiveAudioSchedules(activeSchedules);
+          if (data.success && data.schedules) {
+            console.log(`🎵 Dashboard: Found ${data.schedules.length} audio schedules`);
+            
+            if (data.schedules.length > 0) {
+              console.log(`🎵 Dashboard: Processing ${data.schedules.length} active audio schedules`);
+              handleDashboardAudioSchedules(data.schedules);
+            } else {
+              console.log('⏸️ Dashboard: No audio schedules found');
+            }
           } else {
-            console.log('⏸️ No currently active audio schedules');
+            console.log('⏸️ Dashboard: No schedules in response');
           }
+        } else {
+          console.error('❌ Dashboard: API response not ok:', response.status);
         }
 
       } catch (error) {
-        console.error('❌ Error checking audio schedules:', error);
+        console.error('❌ Dashboard: Error checking audio schedules:', error);
       }
     }
 
-    function handleActiveAudioSchedules(schedules) {
-      // Update audio queue
+    function handleDashboardAudioSchedules(schedules) {
+      // Update audio queue - no auto-rotate, play once only
       audioQueue = schedules.map(schedule => ({
         id: schedule.id,
         name: schedule.media.name,
         src: `/storage/${schedule.media.file_path}`,
         duration: schedule.display_duration,
-        autoRotate: schedule.auto_rotate
+        autoRotate: false
       }));
 
-      // Auto-play if enabled and not currently playing
-      if (isAutoPlayEnabled && !currentlyPlayingAudio && audioQueue.length > 0) {
+      // Dashboard audio scheduling is independent - no auto-play to landing page
+      console.log(`🎵 Dashboard: Audio queue updated with ${audioQueue.length} items (play once only)`);
+      
+      // Auto-play first audio if queue has items and no audio is currently playing
+      if (audioQueue.length > 0 && !currentlyPlayingAudio) {
+        console.log('🎵 Dashboard: Auto-playing first scheduled audio');
         playNextScheduledAudio();
       }
     }
 
     function playNextScheduledAudio() {
       if (audioQueue.length === 0) return;
-
+      
       const nextAudio = audioQueue.shift();
-      console.log(`🎵 Playing scheduled audio: ${nextAudio.name}`);
+      console.log(`🎵 Dashboard: Playing scheduled audio: ${nextAudio.name}`);
 
-      // Find the audio element for this schedule
-      const audioElement = document.querySelector(`audio[data-schedule-id="${nextAudio.id}"]`);
+      // Create audio element dynamically since we don't have pre-existing elements
+      const audioElement = document.createElement('audio');
+      audioElement.src = nextAudio.src;
+      audioElement.volume = 0.7;
+      audioElement.setAttribute('data-schedule-id', nextAudio.id);
+      audioElement.setAttribute('data-duration', nextAudio.duration);
+      
+      // Add to DOM temporarily
+      document.body.appendChild(audioElement);
       if (audioElement) {
         currentlyPlayingAudio = {
           element: audioElement,
-          schedule: nextAudio
+          duration: nextAudio.duration,
+          autoRotate: nextAudio.autoRotate
         };
 
-        // Play the audio
         audioElement.currentTime = 0;
         audioElement.play().then(() => {
-          console.log(`✅ Started playing: ${nextAudio.name}`);
+          console.log(`🎵 Dashboard: Playing scheduled audio: ${nextAudio.name} for ${nextAudio.duration}s`);
           
-          // Set up timer for duration
+          // Show audio popup notification
+          showAudioPopup(nextAudio);
+          
+          // Auto-stop after duration - play once only, no looping
           setTimeout(() => {
             audioElement.pause();
+            audioElement.currentTime = 0;
+            audioElement.remove(); // Remove from DOM
             currentlyPlayingAudio = null;
-            
-            // If auto-rotate is enabled, play next audio
-            if (nextAudio.autoRotate && audioQueue.length > 0) {
-              setTimeout(() => playNextScheduledAudio(), 1000);
-            }
+            hideAudioPopup();
+            console.log(`🎵 Dashboard: Audio playback completed - stopped after ${nextAudio.duration}s`);
+            // Do not continue to next audio - play once only
           }, nextAudio.duration * 1000);
-          
         }).catch(error => {
-          console.error('❌ Failed to play audio:', error);
+          console.error('❌ Dashboard: Error playing audio:', error);
+          audioElement.remove(); // Remove from DOM on error
           currentlyPlayingAudio = null;
         });
       }
@@ -1785,15 +1804,17 @@
             audioElement.currentTime = 0;
             audioElement.play().then(() => {
               const duration = parseInt(audioElement.dataset.duration) || 10;
-              console.log(`🎵 Manual play: ${audioElement.dataset.scheduleId} for ${duration}s`);
+              console.log(`🎵 Dashboard: Manual play: ${audioElement.dataset.scheduleId} for ${duration}s`);
               
-              // Auto-stop after duration
+              // Auto-stop after duration - play once only, no looping
               setTimeout(() => {
                 audioElement.pause();
+                audioElement.currentTime = 0;
+                console.log(`🎵 Dashboard: Manual playback completed - stopped after ${duration}s`);
+                // Do not continue to next audio - play once only
               }, duration * 1000);
-              
             }).catch(error => {
-              console.error('❌ Failed to play audio:', error);
+              console.error('❌ Dashboard: Error playing audio:', error);
               toast('Failed to play audio', 'error');
             });
           }
@@ -1835,8 +1856,9 @@
       try {
         showLoading(true);
         
-        // Refresh the page to get updated schedules
-        window.location.reload();
+        // Just refresh audio schedules data, no page reload
+        await checkAudioSchedules();
+        toast('Audio schedules refreshed', 'success');
         
       } catch (error) {
         console.error('❌ Error refreshing audio schedules:', error);
@@ -1848,11 +1870,8 @@
 
     // Initialize audio scheduling when page loads
     document.addEventListener('DOMContentLoaded', function() {
-      // Initialize audio scheduling system if there are active schedules
-      const audioScheduleContainer = document.getElementById('audioScheduleContainer');
-      if (audioScheduleContainer && audioScheduleContainer.children.length > 0) {
-        setTimeout(initAudioSchedulingSystem, 1000);
-      }
+      // Initialize audio scheduling system always - it will check for schedules
+      setTimeout(initAudioSchedulingSystem, 1000);
     });
 
     // Clean up intervals when page unloads
@@ -1864,6 +1883,93 @@
         currentlyPlayingAudio.element.pause();
       }
     });
+
+    // Audio popup functions for dashboard
+    function showAudioPopup(audioData) {
+      // Remove existing popup
+      hideAudioPopup();
+      
+      const popup = document.createElement('div');
+      popup.id = 'dashboardAudioPopup';
+      popup.innerHTML = `
+        <div style="
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          padding: 15px 20px;
+          border-radius: 12px;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+          z-index: 9999;
+          min-width: 280px;
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255,255,255,0.2);
+          animation: slideInRight 0.3s ease-out;
+        ">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="
+              width: 40px;
+              height: 40px;
+              background: rgba(255,255,255,0.2);
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              animation: pulse 2s infinite;
+            ">
+              <i class="bi bi-music-note-beamed" style="font-size: 18px;"></i>
+            </div>
+            <div style="flex: 1;">
+              <div style="font-weight: 600; font-size: 14px; margin-bottom: 2px;">
+                🎵 Audio Dashboard
+              </div>
+              <div style="font-size: 12px; opacity: 0.9;">
+                ${audioData.name} (${audioData.duration}s)
+              </div>
+            </div>
+            <button onclick="hideAudioPopup()" style="
+              background: rgba(255,255,255,0.2);
+              border: none;
+              color: white;
+              width: 24px;
+              height: 24px;
+              border-radius: 50%;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            ">×</button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(popup);
+      
+      // Add animations
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes slideInRight {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.1); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    function hideAudioPopup() {
+      const popup = document.getElementById('dashboardAudioPopup');
+      if (popup) {
+        popup.remove();
+      }
+    }
+
+    // Make functions globally available
+    window.hideAudioPopup = hideAudioPopup;
 
     // Debug functions
     window.checkAudioSchedules = checkAudioSchedules;

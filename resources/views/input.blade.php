@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <meta name="csrf-token" content="{{ csrf_token() }}">
+  @include('components.global-audio-system')
 </head>
 
 <style>
@@ -20,6 +21,7 @@
       padding: 0;
       opacity: 0;
       animation: pageLoad 0.6s ease-out forwards;
+      overflow-x: hidden;
     }
 
     @keyframes pageLoad {
@@ -87,7 +89,7 @@
       width: 250px;
       display: flex;
       flex-direction: column;
-      position: fixed;
+      position: fixed !important;
       left: 0;
       top: 0;
       z-index: 1000;
@@ -700,13 +702,13 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{{ route('layout.index') }}">
-            <i class="bi bi-grid-3x3-gap"></i> <span>Layout Manager</span>
+          <a class="nav-link" href="{{ route('schedule.index') }}">
+            <i class="bi bi-calendar3"></i> <span>Penjadwalan</span>
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{{ route('schedule.index') }}">
-            <i class="bi bi-calendar3"></i> <span>Penjadwalan</span>
+          <a class="nav-link" href="{{ route('layout') }}">
+            <i class="bi bi-grid-3x3"></i> <span>Layout Manager</span>
           </a>
         </li>
         <li class="nav-item">
@@ -883,6 +885,7 @@
                 <textarea class="form-control form-control-enhanced" id="deskripsi" name="deskripsi" rows="4" placeholder="Tambahkan deskripsi untuk media ini..."></textarea>
               </div>
             </div>
+
           </div>
 
           <!-- Step 4: Confirmation -->
@@ -1516,43 +1519,46 @@
       const viewMediaBtn = document.getElementById('viewMediaBtn');
       if(uploadAnother){ uploadAnother.addEventListener('click', ()=>{ form.reset(); qs('#filePreview').classList.add('d-none'); qs('#previewContainer').innerHTML=''; jenisMediaInput.value=''; qsa('.media-type-card').forEach(c=> c.classList.remove('selected')); const vg=qs('#videoLinkGroup'); if(vg) vg.classList.add('d-none'); const ua=qs('#uploadArea'); if(ua) ua.classList.remove('d-none'); const t=qs('#step2Title'); if(t) t.textContent='Upload File'; const s=qs('#step2Sub'); if(s) s.textContent='Pilih file dari komputer Anda atau drag & drop ke area di bawah'; setStep(1); }); }
       if(viewMediaBtn){ viewMediaBtn.addEventListener('click', ()=>{ document.querySelector('#mediaGrid')?.scrollIntoView({ behavior: 'smooth' }); }); }
-    })();
-    // Page transition functionality
-    function showPageTransition() {
-      const transition = document.getElementById('pageTransition');
-      if (transition) {
-        transition.classList.add('active');
-      }
-    }
 
-    function hidePageTransition() {
-      const transition = document.getElementById('pageTransition');
-      if (transition) {
-        transition.classList.remove('active');
-      }
-    }
-
-    // Add smooth page transitions to navigation links
-    document.addEventListener('DOMContentLoaded', function() {
-      const navLinks = document.querySelectorAll('.nav-link[href]');
+      // Show/hide layout position based on show_on_landing checkbox
+      const showOnLandingCheckbox = qs('#showOnLanding');
+      const layoutPositionGroup = qs('#layoutPositionGroup');
+      const setAsMainBackgroundCheckbox = qs('#setAsMainBackground');
       
-      navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-          const href = this.getAttribute('href');
-          
-          if (href === '#' || this.closest('form')) return;
-          
-          e.preventDefault();
-          showPageTransition();
-          
-          setTimeout(() => {
-            window.location.href = href;
-          }, 200);
+      if (showOnLandingCheckbox && layoutPositionGroup) {
+        showOnLandingCheckbox.addEventListener('change', function() {
+          if (this.checked) {
+            layoutPositionGroup.classList.remove('d-none');
+          } else {
+            layoutPositionGroup.classList.add('d-none');
+            qs('#layoutPosition').value = '';
+          }
         });
-      });
+      }
 
-      setTimeout(hidePageTransition, 100);
-    });
-  </script>
+      // Handle main background checkbox - only allow for images and videos
+      if (setAsMainBackgroundCheckbox) {
+        setAsMainBackgroundCheckbox.addEventListener('change', function() {
+          if (this.checked) {
+            // Uncheck show on landing if main background is selected
+            if (showOnLandingCheckbox) {
+              showOnLandingCheckbox.checked = false;
+              layoutPositionGroup.classList.add('d-none');
+              qs('#layoutPosition').value = '';
+            }
+          }
+        });
+      }
+
+      // Prevent both checkboxes from being checked simultaneously
+      if (showOnLandingCheckbox) {
+        showOnLandingCheckbox.addEventListener('change', function() {
+          if (this.checked && setAsMainBackgroundCheckbox && setAsMainBackgroundCheckbox.checked) {
+            setAsMainBackgroundCheckbox.checked = false;
+          }
+        });
+      }
+    })();
+</script>
 </body>
 </html>

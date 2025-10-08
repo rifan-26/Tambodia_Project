@@ -455,15 +455,14 @@ class MediaController extends Controller
     }
 
     /**
-     * Get user's media for layout manager (API endpoint)
+     * Get all media for scheduling and layout (API endpoint) - cross-admin access
      */
     public function getUserMedia()
     {
         try {
-            $media = Media::where('user_id', Auth::id())
-                ->whereIn('type', ['Gambar', 'Video'])
+            $media = Media::whereIn('type', ['Gambar', 'Video', 'Audio'])
                 ->orderBy('created_at', 'desc')
-                ->get();
+                ->get(['id', 'name', 'type', 'file_path', 'created_at']);
 
             return response()->json([
                 'success' => true,
@@ -479,6 +478,7 @@ class MediaController extends Controller
 
     /**
      * Search media by name (API endpoint)
+     * Used by Layout Manager and other components
      */
     public function search(Request $request)
     {
@@ -502,7 +502,14 @@ class MediaController extends Controller
                 $query->where('name', 'like', '%' . $request->search . '%');
             }
             
-            $media = $query->latest()->get();
+            // Get all media with necessary fields
+            $media = $query->latest()->get(['id', 'name', 'type', 'file_path', 'created_at']);
+            
+            \Illuminate\Support\Facades\Log::info('Media search API called', [
+                'total_media' => $media->count(),
+                'has_type_filter' => $request->filled('type'),
+                'has_search' => $request->filled('search')
+            ]);
             
             return response()->json([
                 'success' => true,
@@ -510,7 +517,9 @@ class MediaController extends Controller
             ]);
             
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Error searching media: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Error searching media: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
             
             return response()->json([
                 'success' => false,

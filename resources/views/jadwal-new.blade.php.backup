@@ -338,7 +338,7 @@
       border-radius: 8px;
       padding: 1rem;
       background-color: #f8f9fa;
-      min-height: 200px;
+      min-height: 220px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -352,51 +352,73 @@
 
     .layout-preview {
       width: 100%;
-      max-width: 300px;
-      height: 180px;
+      max-width: 280px;
+      height: 200px;
       position: relative;
-      background: #fff;
-      border-radius: 6px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      background: rgba(11, 11, 11, 0.9);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       overflow: hidden;
+      padding: 8px;
     }
 
-    /* Grid Layout Preview */
     .preview-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       grid-template-rows: repeat(4, 1fr);
-      gap: 2px;
+      gap: 4px;
       height: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 4px;
       padding: 4px;
     }
 
     .preview-grid-item {
-      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 10px;
-      color: #1976d2;
-      font-weight: 500;
-      border: 1px solid #ddd;
+      font-size: 8px;
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: 600;
+      position: relative;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(4px);
     }
 
     .preview-grid-item.active {
       background: linear-gradient(135deg, #1f9e76 0%, #16a085 100%);
       color: white;
       border-color: #1f9e76;
-      box-shadow: 0 2px 8px rgba(31, 158, 118, 0.3);
+      box-shadow: 0 0 12px rgba(31, 158, 118, 0.6);
+      transform: scale(1.05);
     }
 
-    /* Position specific styling */
     .preview-grid-item:nth-child(1) { grid-column: 1; grid-row: 1; }
     .preview-grid-item:nth-child(2) { grid-column: 2; grid-row: 1 / 3; }
     .preview-grid-item:nth-child(3) { grid-column: 1; grid-row: 2 / 4; }
     .preview-grid-item:nth-child(4) { grid-column: 2; grid-row: 3; }
     .preview-grid-item:nth-child(5) { grid-column: 1; grid-row: 4; }
     .preview-grid-item:nth-child(6) { grid-column: 2; grid-row: 4; }
+
+    .preview-position-label {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      font-size: 7px;
+      padding: 1px 3px;
+      border-radius: 2px;
+      font-weight: bold;
+    }
+
+    .preview-grid-item.active .preview-position-label {
+      background: rgba(255,255,255,0.9);
+      color: #1f9e76;
+    }
 
     .preview-empty {
       color: #6c757d;
@@ -438,6 +460,49 @@
       margin-bottom: 1rem;
       opacity: 0.5;
     }
+
+    /* Media Type Badges */
+    .media-type-badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .media-type-badge.audio {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+
+    .media-type-badge.video {
+      background-color: #dbeafe;
+      color: #1e40af;
+    }
+
+    .media-type-badge.gambar {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+
+    /* Alert Styles */
+    .alert {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      border: none;
+      margin-bottom: 1rem;
+    }
+
+    .alert-info {
+      background-color: #e0f2fe;
+      color: #0c4a6e;
+      border-left: 4px solid #0ea5e9;
+    }
+
+    .alert-warning {
+      background-color: #fef3c7;
+      color: #92400e;
+      border-left: 4px solid #f59e0b;
+    }
 </style>
 
 <body>
@@ -464,13 +529,13 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{{ route('layout.index') }}">
-            <i class="bi bi-grid-3x3-gap"></i> <span>Layout Manager</span>
+          <a class="nav-link active" href="{{ route('schedule.index') }}">
+            <i class="bi bi-calendar3"></i> <span>Penjadwalan</span>
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link active" href="{{ route('schedule.index') }}">
-            <i class="bi bi-calendar3"></i> <span>Penjadwalan</span>
+          <a class="nav-link" href="{{ route('layout') }}">
+            <i class="bi bi-grid-3x3"></i> <span>Layout Manager</span>
           </a>
         </li>
         <li class="nav-item">
@@ -487,7 +552,7 @@
 
   <main class="content-area">
     <div class="header-top">
-      <h2 class="section-header">Atur Jadwal Media dengan Posisi Layout</h2>
+      <h2 class="section-header">Atur Jadwal Media</h2>
       <div class="user-badge" title="Logged in">
         <span class="status-indicator" aria-label="online status"></span>
         <span>{{ Auth::user()->name ?? 'User' }}</span>
@@ -518,12 +583,16 @@
                 <tbody>
                   @if(isset($media) && $media->count() > 0)
                     @foreach($media as $item)
-                    <tr data-id="{{ $item->id }}" class="media-row">
+                    <tr data-id="{{ $item->id }}" data-type="{{ $item->type }}" class="media-row">
                       <td class="icon-cell">
                         <input type="checkbox" name="select_row" value="{{ $item->id }}" class="checkbox-custom">
                       </td>
                       <td>{{ $item->name }}</td>
-                      <td>{{ $item->type }}</td>
+                      <td>
+                        <span class="media-type-badge {{ strtolower($item->type) }}">
+                          {{ $item->type }}
+                        </span>
+                      </td>
                       <td>{{ $item->date->format('Y-m-d') }}</td>
                     </tr>
                     @endforeach
@@ -544,19 +613,28 @@
         
         <div class="col-lg-5">
           <div class="content-card">
-            <h5><i class="bi bi-calendar-plus me-2"></i>Atur Jadwal & Posisi</h5>
+            <h5><i class="bi bi-calendar-plus me-2"></i>Atur Jadwal</h5>
             
             <div id="alertContainer"></div>
             
             <form id="scheduleForm" action="{{ route('schedule.store') }}" method="POST">
               @csrf
               <input type="hidden" id="media_id" name="media_id">
+              <input type="hidden" id="media_type" name="media_type">
               
               <div class="form-section">
                 <label for="namaFile" class="form-label">
                   <i class="bi bi-file-earmark-text me-2"></i>Media Terpilih
                 </label>
                 <input type="text" class="form-control" id="namaFile" readonly placeholder="Pilih media dari tabel">
+              </div>
+
+              <!-- Media Type Info -->
+              <div class="form-section" id="mediaTypeInfo" style="display: none;">
+                <div class="alert" id="mediaTypeAlert">
+                  <i class="bi bi-info-circle me-2"></i>
+                  <span id="mediaTypeMessage"></span>
+                </div>
               </div>
               
               <div class="row">
@@ -601,12 +679,12 @@
                 <input type="time" class="form-control" id="time" name="time">
               </div>
 
-              <!-- Layout Position Section -->
-              <div class="form-section">
+              <!-- Layout Position Section - Only for Gambar & Video -->
+              <div class="form-section" id="layoutPositionSection" style="display: none;">
                 <label for="layout_position" class="form-label">
-                  <i class="bi bi-grid-3x3-gap me-2"></i>Posisi di Layout
+                  <i class="bi bi-grid-3x3-gap me-2"></i>Posisi di Layout Landing Page
                 </label>
-                <select class="form-select" id="layout_position" name="layout_position" required>
+                <select class="form-select" id="layout_position" name="layout_position">
                   <option value="">Pilih Posisi Layout</option>
                   <option value="1">Posisi 1 - Kiri Atas (Square 1:1)</option>
                   <option value="2">Posisi 2 - Kanan Atas (Portrait 9:16)</option>
@@ -617,12 +695,14 @@
                 </select>
               </div>
 
-              <div class="form-section">
+              <!-- Duration Section - Only for Audio -->
+              <div class="form-section" id="durationSection" style="display: none;">
                 <label for="display_duration" class="form-label">
-                  <i class="bi bi-stopwatch me-2"></i>Durasi Tampil (detik)
+                  <i class="bi bi-stopwatch me-2"></i>Durasi Putar Audio (detik)
                 </label>
                 <input type="number" class="form-control" id="display_duration" name="display_duration" 
-                       min="1" max="300" value="10" placeholder="10">
+                       min="1" max="300" value="30" placeholder="30">
+                <small class="text-muted">Audio akan diputar di dashboard sesuai durasi ini</small>
               </div>
 
               <div class="form-section">
@@ -634,8 +714,8 @@
                 </div>
               </div>
 
-              <!-- Layout Preview Section -->
-              <div class="form-section" id="layoutPreview">
+              <!-- Layout Preview Section - Only for Visual Media -->
+              <div class="form-section" id="layoutPreview" style="display: none;">
                 <label class="form-label">
                   <i class="bi bi-eye me-2"></i>Preview Posisi Layout
                 </label>
@@ -665,9 +745,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const tableRows = document.querySelectorAll("table tbody tr");
     const checkboxes = document.querySelectorAll('input[name="select_row"]');
     const mediaIdInput = document.getElementById('media_id');
+    const mediaTypeInput = document.getElementById('media_type');
     const namaFileInput = document.getElementById('namaFile');
     const scheduleForm = document.getElementById('scheduleForm');
     const layoutPositionSelect = document.getElementById('layout_position');
+    
+    // Sections
+    const layoutPositionSection = document.getElementById('layoutPositionSection');
+    const durationSection = document.getElementById('durationSection');
+    const layoutPreview = document.getElementById('layoutPreview');
+    const mediaTypeInfo = document.getElementById('mediaTypeInfo');
+    const mediaTypeAlert = document.getElementById('mediaTypeAlert');
+    const mediaTypeMessage = document.getElementById('mediaTypeMessage');
     
     // Set today as default for date inputs
     const today = new Date().toISOString().split('T')[0];
@@ -699,18 +788,65 @@ document.addEventListener("DOMContentLoaded", function () {
             if (checkbox.checked) {
                 const row = checkbox.closest('tr');
                 const mediaId = row.getAttribute('data-id');
+                const mediaType = row.getAttribute('data-type');
                 const mediaName = row.cells[1].textContent;
                 
                 // Set values in the form
                 mediaIdInput.value = mediaId;
+                mediaTypeInput.value = mediaType;
                 namaFileInput.value = mediaName;
+                
+                // Show/hide sections based on media type
+                updateFormForMediaType(mediaType);
             } else {
                 // Clear form if unchecked
                 mediaIdInput.value = '';
+                mediaTypeInput.value = '';
                 namaFileInput.value = '';
+                hideAllSections();
             }
         });
     });
+
+    function updateFormForMediaType(mediaType) {
+        hideAllSections();
+        
+        if (mediaType === 'Audio') {
+            // Show duration section for audio
+            durationSection.style.display = 'block';
+            document.getElementById('display_duration').required = true;
+            
+            // Show info message
+            mediaTypeInfo.style.display = 'block';
+            mediaTypeAlert.className = 'alert alert-warning';
+            mediaTypeMessage.textContent = 'Audio akan diputar di dashboard sesuai jadwal dan durasi yang ditentukan.';
+            
+        } else if (mediaType === 'Gambar' || mediaType === 'Video') {
+            // Show layout position and preview for visual media
+            layoutPositionSection.style.display = 'block';
+            layoutPreview.style.display = 'block';
+            document.getElementById('layout_position').required = true;
+            
+            // Show info message
+            mediaTypeInfo.style.display = 'block';
+            mediaTypeAlert.className = 'alert alert-info';
+            mediaTypeMessage.textContent = mediaType + ' akan ditampilkan di landing page sesuai posisi layout yang dipilih.';
+        }
+    }
+
+    function hideAllSections() {
+        layoutPositionSection.style.display = 'none';
+        durationSection.style.display = 'none';
+        layoutPreview.style.display = 'none';
+        mediaTypeInfo.style.display = 'none';
+        
+        // Remove required attributes
+        document.getElementById('layout_position').required = false;
+        document.getElementById('display_duration').required = false;
+        
+        // Reset preview
+        updateLayoutPreview('');
+    }
 
     // Layout position change handler
     layoutPositionSelect.addEventListener('change', function() {
@@ -728,13 +864,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
         container.className = 'layout-preview-container has-preview';
         
+        const positionLabels = {
+            1: 'Square',
+            2: 'Portrait', 
+            3: 'Portrait',
+            4: 'Square',
+            5: 'Landscape',
+            6: 'Landscape'
+        };
+        
         let previewHTML = '<div class="layout-preview">';
         previewHTML += '<div class="preview-grid">';
         
-        // Create 6 grid items
+        // Create 6 grid items with proper styling
         for (let i = 1; i <= 6; i++) {
             const isActive = i == position;
-            previewHTML += `<div class="preview-grid-item ${isActive ? 'active' : ''}">${i}</div>`;
+            const label = positionLabels[i];
+            previewHTML += `
+                <div class="preview-grid-item ${isActive ? 'active' : ''}">
+                    <div class="preview-position-label">${i}</div>
+                    <div style="text-align: center; line-height: 1.2; margin-top: 8px;">
+                        <div style="font-size: 9px; font-weight: bold;">${label}</div>
+                    </div>
+                </div>
+            `;
         }
         
         previewHTML += '</div></div>';
@@ -750,9 +903,19 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        if (!layoutPositionSelect.value) {
-            alert('Silakan pilih posisi layout');
-            return;
+        const mediaType = mediaTypeInput.value;
+        
+        // Validation based on media type
+        if (mediaType === 'Audio') {
+            if (!document.getElementById('display_duration').value) {
+                alert('Silakan isi durasi putar audio');
+                return;
+            }
+        } else if (mediaType === 'Gambar' || mediaType === 'Video') {
+            if (!layoutPositionSelect.value) {
+                alert('Silakan pilih posisi layout');
+                return;
+            }
         }
         
         // Validate dates
@@ -786,6 +949,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Reset form
                 scheduleForm.reset();
                 mediaIdInput.value = '';
+                mediaTypeInput.value = '';
                 namaFileInput.value = '';
                 // Uncheck all checkboxes
                 checkboxes.forEach(cb => {
@@ -794,8 +958,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Set today as default for date inputs
                 document.getElementById('start_date').value = today;
                 document.getElementById('end_date').value = today;
-                // Reset preview
-                updateLayoutPreview('');
+                // Hide all sections
+                hideAllSections();
             } else {
                 alert(data.message || 'Terjadi kesalahan saat menyimpan jadwal');
             }
@@ -809,13 +973,14 @@ document.addEventListener("DOMContentLoaded", function () {
     // Reset button
     document.getElementById('resetButton').addEventListener('click', function() {
         mediaIdInput.value = '';
+        mediaTypeInput.value = '';
         namaFileInput.value = '';
         // Uncheck all checkboxes
         checkboxes.forEach(cb => {
             cb.checked = false;
         });
-        // Reset layout preview
-        updateLayoutPreview('');
+        // Hide all sections
+        hideAllSections();
     });
 });
 </script>

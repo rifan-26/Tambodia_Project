@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Layout Manager - Tambodia</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  @include('components.global-audio-system')
+  <style>
+    :root {
+      --primary: #1f9e76;
+      --primary-light: #58cbaa;
+      --text-dark: #2c3a67;
+      --text-muted: #6c757d;
+      --bg-light: #f8f9fa;
+      --border-light: #e9ecef;
+    }
+    
+    body {
+      background-color: #f5f5f5;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      background: linear-gradient(180deg, #E7FFEA 0%, #ffffff 50%, #dcedff 100%);
+      border-right: none;
+      height: 100vh;
+      width: 250px;
+      display: flex;
+      flex-direction: column;
+      position: fixed !important;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 1000;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem 1.5rem 1rem;
+      border-bottom: 1px solid #f1f3f4;
+      flex-shrink: 0;
+    }
+
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 0;
+      height: calc(100vh - 120px);
+      overflow-x: hidden;
+    }
+
+    .sidebar-header img {
+      width: 50px;
+      height: 50px;
+    }
+
+    .sidebar-title {
+      font-weight: 600;
+      font-size: 1.25rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .tam { color: #0084d6; }
+    .bo { color: #a0d5d2; }
+    .dia { color: #1f9e76; }
+
+    .nav-link.active {
+      background-color: var(--primary);
+      color: white;
+      font-weight: 500;
+      border-radius: 0.375rem;
+    }
+    
+    .nav-link {
+      color: #4b596a;
+      padding: 0.5rem 1rem;
+      margin: 0.25rem 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1rem;
+      border-radius: 0.375rem;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    
+    .nav-link:hover:not(.active) {
+      background-color: #bcddc9;
+      color: #1f9e76;
+      cursor: pointer;
+      transform: translateX(5px);
+      box-shadow: 0 4px 12px rgba(31, 158, 118, 0.2);
+    }
+
+    .nav-link i {
+      font-size: 1.1rem;
+      width: 20px;
+      text-align: center;
+    }
+
+    /* Content Area */
+    .content-area {
+      margin-left: 250px;
+      padding: 2rem;
+      min-height: 100vh;
+      background-color: #f5f5f5;
+    }
+    
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-light);
+    }
+    
+    .header-top h2 {
+      margin: 0;
+      font-weight: 600;
+      font-size: 1.75rem;
+      color: var(--text-dark);
+    }
+    
+    .user-badge {
+      background: linear-gradient(90deg, #58cbaa, #7cb8f4);
+      padding: 0.35rem 1rem;
+      border-radius: 2rem;
+      color: white;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 2px 8px rgb(0 0 0 / 0.15);
+    }
+    
+    .user-badge .status-indicator {
+      width: 16px;
+      height: 16px;
+      background-color: #44d69e;
+      border-radius: 50%;
+      box-shadow: 0 0 6px #44d69eaa;
+    }
+    
+    .card {
+      border: none;
+      border-radius: 16px;
+      background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 10px 40px rgba(0,0,0,0.03);
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    
+    .card:hover {
+      box-shadow: 0 4px 6px rgba(0,0,0,0.07), 0 20px 50px rgba(0,0,0,0.05);
+      transform: translateY(-2px);
+    }
+    
+    .card-header {
+      background: linear-gradient(135deg, #f8fafb 0%, #ffffff 100%) !important;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      color: var(--text-dark) !important;
+      padding: 1.25rem 1.75rem;
+    }
+    
+    .card-header h5 {
+      color: var(--text-dark) !important;
+      font-weight: 700;
+      margin: 0;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .card-header h5 i {
+      color: var(--primary);
+      font-size: 1.3rem;
+    }
+    
+    .card-body {
+      padding: 1.75rem;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      border: none;
+      padding: 0.65rem 1.5rem;
+      font-weight: 600;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(31, 158, 118, 0.25);
+      transition: all 0.3s ease;
+      letter-spacing: 0.3px;
+    }
+    
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+      box-shadow: 0 6px 20px rgba(31, 158, 118, 0.35);
+      transform: translateY(-2px);
+    }
+    
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+    
+    .btn-success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border: none;
+      padding: 0.65rem 1.5rem;
+      font-weight: 600;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+      transition: all 0.3s ease;
+      letter-spacing: 0.3px;
+    }
+    
+    .btn-success:hover {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+      transform: translateY(-2px);
+    }
+    
+    .btn-success:active {
+      transform: translateY(0);
+    }
+    
+    .btn-secondary {
+      background: #f3f4f6;
+      border: none;
+      color: #6b7280;
+      padding: 0.65rem 1.5rem;
+      font-weight: 600;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+      background: #e5e7eb;
+      color: #4b5563;
+    }
+    
+    /* Background Selection Area */
+    .background-selector {
+      border: 2px dashed #e2e8f0;
+      border-radius: 16px;
+      padding: 3.5rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      background: linear-gradient(135deg, #f8fafb 0%, #ffffff 50%, #f0fdf4 100%);
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .background-selector::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(31, 158, 118, 0.03) 0%, transparent 70%);
+      transition: all 0.6s ease;
+      opacity: 0;
+    }
+    
+    .background-selector:hover::before {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+    
+    .background-selector:hover {
+      border-color: var(--primary);
+      background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 50%, #dcfce7 100%);
+      box-shadow: 0 8px 25px rgba(31, 158, 118, 0.12);
+      transform: translateY(-4px);
+    }
+    
+    .background-selector i {
+      transition: all 0.4s ease;
+    }
+    
+    .background-selector:hover i {
+      transform: scale(1.1) translateY(-5px);
+    }
+    
+    .background-selector.has-image {
+      padding: 0;
+      border-style: solid;
+      border-color: var(--primary);
+      position: relative;
+    }
+    
+    .background-selector.has-image::before {
+      display: none;
+    }
+    
+    .background-selector img,
+    .background-selector video {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 14px;
+    }
+    
+    .background-selector .remove-bg {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(220, 38, 38, 0.95);
+      color: white;
+      border: 2px solid white;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      cursor: pointer;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      transition: all 0.3s ease;
+      font-size: 1.2rem;
+    }
+    
+    .background-selector .remove-bg:hover {
+      background: rgba(185, 28, 28, 1);
+      transform: scale(1.15) rotate(90deg);
+      box-shadow: 0 6px 20px rgba(220, 38, 38, 0.6);
+      border-color: #fff;
+    }
+    
+    .background-selector .remove-bg:active {
+      transform: scale(1.05) rotate(90deg);
+      box-shadow: 0 3px 10px rgba(220, 38, 38, 0.5);
+    }
+    
+    /* Grid Layout - Rapih & Proporsional */
+    .grid-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 150px 150px 150px 100px;
+      gap: 0.75rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .grid-item {
+      position: relative;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100px;
+    }
+
+    /* Position 1: Top Left - Square */
+    .grid-item[data-position="1"] {
+      grid-column: 1 / 2;
+      grid-row: 1 / 2;
+    }
+
+    /* Position 2: Top Right - Portrait (2 rows) */
+    .grid-item[data-position="2"] {
+      grid-column: 2 / 3;
+      grid-row: 1 / 3;
+    }
+
+    /* Position 3: Middle Left - Portrait (2 rows) */
+    .grid-item[data-position="3"] {
+      grid-column: 1 / 2;
+      grid-row: 2 / 4;
+    }
+
+    /* Position 4: Middle Right - Square */
+    .grid-item[data-position="4"] {
+      grid-column: 2 / 3;
+      grid-row: 3 / 4;
+    }
+
+    /* Position 5: Bottom Left - Landscape */
+    .grid-item[data-position="5"] {
+      grid-column: 1 / 2;
+      grid-row: 4 / 5;
+    }
+
+    /* Position 6: Bottom Right - Landscape */
+    .grid-item[data-position="6"] {
+      grid-column: 2 / 3;
+      grid-row: 4 / 5;
+    }
+    
+    .grid-item::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 0%, rgba(31, 158, 118, 0.05) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .grid-item:hover::after {
+      opacity: 1;
+    }
+    
+    .grid-item:hover {
+      border-color: var(--primary);
+      box-shadow: 0 8px 25px rgba(31, 158, 118, 0.15);
+      transform: translateY(-4px) scale(1.02);
+    }
+    
+    .grid-item.has-media {
+      border-color: var(--primary);
+      background: white;
+      box-shadow: 0 4px 15px rgba(31, 158, 118, 0.1);
+    }
+    
+    .grid-item.has-media::after {
+      display: none;
+    }
+    
+    .grid-item img,
+    .grid-item video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+    
+    .grid-item:hover img,
+    .grid-item:hover video {
+      transform: scale(1.05);
+    }
+    
+    .grid-item .position-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      border: 2px solid white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      z-index: 5;
+      box-shadow: 0 4px 15px rgba(31, 158, 118, 0.4);
+      transition: all 0.3s ease;
+    }
+    
+    .grid-item:hover .position-badge {
+      transform: scale(1.1);
+    }
+    
+    .grid-item .remove-item {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(220, 38, 38, 0.9);
+      color: white;
+      border: 2px solid white;
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      transition: all 0.2s ease;
+      opacity: 1;
+    }
+
+    .grid-item .remove-item:hover {
+      background: rgba(185, 28, 28, 1);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.5);
+      border-color: #fff;
+    }
+
+    .grid-item .remove-item:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
+    }
+
+    .grid-item .remove-item i {
+      font-size: 0.9rem;
+    }
+    
+    .grid-item .placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #9ca3af;
+      font-size: 0.85rem;
+      font-weight: 500;
+      gap: 0.5rem;
+    }
+    
+    .grid-item .placeholder i {
+      font-size: 1.8rem;
+      opacity: 0.5;
+    }
+    
+    /* Preview Section */
+    .preview-section {
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafb 100%);
+      border: none;
+      border-radius: 16px;
+      padding: 2.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 10px 40px rgba(0,0,0,0.03);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .preview-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+    }
+    
+    .preview-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+      background: linear-gradient(135deg, #2c3a67 0%, #1f9e76 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .preview-title .bps {
+      color: #0066cc;
+    }
+    
+    .preview-subtitle {
+      font-size: 1.35rem;
+      color: #4b5563;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+    
+    .description-label {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .description-label i {
+      color: var(--primary);
+      font-size: 1.2rem;
+    }
+    
+    .description-label strong {
+      font-weight: 700;
+      color: var(--text-dark);
+      font-size: 1.05rem;
+    }
+    
+    .description-content {
+      line-height: 1.9;
+      color: #6b7280;
+      font-size: 0.95rem;
+      padding: 1rem;
+      background: white;
+      border-radius: 12px;
+      border-left: 4px solid var(--primary);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    
+    /* Success notification */
+    .success-notification {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 1rem 1.75rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 8px 25px rgba(16, 185, 129, 0.25);
+      border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
+    }
+    
+    .success-notification::before {
+      content: '✓';
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: rgba(255,255,255,0.25);
+      border-radius: 8px;
+      margin-right: 0.75rem;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+    
+    .success-notification.show {
+      display: flex;
+      animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    @keyframes slideDown {
+      0% {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+      }
+      50% {
+        transform: translateY(5px) scale(1.02);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    
+    .success-notification .close-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      margin-left: 1rem;
+      font-size: 1.2rem;
+    }
+    
+    .success-notification .close-btn:hover {
+      background: rgba(255,255,255,0.3);
+      transform: rotate(90deg);
+    }
+
+    /* Loading Overlay */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(8px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .loading-overlay.show {
+      display: flex;
+    }
+    
+    .loading-overlay .spinner-border {
+      width: 4rem;
+      height: 4rem;
+      border-width: 4px;
+    }
+    
+    /* Modal Improvements */
+    .modal-content {
+      border: none;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    
+    .modal-header {
+      padding: 1.5rem 1.75rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .modal-body {
+      padding: 1.75rem;
+    }
+    
+    .modal-footer {
+      padding: 1.25rem 1.75rem;
+      border-top: 1px solid #e5e7eb;
+      background: #f9fafb;
+    }
+    
+    /* Form Controls */
+    .form-control {
+      border: 2px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 0.65rem 1rem;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(31, 158, 118, 0.1);
+      outline: none;
+    }
+    
+    textarea.form-control {
+      resize: vertical;
+      min-height: 120px;
+    }
+    
+    .form-text {
+      color: #9ca3af;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 70px;
+      }
+      
+      .sidebar-title,
+      .nav-link span {
+        display: none;
+      }
+      
+      .content-area {
+        margin-left: 70px;
+        padding: 1rem;
+      }
+      
+      .nav-link {
+        justify-content: center;
+        padding: 0.75rem 0.5rem;
+        margin: 0 0.25rem;
+      }
+      
+      .grid-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-header d-flex align-items-center gap-2">
+      <img src="{{ asset('img/Desain tanpa judul.svg') }}" alt="Logo Tambodia" />
+      <h1 class="sidebar-title">
+        <span class="title-text">
+          <span class="tam">Tam</span><span class="bo">bo</span><span class="dia">dia</span>
+        </span>
+      </h1>
+    </div>
+    
+    <div class="sidebar-content">
+      <ul class="nav flex-column px-1">
+        <li class="nav-item mb-1">
+          <a class="nav-link" href="{{ route('dashboard.pegawai') }}">
+            <i class="bi bi-speedometer2"></i> Dashboard
+          </a>
+        </li>
+        <li class="nav-item mb-1">
+          <a class="nav-link" href="{{ route('media.input') }}">
+            <i class="bi bi-pencil-square"></i> Input Media
+          </a>
+        </li>
+        <li class="nav-item mb-1">
+          <a class="nav-link" href="{{ route('schedule.index') }}">
+            <i class="bi bi-calendar3"></i> Penjadwalan
+          </a>
+        </li>
+        <li class="nav-item mb-1">
+          <a class="nav-link active" href="{{ route('layout') }}">
+            <i class="bi bi-grid-3x3"></i> Layout Manager
+          </a>
+        </li>
+        <li class="nav-item mt-auto">
+          <form action="{{ route('logout') }}" method="POST" id="logout-form" style="display:none;">
+            @csrf
+          </form>
+          <a class="nav-link" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+            <i class="bi bi-box-arrow-left"></i> Log Out
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="content-area">
+    <!-- Header -->
+    <div class="header-top">
+      <h2>Layout Manager</h2>
+      <div class="user-badge" title="Logged in">
+        <span class="status-indicator" aria-label="online status"></span>
+        <span>{{ Auth::user()->name ?? 'User' }}</span>
+      </div>
+    </div>
+    <!-- Success Notification -->
+    <div class="success-notification" id="successNotification">
+      <span id="successMessage"></span>
+      <button class="close-btn" onclick="hideNotification()">×</button>
+    </div>
+
+    <div class="row">
+      <!-- Left Column: Background & Preview -->
+      <div class="col-lg-7">
+        <!-- Background Selector -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5>
+              <i class="fas fa-image me-2"></i>Pilih Gambar Background
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="background-selector" id="backgroundSelector" onclick="openBackgroundModal()">
+              <i class="fas fa-cloud-upload-alt fa-4x text-primary mb-3"></i>
+              <p class="text-dark fw-bold mb-1">Klik area lalu pilih media yang ingin ditampilkan</p>
+              <p class="text-muted small">Untuk menambahkan gambar background</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="preview-section">
+          <div class="preview-title">
+            Selamat Datang Di <span class="bps">B</span><span style="color: #ff9933;">P</span><span style="color: #00cc66;">S</span> Provinsi
+          </div>
+          <div class="preview-subtitle">Sumatera Utara</div>
+          
+          <div class="description-label">
+            <i class="fas fa-align-left"></i>
+            <strong>Deskripsi Landing Page</strong>
+          </div>
+          <div class="description-content" id="previewDescription">
+            <em class="text-muted">Belum ada deskripsi. Klik tombol edit untuk menambahkan deskripsi.</em>
+          </div>
+          
+          <button class="btn btn-primary mt-3" onclick="openDescriptionModal()">
+            <i class="fas fa-edit me-2"></i>Edit Deskripsi
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Column: Grid Layout -->
+      <div class="col-lg-5">
+        <div class="card">
+          <div class="card-header">
+            <h5>
+              <i class="fas fa-th me-2"></i>Layout Grid (6 Posisi)
+            </h5>
+          </div>
+          <div class="card-body">
+            <!-- Error/Info Banner -->
+            <div id="errorBanner" class="alert alert-danger d-none mb-3" role="alert">
+              <h6 class="alert-heading">❌ Error Saat Menyimpan!</h6>
+              <p class="mb-2" id="errorMessage"></p>
+              <hr>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-danger" onclick="location.reload()">
+                  <i class="bi bi-arrow-clockwise"></i> Refresh Halaman
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="$('#errorBanner').addClass('d-none')">
+                  <i class="bi bi-x"></i> Tutup
+                </button>
+              </div>
+            </div>
+            
+            <div class="grid-container" id="gridContainer">
+              <!-- Grid items will be generated dynamically -->
+            </div>
+            <div class="d-flex gap-2 mt-3">
+              <button class="btn btn-outline-danger" onclick="clearAllGridMedia()" style="flex: 0 0 auto;">
+                <i class="bi bi-trash me-2"></i>Hapus Semua
+              </button>
+              <button class="btn btn-success w-100" onclick="saveLayout()">
+                <i class="fas fa-save me-2"></i>Simpan Layout
+              </button>
+            </div>
+            <div class="mt-2">
+              <small class="text-muted">
+                <i class="bi bi-info-circle"></i> 
+                Klik "Hapus Semua" untuk menghapus semua media, lalu klik "Simpan Layout" untuk menyimpan perubahan.
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+<!-- Media Selection Modal (Background) -->
+<div class="modal fade" id="backgroundModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header" style="background: var(--bg-light); border-bottom: 1px solid var(--border-light);">
+        <h5 class="modal-title" style="color: var(--text-dark); font-weight: 600;">
+          <i class="fas fa-image me-2 text-primary"></i>Pilih Media untuk Background
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3" id="backgroundMediaList">
+          <!-- Media items will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Media Selection Modal (Grid Position) -->
+<div class="modal fade" id="gridMediaModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header" style="background: var(--bg-light); border-bottom: 1px solid var(--border-light);">
+        <h5 class="modal-title" style="color: var(--text-dark); font-weight: 600;">
+          <i class="fas fa-th me-2 text-primary"></i>Pilih Media untuk Posisi <span id="currentPosition"></span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3" id="gridMediaList">
+          <!-- Media items will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Description Edit Modal -->
+<div class="modal fade" id="descriptionModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header" style="background: var(--bg-light); border-bottom: 1px solid var(--border-light);">
+        <h5 class="modal-title" style="color: var(--text-dark); font-weight: 600;">
+          <i class="fas fa-edit me-2 text-primary"></i>Edit Deskripsi Landing Page
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <textarea class="form-control" id="descriptionTextarea" rows="10" maxlength="1000" 
+                  placeholder="Masukkan deskripsi untuk landing page..."></textarea>
+        <div class="form-text mt-2">
+          <span id="modalCharCount">0</span>/1000 karakter
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-primary" onclick="saveDescription()">
+          <i class="fas fa-save me-2"></i>Simpan Deskripsi
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="text-center">
+        <div class="spinner-border text-light" style="width: 3rem; height: 3rem;" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <div class="text-white mt-3">Memproses...</div>
+    </div>
+</div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+// Global variables
+let allMedia = [];
+let layoutData = {
+  background: null,
+  description: '',
+  gridItems: {}
+};
+let currentGridPosition = null;
+
+$(document).ready(function() {
+    // Initialize
+    initializeGrid();
+    
+    // Load media first, then load layout settings after media is loaded
+    loadMedia().then(() => {
+        loadLayoutSettings();
+    });
+    
+    // Description textarea character counter
+    $('#descriptionTextarea').on('input', function() {
+        $('#modalCharCount').text($(this).val().length);
+    });
+});
+
+// Initialize grid with 6 positions
+function initializeGrid() {
+    const gridContainer = $('#gridContainer');
+    for (let i = 1; i <= 6; i++) {
+        const gridItem = $(`
+            <div class="grid-item" data-position="${i}" onclick="openGridMediaModal(${i})">
+                <div class="position-badge">${i}</div>
+                <div class="placeholder">
+                    <i class="fas fa-plus-circle"></i>
+                    Klik untuk pilih media
+                </div>
+            </div>
+        `);
+        gridContainer.append(gridItem);
+    }
+}
+
+// Load all media
+function loadMedia() {
+    console.log('Starting to load media from API...');
+    return $.ajax({
+        url: '/api/media/search',
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    })
+    .done(function(response) {
+        console.log('API Response received:', response);
+        
+        let mediaData = [];
+        
+        // Handle different response formats
+        if (Array.isArray(response)) {
+            // Direct array
+            mediaData = response;
+            console.log('Format: Direct array');
+        } else if (response.data && Array.isArray(response.data)) {
+            // Object with 'data' property
+            mediaData = response.data;
+            console.log('Format: Object with data property');
+        } else if (response.media && Array.isArray(response.media)) {
+            // Object with 'media' property
+            mediaData = response.media;
+            console.log('Format: Object with media property');
+        } else {
+            console.error('Unknown response format:', response);
+            alert('Format response API tidak dikenali. Cek console.');
+            return;
+        }
+        
+        // Filter only Gambar and Video
+        allMedia = mediaData.filter(m => m.type === 'Gambar' || m.type === 'Video');
+        console.log('Media loaded and filtered:', allMedia.length, 'items');
+        console.log('Sample media:', allMedia.slice(0, 3));
+        
+        if (allMedia.length === 0) {
+            console.warn('No Gambar/Video media found in database');
+        }
+    })
+    .fail(function(xhr, status, error) {
+        console.error('Failed to load media:', error);
+        console.error('Status:', status);
+        console.error('Response:', xhr.responseText);
+        alert('Gagal memuat media dari server. Cek console untuk detail error.');
+    });
+}
+
+// Load current layout settings
+function loadLayoutSettings() {
+    console.log('📥 Loading layout settings from database...');
+    $.get('/layout/settings')
+        .done(function(response) {
+            console.log('📦 Layout settings response:', response);
+            
+            if (response.success) {
+                // Load background
+                if (response.background_media) {
+                    const bgMedia = allMedia.find(m => m.id == response.background_media.id);
+                    if (bgMedia) {
+                        setBackground(bgMedia);
+                        console.log('🖼️ Background loaded from DB:', bgMedia.name, '(ID:', bgMedia.id, ')');
+                    }
+                } else {
+                    console.log('📭 No background in database');
+                }
+                
+                // Load description
+                if (response.description) {
+                    layoutData.description = response.description;
+                    updateDescriptionPreview();
+                    console.log('📝 Description loaded');
+                }
+                
+                // Load grid media from default_media
+                if (response.default_media && response.default_media.length > 0) {
+                    console.log('📊 Loading', response.default_media.length, 'media from database:');
+                    response.default_media.forEach((mediaData) => {
+                        // Find full media object from allMedia
+                        const fullMedia = allMedia.find(m => m.id == mediaData.id);
+                        if (fullMedia && mediaData.layout_order) {
+                            setGridMedia(mediaData.layout_order, fullMedia);
+                            console.log(`  ✅ Position ${mediaData.layout_order}: ${fullMedia.name} (${fullMedia.type}, ID: ${fullMedia.id})`);
+                        } else {
+                            console.warn(`  ⚠️ Position ${mediaData.layout_order}: Media ID ${mediaData.id} not found in allMedia`);
+                        }
+                    });
+                    console.log('✅ All grid media loaded from database');
+                } else {
+                    console.log('📭 No grid media in database - starting with empty grid');
+                }
+            }
+        })
+        .fail(function(xhr, status, error) {
+            console.error('❌ Failed to load layout settings:', error);
+            console.error('Response:', xhr.responseText);
+        });
+}
+
+// Open background selection modal
+function openBackgroundModal() {
+    console.log('Opening background modal');
+    console.log('Available media:', allMedia.length, allMedia);
+    
+    const mediaList = $('#backgroundMediaList');
+    mediaList.empty();
+    
+    if (allMedia.length === 0) {
+        mediaList.html(`
+            <div class="col-12 text-center p-4">
+                <p class="text-muted">Tidak ada media tersedia.</p>
+                <p class="small">Silakan upload media terlebih dahulu di menu "Input Media"</p>
+            </div>
+        `);
+        console.warn('No media available for background');
+    } else {
+        console.log('Adding', allMedia.length, 'media cards to background modal');
+        allMedia.forEach((media, index) => {
+            console.log(`Creating background card ${index + 1}:`, media.name);
+            const mediaCard = createMediaCard(media, 'selectBackground');
+            mediaList.append(mediaCard);
+        });
+    }
+    
+    new bootstrap.Modal($('#backgroundModal')).show();
+}
+
+// Open grid media selection modal
+function openGridMediaModal(position) {
+    console.log('Opening grid media modal for position:', position);
+    console.log('Available media:', allMedia.length, allMedia);
+    
+    currentGridPosition = position;
+    $('#currentPosition').text(position);
+    
+    const mediaList = $('#gridMediaList');
+    mediaList.empty();
+    
+    if (allMedia.length === 0) {
+        mediaList.html(`
+            <div class="col-12 text-center p-4">
+                <p class="text-muted">Tidak ada media tersedia.</p>
+                <p class="small">Silakan upload media terlebih dahulu di menu "Input Media"</p>
+            </div>
+        `);
+        console.warn('No media available to display');
+    } else {
+        console.log('Adding', allMedia.length, 'media cards to modal');
+        allMedia.forEach((media, index) => {
+            console.log(`Creating card ${index + 1}:`, media.name);
+            const mediaCard = createMediaCard(media, 'selectGridMedia');
+            mediaList.append(mediaCard);
+        });
+    }
+    
+    new bootstrap.Modal($('#gridMediaModal')).show();
+}
+
+// Open description edit modal
+function openDescriptionModal() {
+    $('#descriptionTextarea').val(layoutData.description);
+    $('#modalCharCount').text(layoutData.description.length);
+    new bootstrap.Modal($('#descriptionModal')).show();
+}
+
+// Create media card for selection
+function createMediaCard(media, callback) {
+    const isVideo = media.type === 'Video';
+    const isYouTube = media.file_path && (media.file_path.includes('youtube.com') || media.file_path.includes('youtu.be'));
+    
+    let mediaElement;
+    
+    if (isYouTube) {
+        // YouTube video - show thumbnail
+        mediaElement = `
+            <div style="width:100%; height:150px; background:#f0f0f0; display:flex; align-items:center; justify-content:center;">
+                <i class="bi bi-youtube" style="font-size:3rem; color:#ff0000;"></i>
+            </div>
+        `;
+    } else if (isVideo) {
+        // Local video file
+        const videoPath = `/storage/${media.file_path}`;
+        mediaElement = `
+            <video style="width:100%; height:150px; object-fit:cover; background:#000;" muted>
+                <source src="${videoPath}" type="video/mp4">
+                <div style="display:flex; align-items:center; justify-content:center; height:100%; background:#333;">
+                    <i class="bi bi-play-circle" style="font-size:3rem; color:#fff;"></i>
+                </div>
+            </video>
+        `;
+    } else {
+        // Image file
+        const imagePath = `/storage/${media.file_path}`;
+        
+        mediaElement = `
+            <div class="img-preview-container" style="width:100%; height:150px; background:#f8f9fa; display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative;">
+                <img src="${imagePath}" 
+                     class="img-preview"
+                     style="max-width:100%; max-height:150px; object-fit:contain;" 
+                     alt="${media.name}"
+                     onload="this.style.opacity='1'"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="img-fallback" style="display:none; flex-direction:column; align-items:center; gap:10px; position:absolute;">
+                    <i class="bi bi-image" style="font-size:3rem; color:#ccc;"></i>
+                    <small style="color:#999; text-align:center;">Preview tidak tersedia</small>
+                </div>
+            </div>
+        `;
+    }
+    
+    console.log('Creating card for:', media.name, 'Type:', media.type, 'Path:', `/storage/${media.file_path}`);
+    
+    // Create card element
+    const card = $(`
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 shadow-sm media-select-card" data-media-id="${media.id}" style="cursor:pointer; transition: transform 0.2s;">
+                <div class="card-body p-2">
+                    ${mediaElement}
+                    <p class="mb-0 mt-2 small text-truncate fw-bold" title="${media.name}">${media.name}</p>
+                    <small class="text-muted"><i class="bi bi-${media.type === 'Video' ? 'play-circle' : 'image'}"></i> ${media.type}</small>
+                </div>
+            </div>
+        </div>
+    `);
+    
+    // Attach click handler using jQuery
+    card.find('.media-select-card').on('click', function() {
+        console.log('Card clicked, media ID:', media.id, 'callback:', callback);
+        window[callback](media.id);
+    });
+    
+    // Hover effects
+    card.find('.media-select-card')
+        .on('mouseenter', function() { $(this).css('transform', 'translateY(-5px)'); })
+        .on('mouseleave', function() { $(this).css('transform', 'translateY(0)'); });
+    
+    return card;
+}
+
+// Select background media
+function selectBackground(mediaId) {
+    console.log('selectBackground called with mediaId:', mediaId);
+    console.log('Available media count:', allMedia.length);
+    
+    const media = allMedia.find(m => m.id == mediaId);
+    console.log('Found media:', media);
+    
+    if (media) {
+        console.log('Setting background to:', media.name);
+        setBackground(media);
+        
+        // Close modal
+        const modalInstance = bootstrap.Modal.getInstance($('#backgroundModal'));
+        if (modalInstance) {
+            modalInstance.hide();
+        }
+        console.log('Background modal closed');
+    } else {
+        console.error('Media not found for ID:', mediaId);
+    }
+}
+
+// Select grid media
+function selectGridMedia(mediaId) {
+    console.log('selectGridMedia called with mediaId:', mediaId, 'position:', currentGridPosition);
+    
+    const media = allMedia.find(m => m.id == mediaId);
+    console.log('Found media:', media);
+    
+    if (media && currentGridPosition) {
+        console.log('Setting grid media at position', currentGridPosition, 'to:', media.name);
+        setGridMedia(currentGridPosition, media);
+        
+        // Close modal
+        const modalInstance = bootstrap.Modal.getInstance($('#gridMediaModal'));
+        if (modalInstance) {
+            modalInstance.hide();
+        }
+        console.log('Grid media modal closed');
+    } else {
+        if (!media) {
+            console.error('Media not found for ID:', mediaId);
+        }
+        if (!currentGridPosition) {
+            console.error('No grid position set');
+        }
+    }
+}
+
+// Set background
+function setBackground(media) {
+    console.log('setBackground called for media:', media);
+    
+    layoutData.background = media;
+    const selector = $('#backgroundSelector');
+    
+    const isVideo = media.type === 'Video';
+    const isYouTube = media.file_path && (media.file_path.includes('youtube.com') || media.file_path.includes('youtu.be'));
+    
+    let mediaElement;
+    
+    if (isYouTube) {
+        // YouTube video - convert to embed
+        let embedUrl = media.file_path;
+        if (embedUrl.includes('youtu.be/')) {
+            const videoId = embedUrl.split('youtu.be/')[1].split('?')[0];
+            embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
+        } else if (embedUrl.includes('watch?v=')) {
+            const videoId = embedUrl.split('watch?v=')[1].split('&')[0];
+            embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
+        }
+        mediaElement = `<iframe src="${embedUrl}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+    } else if (isVideo) {
+        mediaElement = `<video src="/storage/${media.file_path}" autoplay muted loop></video>`;
+    } else {
+        mediaElement = `<img src="/storage/${media.file_path}" alt="${media.name}">`;
+    }
+    
+    selector.html(`
+        ${mediaElement}
+        <button class="remove-bg" onclick="removeBackground(event)">
+            <i class="fas fa-times"></i>
+        </button>
+    `).addClass('has-image');
+    selector.attr('onclick', '');
+    
+    console.log('Background set successfully');
+}
+
+// Remove background
+function removeBackground(event) {
+    event.stopPropagation();
+    
+    console.log('Removing background:', layoutData.background ? layoutData.background.name : 'none');
+    
+    const removedBg = layoutData.background;
+    layoutData.background = null;
+    
+    const selector = $('#backgroundSelector');
+    selector.html(`
+        <i class="fas fa-cloud-upload-alt fa-4x text-primary mb-3"></i>
+        <p class="text-dark fw-bold mb-1">Klik area lalu pilih media yang ingin ditampilkan</p>
+        <p class="text-muted small">Untuk menambahkan gambar background</p>
+    `).removeClass('has-image');
+    selector.attr('onclick', 'openBackgroundModal()');
+    
+    console.log('Background removed:', removedBg ? removedBg.name : 'none');
+    showNotification('Background dihapus');
+}
+
+// Set grid media
+function setGridMedia(position, media) {
+    console.log('setGridMedia called for position:', position, 'media:', media);
+    
+    layoutData.gridItems[position] = media;
+    const gridItem = $(`.grid-item[data-position="${position}"]`);
+    
+    const isVideo = media.type === 'Video';
+    const isYouTube = media.file_path && (media.file_path.includes('youtube.com') || media.file_path.includes('youtu.be'));
+    
+    let mediaElement;
+    
+    if (isYouTube) {
+        // YouTube video - convert to embed
+        let embedUrl = media.file_path;
+        if (embedUrl.includes('youtu.be/')) {
+            const videoId = embedUrl.split('youtu.be/')[1].split('?')[0];
+            embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
+        } else if (embedUrl.includes('watch?v=')) {
+            const videoId = embedUrl.split('watch?v=')[1].split('&')[0];
+            embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
+        }
+        mediaElement = `<iframe src="${embedUrl}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="width:100%; height:100%;"></iframe>`;
+    } else if (isVideo) {
+        mediaElement = `<video src="/storage/${media.file_path}" autoplay muted loop playsinline></video>`;
+    } else {
+        mediaElement = `<img src="/storage/${media.file_path}" alt="${media.name}">`;
+    }
+    
+    gridItem.html(`
+        <div class="position-badge">${position}</div>
+        ${mediaElement}
+        <button class="remove-item" onclick="removeGridMedia(event, ${position})">
+            <i class="bi bi-trash"></i> Hapus
+        </button>
+    `).addClass('has-media');
+    
+    // Autoplay video if it's a local video
+    if (isVideo && !isYouTube) {
+        const video = gridItem.find('video')[0];
+        if (video) {
+            video.play().catch(e => console.log('Autoplay prevented:', e));
+        }
+    }
+    
+    console.log('Grid media set successfully at position', position);
+}
+
+// Remove grid media
+function removeGridMedia(event, position) {
+    event.stopPropagation();
+    
+    console.log('Removing media from grid position:', position);
+    
+    // Remove from layoutData
+    const removedMedia = layoutData.gridItems[position];
+    delete layoutData.gridItems[position];
+    
+    // Reset grid item UI
+    const gridItem = $(`.grid-item[data-position="${position}"]`);
+    gridItem.html(`
+        <div class="position-badge">${position}</div>
+        <div class="placeholder">
+            <i class="fas fa-plus-circle"></i>
+            Klik untuk pilih media
+        </div>
+    `).removeClass('has-media');
+    
+    // Re-attach click handler
+    gridItem.attr('onclick', `openGridMediaModal(${position})`);
+    
+    console.log('Media removed from position', position, ':', removedMedia ? removedMedia.name : 'none');
+    showNotification(`Media dihapus dari posisi ${position}`);
+}
+
+// Clear all grid media
+function clearAllGridMedia() {
+    if (confirm('Apakah Anda yakin ingin menghapus semua media dari grid?')) {
+        console.log('Clearing all grid media');
+        
+        // Count current media
+        const mediaCount = Object.keys(layoutData.gridItems).length;
+        
+        // Clear all grid items
+        for (let i = 1; i <= 6; i++) {
+            if (layoutData.gridItems[i]) {
+                delete layoutData.gridItems[i];
+                
+                const gridItem = $(`.grid-item[data-position="${i}"]`);
+                gridItem.html(`
+                    <div class="position-badge">${i}</div>
+                    <div class="placeholder">
+                        <i class="fas fa-plus-circle"></i>
+                        Klik untuk pilih media
+                    </div>
+                `).removeClass('has-media');
+                gridItem.attr('onclick', `openGridMediaModal(${i})`);
+            }
+        }
+        
+        console.log(`Cleared ${mediaCount} media from grid`);
+        showNotification(`${mediaCount} media dihapus dari grid`);
+    }
+}
+
+// Save description
+function saveDescription() {
+    const description = $('#descriptionTextarea').val();
+    
+    $.ajax({
+        url: '/layout/description',
+        method: 'POST',
+        data: { description: description },
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+    })
+    .done(function(response) {
+        if (response.success) {
+            layoutData.description = description;
+            updateDescriptionPreview();
+            bootstrap.Modal.getInstance($('#descriptionModal')).hide();
+            showNotification('Deskripsi berhasil diperbarui!');
+        }
+    })
+    .fail(function() {
+        alert('Gagal menyimpan deskripsi');
+    });
+}
+
+// Update description preview
+function updateDescriptionPreview() {
+    const preview = $('#previewDescription');
+    if (layoutData.description) {
+        preview.html(layoutData.description.replace(/\n/g, '<br>'));
+    } else {
+        preview.html('<em class="text-muted">Belum ada deskripsi. Klik tombol edit untuk menambahkan deskripsi.</em>');
+    }
+}
+
+// Save complete layout
+function saveLayout() {
+    console.log('=== SAVING LAYOUT ===');
+    $('#loadingOverlay').addClass('show');
+    
+    const promises = [];
+    
+    // Save background (or remove if null) - always send request to sync with backend
+    const bgMediaId = layoutData.background ? layoutData.background.id : null;
+    console.log('Saving background:', bgMediaId ? layoutData.background.name : 'CLEAR/REMOVE');
+    
+    const bgPromise = $.ajax({
+        url: '/layout/background',
+        method: 'POST',
+        data: { media_id: bgMediaId },
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+    });
+    promises.push(bgPromise);
+    
+    // Save grid layout - collect media IDs in order by position
+    const mediaIds = [];
+    for (let i = 1; i <= 6; i++) {
+        if (layoutData.gridItems[i]) {
+            mediaIds.push(layoutData.gridItems[i].id);
+            console.log(`Position ${i}: Media ID ${layoutData.gridItems[i].id} - ${layoutData.gridItems[i].name}`);
+        }
+    }
+    
+    // IMPORTANT: Always send layout update, even if empty (to clear media from landing page)
+    console.log('Saving grid with', mediaIds.length, 'media items:', mediaIds);
+    const layoutPromise = $.ajax({
+        url: '/layout/update',
+        method: 'POST',
+        data: { 
+            media_ids: mediaIds.length > 0 ? mediaIds : [] 
+        },
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+    })
+    .done(function(response) {
+        console.log('Layout update response:', response);
+    })
+    .fail(function(xhr, status, error) {
+        console.error('Layout update failed:', status, error);
+        console.error('Response:', xhr.responseText);
+    });
+    promises.push(layoutPromise);
+    
+    // Wait for all promises to complete
+    $.when.apply($, promises)
+        .done(function(bgResponse, layoutResponse) {
+            $('#loadingOverlay').removeClass('show');
+            
+            console.log('=== ALL REQUESTS COMPLETED ===');
+            console.log('Background response:', bgResponse);
+            console.log('Layout response:', layoutResponse);
+            
+            if (mediaIds.length === 0) {
+                showNotification('Layout dikosongkan dan disimpan!');
+                console.log('✅ Layout cleared successfully');
+            } else {
+                showNotification('Layout berhasil disimpan dan akan muncul di landing page!');
+                console.log('✅ Layout saved successfully');
+            }
+        })
+        .fail(function(xhr, status, error) {
+            $('#loadingOverlay').removeClass('show');
+            console.error('=== SAVE FAILED ===');
+            console.error('Status:', status);
+            console.error('Error:', error);
+            console.error('XHR:', xhr);
+            
+            let errorTitle = 'Gagal Menyimpan Layout!';
+            let errorDetail = '';
+            let solution = '';
+            
+            if (xhr && xhr.status) {
+                if (xhr.status === 419) {
+                    errorTitle = '⚠️ Session Expired!';
+                    errorDetail = 'Token keamanan (CSRF) sudah kadaluarsa.';
+                    solution = '<strong>SOLUSI:</strong> Klik tombol "Refresh Halaman" di bawah atau tekan F5.';
+                } else if (xhr.status === 422) {
+                    errorTitle = '⚠️ Data Tidak Valid!';
+                    errorDetail = 'Data yang dikirim tidak sesuai format.';
+                    if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        errorDetail += '<br><small>' + JSON.stringify(xhr.responseJSON.errors) + '</small>';
+                    }
+                    solution = '<strong>SOLUSI:</strong> Coba refresh halaman dan ulangi.';
+                } else if (xhr.status === 500) {
+                    errorTitle = '⚠️ Server Error!';
+                    errorDetail = 'Ada kesalahan di server Laravel.';
+                    solution = '<strong>SOLUSI:</strong> Cek file log Laravel di storage/logs/laravel.log';
+                } else if (xhr.status === 404) {
+                    errorTitle = '⚠️ Endpoint Not Found!';
+                    errorDetail = 'Route /layout/update tidak ditemukan.';
+                    solution = '<strong>SOLUSI:</strong> Jalankan: php artisan route:clear';
+                } else {
+                    errorDetail = 'HTTP Status: ' + xhr.status;
+                    solution = '<strong>SOLUSI:</strong> Refresh halaman dan coba lagi.';
+                }
+                
+                if (xhr.responseText) {
+                    console.error('Response Text:', xhr.responseText);
+                }
+            } else {
+                errorTitle = '⚠️ Network Error!';
+                errorDetail = 'Request tidak sampai ke server.';
+                solution = '<strong>SOLUSI:</strong> Cek koneksi internet dan pastikan Laravel server berjalan.';
+            }
+            
+            // Show error banner
+            $('#errorMessage').html(`
+                <strong>${errorTitle}</strong><br>
+                ${errorDetail}<br><br>
+                ${solution}
+            `);
+            $('#errorBanner').removeClass('d-none');
+            
+            // Scroll to error banner
+            $('html, body').animate({
+                scrollTop: $('#errorBanner').offset().top - 100
+            }, 500);
+            
+            // Also show alert
+            alert(errorTitle + '\n\n' + errorDetail.replace(/<[^>]*>/g, '') + '\n\n' + solution.replace(/<[^>]*>/g, ''));
+        });
+}
+
+// Show notification
+function showNotification(message) {
+    $('#successMessage').text(message);
+    $('#successNotification').addClass('show');
+    setTimeout(() => {
+        $('#successNotification').removeClass('show');
+    }, 3000);
+}
+
+// Hide notification
+function hideNotification() {
+    $('#successNotification').removeClass('show');
+}
+</script>
+</body>
+</html>
