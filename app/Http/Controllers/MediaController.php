@@ -455,15 +455,14 @@ class MediaController extends Controller
     }
 
     /**
-     * Get user's media for layout manager (API endpoint)
+     * Get all media for scheduling and layout (API endpoint) - cross-admin access
      */
     public function getUserMedia()
     {
         try {
-            $media = Media::where('user_id', Auth::id())
-                ->whereIn('type', ['Gambar', 'Video'])
+            $media = Media::whereIn('type', ['Gambar', 'Video', 'Audio'])
                 ->orderBy('created_at', 'desc')
-                ->get();
+                ->get(['id', 'name', 'type', 'file_path', 'created_at']);
 
             return response()->json([
                 'success' => true,

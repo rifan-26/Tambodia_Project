@@ -14,6 +14,66 @@
       font-family: 'Poppins', sans-serif;
       background: #fff;
       overflow-x: hidden;
+      opacity: 0;
+      animation: pageLoad 0.6s ease-out forwards;
+    }
+
+    @keyframes pageLoad {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Smooth transitions for all interactive elements */
+    * {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Page transition overlay */
+    .page-transition {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, #1f9e76, #58cbaa);
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.4s ease;
+    }
+
+    .page-transition.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .transition-content {
+      text-align: center;
+      color: white;
+    }
+
+    .transition-spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
     .container {
       display: flex;
@@ -164,6 +224,14 @@
   </style>
 </head>
 <body>
+  <!-- Page Transition Overlay -->
+  <div class="page-transition" id="pageTransition">
+    <div class="transition-content">
+      <div class="transition-spinner"></div>
+      <p>Loading...</p>
+    </div>
+  </div>
+
   <!-- main container -->
   <div class="container" role="main" aria-label="Login page for Tambodia">
     <section class="left">
@@ -198,5 +266,68 @@
       </form>
     </section>
   </div>
+
+  <script>
+    // Page transition and animation functions
+    function showPageTransition() {
+        const transition = document.getElementById('pageTransition');
+        if (transition) {
+            transition.classList.add('active');
+        }
+    }
+
+    function hidePageTransition() {
+        const transition = document.getElementById('pageTransition');
+        if (transition) {
+            transition.classList.remove('active');
+        }
+    }
+
+    // Add staggered animation to elements
+    function animateElements() {
+        const elements = document.querySelectorAll('.left, .right, .login-card');
+        elements.forEach((element, index) => {
+            element.style.animationDelay = `${index * 0.2}s`;
+            element.style.animation = 'slideInUp 0.8s ease-out forwards';
+        });
+    }
+
+    // Handle form submission with transition
+    document.addEventListener('DOMContentLoaded', function() {
+        // Hide page transition after load
+        setTimeout(hidePageTransition, 100);
+        
+        // Animate elements
+        setTimeout(animateElements, 300);
+        
+        // Add transition to form submission
+        const loginForm = document.querySelector('form');
+        if (loginForm) {
+            loginForm.addEventListener('submit', function(e) {
+                showPageTransition();
+            });
+        }
+    });
+
+    // Add CSS for element animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .left, .right, .login-card {
+            opacity: 0;
+        }
+    `;
+    document.head.appendChild(style);
+  </script>
 </body>
 </html>

@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <meta name="csrf-token" content="{{ csrf_token() }}">
+  @include('components.global-audio-system')
 </head>
 
 <style>
@@ -20,6 +21,7 @@
       padding: 0;
       opacity: 0;
       animation: pageLoad 0.6s ease-out forwards;
+      overflow-x: hidden;
     }
 
     @keyframes pageLoad {
@@ -87,7 +89,7 @@
       width: 250px;
       display: flex;
       flex-direction: column;
-      position: fixed;
+      position: fixed !important;
       left: 0;
       top: 0;
       z-index: 1000;
@@ -700,11 +702,6 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{{ route('layout.index') }}">
-            <i class="bi bi-grid-3x3-gap"></i> <span>Layout Manager</span>
-          </a>
-        </li>
-        <li class="nav-item">
           <a class="nav-link" href="{{ route('schedule.index') }}">
             <i class="bi bi-calendar3"></i> <span>Penjadwalan</span>
           </a>
@@ -883,6 +880,51 @@
                 <textarea class="form-control form-control-enhanced" id="deskripsi" name="deskripsi" rows="4" placeholder="Tambahkan deskripsi untuk media ini..."></textarea>
               </div>
             </div>
+
+            <!-- Layout Options Section -->
+            <div class="row mt-4" id="layoutOptionsSection">
+              <div class="col-12">
+                <div class="card border-0 bg-light">
+                  <div class="card-body">
+                    <h6 class="card-title mb-3">
+                      <i class="bi bi-layout-wtf me-2"></i>Pilihan Layout
+                    </h6>
+                    
+                    <div class="form-check mb-3">
+                      <input class="form-check-input" type="checkbox" id="setAsMainBackground" name="set_as_main_background">
+                      <label class="form-check-label" for="setAsMainBackground">
+                        <strong>Jadikan sebagai Background Utama Landing Page</strong>
+                        <div class="form-text">Media ini akan menjadi background utama di halaman landing</div>
+                      </label>
+                    </div>
+
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" id="showOnLanding" name="show_on_landing">
+                      <label class="form-check-label" for="showOnLanding">
+                        <strong>Tampilkan di Landing Page</strong>
+                        <div class="form-text">Media akan ditampilkan dalam grid layout landing page</div>
+                      </label>
+                    </div>
+
+                    <div id="layoutPositionGroup" class="mt-3 d-none">
+                      <label class="form-label-enhanced">
+                        <i class="bi bi-grid-3x3-gap"></i>
+                        Posisi Layout
+                      </label>
+                      <select class="form-control form-control-enhanced" id="layoutPosition" name="layout_position">
+                        <option value="">Pilih posisi...</option>
+                        <option value="1">Posisi 1 - Square (Top Left)</option>
+                        <option value="2">Posisi 2 - Portrait (Top Right)</option>
+                        <option value="3">Posisi 3 - Portrait (Middle Left)</option>
+                        <option value="4">Posisi 4 - Square (Middle Right)</option>
+                        <option value="5">Posisi 5 - Landscape (Bottom Left)</option>
+                        <option value="6">Posisi 6 - Landscape (Bottom Right)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Step 4: Confirmation -->
@@ -983,6 +1025,108 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  
+  <script>
+    // Track shown messages and timeout
+    const shownMessages = new Set();
+    let toastTimeout;
+    let isProcessing = false;
+
+    function toast(message, type = 'success') {
+      const messageKey = `${message}-${type}`;
+      if (shownMessages.has(messageKey)) return;
+      
+      shownMessages.add(messageKey);
+      if (toastTimeout) {
+        clearTimeout(toastTimeout);
+      }
+
+      Toastify({
+        text: message,
+        duration: 3000,
+        gravity: "top",
+        position: "right",
+        backgroundColor: type === 'success' ? '#1f9e76' : '#dc3545',
+      }).showToast();
+      
+      toastTimeout = setTimeout(() => {
+        shownMessages.delete(messageKey);
+      }, 3000);
+    }
+
+    async function checkFileExists(url) {
+      try {
+        const response = await fetch(url, { method: 'HEAD' });
+        return response.ok;
+      } catch (e) {
+        console.error('File check error:', e);
+        return false;
+      }
+    }
+
+    // Function to clean up missing media files
+    async function cleanupMissingFiles() {
+      if (isProcessing) return;
+      
+      try {
+        isProcessing = true;
+        
+        // Get all media previews
+        const mediaElements = document.querySelectorAll('[data-media-path]');
+        if (!mediaElements.length) return;
+
+        // Process in batches
+        const batchSize = 3;
+        for (let i = 0; i < mediaElements.length; i += batchSize) {
+          const batch = Array.from(mediaElements).slice(i, i + batchSize);
+          
+          await Promise.all(batch.map(async (element) => {
+            const mediaId = element.dataset.mediaId;
+            const mediaPath = element.dataset.mediaPath;
+            if (!mediaId || !mediaPath) return;
+
+            const fileUrl = `${window.location.origin}/storage/${mediaPath}`;
+            const exists = await checkFileExists(fileUrl);
+            
+            if (!exists) {
+              try {
+                const res = await fetch(`/dashboard/media/${mediaId}`, {
+                  method: 'DELETE',
+                  headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                  }
+                });
+
+                if (res.ok) {
+                  // Remove the element from the page
+                  const container = element.closest('.media-item, .preview-item');
+                  if (container) {
+                    container.remove();
+                  }
+                }
+              } catch (e) {
+                console.error('Delete failed:', e);
+              }
+            }
+          }));
+
+          // Add small delay between batches
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      } catch (e) {
+        console.error('Cleanup error:', e);
+      } finally {
+        isProcessing = false;
+      }
+    }
+
+    // Run cleanup when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      cleanupMissingFiles();
+    });
+  </script>
   <script>
     (function() {
       // Helpers (avoid shadowing jQuery $)
@@ -1474,36 +1618,48 @@
       };
       
       // Media delete function
-      window.deleteMedia = function(id, name) {
+      window.deleteMedia = async function(id, name) {
         if(!confirm(`Apakah Anda yakin ingin menghapus media "${name}"?`)) {
           return;
         }
-        
+
         showLoading('Menghapus media...');
-        
-        fetch(`{{ url('/media') }}/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
+
+        try {
+          // Check if file exists first
+          const existsResponse = await fetch(`/api/media/${id}/exists`);
+          const existsData = await existsResponse.json();
+          
+          if (!existsData.exists) {
+            hideLoading();
+            toast('File sudah tidak ada', 'warning');
+            fetchMedia(currentFilter, currentSearch);
+            return;
           }
-        })
-        .then(response => response.json())
-        .then(data => {
+
+          const response = await fetch(`/api/media/${id}`, {
+            method: 'DELETE',
+            headers: {
+              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+              'Accept': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          });
+
+          const data = await response.json();
           hideLoading();
-          if(data.success) {
+
+          if (data.success) {
             toast('Media berhasil dihapus', 'success');
             fetchMedia(currentFilter, currentSearch);
           } else {
             toast(data.message || 'Gagal menghapus media', 'error');
           }
-        })
-        .catch(error => {
+        } catch (error) {
           hideLoading();
           console.error('Error:', error);
           toast('Terjadi kesalahan saat menghapus media', 'error');
-        });
+        }
       };
 
       // Initial setup
@@ -1516,43 +1672,46 @@
       const viewMediaBtn = document.getElementById('viewMediaBtn');
       if(uploadAnother){ uploadAnother.addEventListener('click', ()=>{ form.reset(); qs('#filePreview').classList.add('d-none'); qs('#previewContainer').innerHTML=''; jenisMediaInput.value=''; qsa('.media-type-card').forEach(c=> c.classList.remove('selected')); const vg=qs('#videoLinkGroup'); if(vg) vg.classList.add('d-none'); const ua=qs('#uploadArea'); if(ua) ua.classList.remove('d-none'); const t=qs('#step2Title'); if(t) t.textContent='Upload File'; const s=qs('#step2Sub'); if(s) s.textContent='Pilih file dari komputer Anda atau drag & drop ke area di bawah'; setStep(1); }); }
       if(viewMediaBtn){ viewMediaBtn.addEventListener('click', ()=>{ document.querySelector('#mediaGrid')?.scrollIntoView({ behavior: 'smooth' }); }); }
-    })();
-    // Page transition functionality
-    function showPageTransition() {
-      const transition = document.getElementById('pageTransition');
-      if (transition) {
-        transition.classList.add('active');
-      }
-    }
 
-    function hidePageTransition() {
-      const transition = document.getElementById('pageTransition');
-      if (transition) {
-        transition.classList.remove('active');
-      }
-    }
-
-    // Add smooth page transitions to navigation links
-    document.addEventListener('DOMContentLoaded', function() {
-      const navLinks = document.querySelectorAll('.nav-link[href]');
+      // Show/hide layout position based on show_on_landing checkbox
+      const showOnLandingCheckbox = qs('#showOnLanding');
+      const layoutPositionGroup = qs('#layoutPositionGroup');
+      const setAsMainBackgroundCheckbox = qs('#setAsMainBackground');
       
-      navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-          const href = this.getAttribute('href');
-          
-          if (href === '#' || this.closest('form')) return;
-          
-          e.preventDefault();
-          showPageTransition();
-          
-          setTimeout(() => {
-            window.location.href = href;
-          }, 200);
+      if (showOnLandingCheckbox && layoutPositionGroup) {
+        showOnLandingCheckbox.addEventListener('change', function() {
+          if (this.checked) {
+            layoutPositionGroup.classList.remove('d-none');
+          } else {
+            layoutPositionGroup.classList.add('d-none');
+            qs('#layoutPosition').value = '';
+          }
         });
-      });
+      }
 
-      setTimeout(hidePageTransition, 100);
-    });
-  </script>
+      // Handle main background checkbox - only allow for images and videos
+      if (setAsMainBackgroundCheckbox) {
+        setAsMainBackgroundCheckbox.addEventListener('change', function() {
+          if (this.checked) {
+            // Uncheck show on landing if main background is selected
+            if (showOnLandingCheckbox) {
+              showOnLandingCheckbox.checked = false;
+              layoutPositionGroup.classList.add('d-none');
+              qs('#layoutPosition').value = '';
+            }
+          }
+        });
+      }
+
+      // Prevent both checkboxes from being checked simultaneously
+      if (showOnLandingCheckbox) {
+        showOnLandingCheckbox.addEventListener('change', function() {
+          if (this.checked && setAsMainBackgroundCheckbox && setAsMainBackgroundCheckbox.checked) {
+            setAsMainBackgroundCheckbox.checked = false;
+          }
+        });
+      }
+    })();
+</script>
 </body>
 </html>

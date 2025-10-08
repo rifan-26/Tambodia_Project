@@ -598,10 +598,16 @@
         <input type="email" id="editEmail" name="email" placeholder="Masukkan email" required>
       </div>
 
-      <div class="form-group">
+      <div class="form-group" style="position: relative">
         <label for="editRole">Role:</label>
-        <i class="bi bi-person-gear"></i>
-        <select id="editRole" name="role" class="form-select" required>
+        <i class="bi bi-person-gear" 
+          style="position: absolute; 
+                  left: 10px; 
+                  top: 32px; 
+                  pointer-events: none; 
+                  color: gray;">
+        </i>
+        <select id="editRole" name="role" class="form-select" required style="padding-left: 35px;">
           <option value="pegawai">Pegawai</option>
           <option value="superadmin">Super Admin</option>
         </select>

@@ -29,6 +29,7 @@
       padding: 0;
       opacity: 0;
       animation: pageLoad 0.6s ease-out forwards;
+      overflow-x: hidden;
     }
 
     @keyframes pageLoad {
@@ -92,11 +93,11 @@
     .sidebar {
       background: linear-gradient(180deg, #E7FFEA 0%, #ffffff 50%, #dcedff 100%);
       border-right: none;
-      min-height: 100vh;
+      height: 100vh;
       width: 250px;
       display: flex;
       flex-direction: column;
-      position: fixed;
+      position: fixed !important;
       left: 0;
       top: 0;
       bottom: 0;
@@ -784,11 +785,6 @@
           </a>
         </li>
         <li class="nav-item mb-1">
-          <a class="nav-link" href="{{ route('layout.index') }}">
-            <i class="bi bi-grid-3x3-gap"></i> Layout Manager
-          </a>
-        </li>
-        <li class="nav-item mb-1">
           <a class="nav-link" href="{{ route('schedule.index') }}">
             <i class="bi bi-calendar3"></i> Penjadwalan
           </a>
@@ -903,7 +899,7 @@
                   <audio class="scheduled-audio" controls preload="metadata" 
                          data-schedule-id="{{ $schedule->id }}"
                          data-duration="{{ $schedule->display_duration }}"
-                         data-auto-rotate="{{ $schedule->auto_rotate ? 'true' : 'false' }}">
+                         data-auto-rotate="false">
                     <source src="{{ asset('storage/' . $schedule->media->file_path) }}" type="audio/mpeg">
                     Your browser does not support audio playback.
                   </audio>
@@ -989,12 +985,58 @@
       <!-- Media Grid -->
       <div class="section-content">
         <div class="media-grid" id="mediaContainer">
-            <!-- Media cards will be rendered here -->
+          @forelse($media as $item)
+            <div class="media-card" data-id="{{ $item->id }}">
+              <div class="media-card-header">
+                <h5 class="media-title mb-0">{{ $item->name }}</h5>
+                <span class="media-badge {{ strtolower($item->type) }}">{{ $item->type }}</span>
+              </div>
+              <div class="media-card-body">
+                <div class="media-date">
+                  <i class="bi bi-calendar3 me-1"></i>{{ $item->created_at ? $item->created_at->format('Y-m-d') : $item->date }}
+                </div>
+                <div class="media-preview">
+                  @if($item->type === 'Gambar')
+                    <img src="{{ asset('storage/' . $item->file_path) }}" alt="{{ $item->name }}" class="img-fluid rounded"/>
+                  @elseif($item->type === 'Video')
+                    <video class="w-100 rounded" controls preload="metadata">
+                      <source src="{{ asset('storage/' . $item->file_path) }}" type="video/mp4">
+                      Browser Anda tidak mendukung pemutar video.
+                    </video>
+                  @elseif($item->type === 'Audio')
+                    <div class="audio-player-container">
+                      <audio class="js-player" controls preload="metadata">
+                        <source src="{{ asset('storage/' . $item->file_path) }}" type="audio/mpeg">
+                        Browser Anda tidak mendukung pemutar audio.
+                      </audio>
+                    </div>
+                  @endif
+                </div>
+                <div class="d-flex align-items-center justify-content-between">
+                  <div class="form-check">
+                    <input class="form-check-input checkbox-enhanced media-checkbox" type="checkbox" value="{{ $item->id }}" data-id="{{ $item->id }}">
+                    <label class="form-check-label">Select</label>
+                  </div>
+                  <div class="media-actions">
+                    <button class="btn-enhanced btn-preview" data-action="preview" data-id="{{ $item->id }}" data-type="{{ $item->type }}" data-src="{{ asset('storage/' . $item->file_path) }}" data-name="{{ $item->name }}">
+                      <i class="bi bi-eye"></i> Preview
+                    </button>
+                    <button class="btn-enhanced btn-delete" data-action="delete" data-id="{{ $item->id }}">
+                      <i class="bi bi-trash"></i> Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          @empty
+            <div class="empty-state w-100">
+              <i class="bi bi-folder-x"></i>
+              <div>No media found.</div>
+            </div>
+          @endforelse
         </div>
       </div>
     </div>
-
-    
   </main>
 
   <!-- Scripts -->
@@ -1031,7 +1073,7 @@
       if (/^(?:https?:)?\/\//i.test(p)) return p; // external URL (e.g., YouTube, CDN)
       p = p.replace(/^\/+/, '');
       p = p.replace(/^public\//, '');
-      return `${window.location.origin}/media/${p}`;
+      return `${window.location.origin}/storage/${p}`;
     }
 
     function guessMimeFromPath(path, fallback) {
@@ -1171,28 +1213,104 @@
       if (el) el.textContent = val;
     }
 
-    function renderMediaGrid(items) {
-      const container = document.getElementById('mediaContainer');
-      if (!container) return;
-      try { console.debug('[renderMediaGrid] items:', Array.isArray(items) ? items.length : 'non-array'); } catch (_) {}
-      if (!items.length) {
-        container.innerHTML = `
-          <div class="empty-state w-100">
-            <i class="bi bi-folder-x"></i>
-            <div>No media found.</div>
-          </div>`;
-        // Ensure container is visible even when empty
-        container.style.display = 'grid';
-        return;
+    async function checkFileExists(url) {
+      try {
+        const response = await fetch(url, { method: 'HEAD' });
+        return response.ok;
+      } catch (e) {
+        console.error('File check error:', e);
+        return false;
       }
-      container.innerHTML = items.map(m => mediaCardTemplate(m)).join('');
-      // Ensure the grid is visible after re-render
-      container.style.display = 'grid';
-      try { console.debug('[renderMediaGrid] rendered cards:', container.children.length); } catch (_) {}
-      // Make sure cards are visible (animation CSS sets opacity:0 by default)
-      container.querySelectorAll('.media-card').forEach(card => { card.style.opacity = '1'; });
-      // Trigger entrance animation for newly inserted cards
-      try { requestAnimationFrame(() => animateCards()); } catch (_) {}
+    }
+
+    let isProcessing = false;
+
+    async function renderMediaGrid(items) {
+      const container = document.getElementById('mediaContainer');
+      if (!container || isProcessing) return;
+      
+      try {
+        isProcessing = true;
+        showLoading(true);
+        
+        console.debug('[renderMediaGrid] items:', Array.isArray(items) ? items.length : 'non-array');
+        
+        if (!items.length) {
+          container.innerHTML = `
+            <div class="empty-state w-100">
+              <i class="bi bi-folder-x"></i>
+              <div>No media found.</div>
+            </div>`;
+          container.style.display = 'grid';
+          return;
+        }
+
+        // Process items in batches to prevent too many simultaneous requests
+        const batchSize = 3;
+        const validItems = [];
+        const itemsToDelete = [];
+
+        for (let i = 0; i < items.length; i += batchSize) {
+          const batch = items.slice(i, i + batchSize);
+          const checkResults = await Promise.all(
+            batch.map(async (item) => {
+              const fileUrl = `${window.location.origin}/storage/${item.file_path}`;
+              const exists = await checkFileExists(fileUrl);
+              return { item, exists };
+            })
+          );
+
+          checkResults.forEach(({ item, exists }) => {
+            if (exists) {
+              validItems.push(item);
+            } else {
+              itemsToDelete.push(item);
+            }
+          });
+        }
+
+        // Delete invalid items one at a time
+        if (itemsToDelete.length > 0) {
+          console.log(`Found ${itemsToDelete.length} invalid items to remove`);
+          for (const item of itemsToDelete) {
+            try {
+              await deleteMedia(item.id);
+              await new Promise(resolve => setTimeout(resolve, 500)); // Add delay between deletions
+            } catch (e) {
+              console.error('Auto-delete failed:', e);
+            }
+          }
+        }
+      try {
+        // Only render if we still have the container
+        if (container) {
+          container.innerHTML = validItems.map(m => mediaCardTemplate(m)).join('');
+          // Update state with only valid items
+          state.media = validItems;
+          
+          // Ensure the grid is visible after re-render
+          container.style.display = 'grid';
+          console.debug('[renderMediaGrid] rendered cards:', container.children.length);
+          
+          // Make sure cards are visible
+          container.querySelectorAll('.media-card').forEach(card => { 
+            card.style.opacity = '1'; 
+          });
+          
+          // Trigger animations
+          requestAnimationFrame(() => animateCards());
+          
+          // Update stats with valid items only
+          updateStats(validItems);
+        }
+      } catch (e) {
+        console.error('Render error:', e);
+      } finally {
+        // Always reset processing flag and hide loading
+        isProcessing = false;
+        showLoading(false);
+      }
+      
       // Bind card controls
       container.querySelectorAll('.media-checkbox').forEach(cb => {
         cb.addEventListener('change', updateSelectedCount);
@@ -1209,9 +1327,14 @@
       container.querySelectorAll('[data-action="delete"]').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           const id = e.currentTarget.dataset.id;
-          if (!confirm('Delete this media?')) return;
+          if (!confirm('Apakah Anda yakin ingin menghapus media ini?')) return;
+          
           await deleteMedia(id);
-          await refreshMedia();
+          
+          // Only refresh the entire grid if there are no media items left
+          if (document.querySelectorAll('.media-card').length === 0) {
+            await refreshMedia();
+          }
         });
       });
     }
@@ -1304,8 +1427,21 @@
       }
     }
 
-    async function refreshMedia() { return fetchMedia({}); }
-    function applyAdvancedFilters() { fetchMedia({}); }
+    async function refreshMedia() { 
+      try {
+        showLoading(true);
+        await fetchMedia({});
+      } catch (e) {
+        console.error('Refresh error:', e);
+        toast('Error refreshing media list', 'error');
+      } finally {
+        showLoading(false);
+      }
+    }
+    
+    function applyAdvancedFilters() { 
+      fetchMedia({}); 
+    }
 
     async function toggleLanding(mediaIds, desiredStatus = null) {
       if (!mediaIds || !mediaIds.length) return toast('Please select media first', 'error');
@@ -1346,21 +1482,72 @@
     }
 
     async function deleteMedia(id) {
+      if (!id) {
+        toast('Invalid media ID', 'error');
+        return false;
+      }
+      
       try {
         showLoading(true);
-        const res = await fetch(API.destroy(id), {
+        
+        // Find the media item in state
+        const mediaItem = state.media.find(m => m.id === id);
+        if (mediaItem) {
+          // Check if file exists before attempting delete
+          const fileUrl = `${window.location.origin}/storage/${mediaItem.file_path}`;
+          const exists = await checkFileExists(fileUrl);
+          if (!exists) {
+            console.log('File already missing, proceeding with database cleanup');
+          }
+        }
+        
+        const res = await fetch(`/dashboard/media/${id}`, {
           method: 'DELETE',
           headers: {
-            'X-CSRF-TOKEN': CSRF_TOKEN,
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
             'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
           },
+          credentials: 'same-origin'
         });
+
+        if (!res.ok) {
+          const json = await res.json();
+          throw new Error(json.message || 'Failed to delete media');
+        }
+
         const json = await res.json();
-        if (!json.success) throw new Error(json.message || 'Failed to delete media');
-        toast(json.message || 'Media deleted');
+        
+        // Remove the media from state immediately
+        state.media = state.media.filter(m => m.id !== id);
+        
+        // Remove the card from DOM
+        const card = document.querySelector(`.media-card[data-id="${id}"]`);
+        if (card) {
+          card.remove();
+        }
+        
+        // Update stats and UI
+        updateStats(state.media);
+        updateSelectedCount();
+        
+        toast(json.message || 'Media deleted', 'success');
+        return true;
       } catch (e) {
-        console.error(e);
-        toast('Error deleting media', 'error');
+        console.error('Delete error:', e);
+        if (e.message.includes('not found') || e.message.includes('tidak ditemukan')) {
+          // If media is not found, remove it from the UI anyway
+          const card = document.querySelector(`.media-card[data-id="${id}"]`);
+          if (card) {
+            card.remove();
+            state.media = state.media.filter(m => m.id !== id);
+            updateStats(state.media);
+            updateSelectedCount();
+          }
+        }
+        toast('Error deleting media: ' + (e.message || 'Unknown error'), 'error');
+        return false;
       } finally {
         showLoading(false);
       }
@@ -1682,86 +1869,104 @@
 
     async function checkAudioSchedules() {
       try {
+        console.log('🎵 Dashboard: Checking for audio schedules...');
         const response = await fetch('/api/dashboard/audio-schedules', {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': CSRF_TOKEN
-          }
+            'X-CSRF-TOKEN': CSRF_TOKEN,
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          credentials: 'same-origin'
         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        if (data.success && data.schedules) {
-          // Check for currently active schedules
-          const activeSchedules = data.schedules.filter(schedule => schedule.is_currently_active);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('🎵 Dashboard: API Response:', data);
           
-          if (activeSchedules.length > 0) {
-            console.log(`🎵 Found ${activeSchedules.length} active audio schedules`);
-            handleActiveAudioSchedules(activeSchedules);
+          if (data.success && data.schedules) {
+            console.log(`🎵 Dashboard: Found ${data.schedules.length} audio schedules`);
+            
+            if (data.schedules.length > 0) {
+              console.log(`🎵 Dashboard: Processing ${data.schedules.length} active audio schedules`);
+              handleDashboardAudioSchedules(data.schedules);
+            } else {
+              console.log('⏸️ Dashboard: No audio schedules found');
+            }
           } else {
-            console.log('⏸️ No currently active audio schedules');
+            console.log('⏸️ Dashboard: No schedules in response');
           }
+        } else {
+          console.error('❌ Dashboard: API response not ok:', response.status);
         }
 
       } catch (error) {
-        console.error('❌ Error checking audio schedules:', error);
+        console.error('❌ Dashboard: Error checking audio schedules:', error);
       }
     }
 
-    function handleActiveAudioSchedules(schedules) {
-      // Update audio queue
+    function handleDashboardAudioSchedules(schedules) {
+      // Update audio queue - no auto-rotate, play once only
       audioQueue = schedules.map(schedule => ({
         id: schedule.id,
         name: schedule.media.name,
         src: `/storage/${schedule.media.file_path}`,
         duration: schedule.display_duration,
-        autoRotate: schedule.auto_rotate
+        autoRotate: false
       }));
 
-      // Auto-play if enabled and not currently playing
-      if (isAutoPlayEnabled && !currentlyPlayingAudio && audioQueue.length > 0) {
+      // Dashboard audio scheduling is independent - no auto-play to landing page
+      console.log(`🎵 Dashboard: Audio queue updated with ${audioQueue.length} items (play once only)`);
+      
+      // Auto-play first audio if queue has items and no audio is currently playing
+      if (audioQueue.length > 0 && !currentlyPlayingAudio) {
+        console.log('🎵 Dashboard: Auto-playing first scheduled audio');
         playNextScheduledAudio();
       }
     }
 
     function playNextScheduledAudio() {
       if (audioQueue.length === 0) return;
-
+      
       const nextAudio = audioQueue.shift();
-      console.log(`🎵 Playing scheduled audio: ${nextAudio.name}`);
+      console.log(`🎵 Dashboard: Playing scheduled audio: ${nextAudio.name}`);
 
-      // Find the audio element for this schedule
-      const audioElement = document.querySelector(`audio[data-schedule-id="${nextAudio.id}"]`);
+      // Create audio element dynamically since we don't have pre-existing elements
+      const audioElement = document.createElement('audio');
+      audioElement.src = nextAudio.src;
+      audioElement.volume = 0.7;
+      audioElement.setAttribute('data-schedule-id', nextAudio.id);
+      audioElement.setAttribute('data-duration', nextAudio.duration);
+      
+      // Add to DOM temporarily
+      document.body.appendChild(audioElement);
       if (audioElement) {
         currentlyPlayingAudio = {
           element: audioElement,
-          schedule: nextAudio
+          duration: nextAudio.duration,
+          autoRotate: nextAudio.autoRotate
         };
 
-        // Play the audio
         audioElement.currentTime = 0;
         audioElement.play().then(() => {
-          console.log(`✅ Started playing: ${nextAudio.name}`);
+          console.log(`🎵 Dashboard: Playing scheduled audio: ${nextAudio.name} for ${nextAudio.duration}s`);
           
-          // Set up timer for duration
+          // Show audio popup notification
+          showAudioPopup(nextAudio);
+          
+          // Auto-stop after duration - play once only, no looping
           setTimeout(() => {
             audioElement.pause();
+            audioElement.currentTime = 0;
+            audioElement.remove(); // Remove from DOM
             currentlyPlayingAudio = null;
-            
-            // If auto-rotate is enabled, play next audio
-            if (nextAudio.autoRotate && audioQueue.length > 0) {
-              setTimeout(() => playNextScheduledAudio(), 1000);
-            }
+            hideAudioPopup();
+            console.log(`🎵 Dashboard: Audio playback completed - stopped after ${nextAudio.duration}s`);
+            // Do not continue to next audio - play once only
           }, nextAudio.duration * 1000);
-          
         }).catch(error => {
-          console.error('❌ Failed to play audio:', error);
+          console.error('❌ Dashboard: Error playing audio:', error);
+          audioElement.remove(); // Remove from DOM on error
           currentlyPlayingAudio = null;
         });
       }
@@ -1785,15 +1990,17 @@
             audioElement.currentTime = 0;
             audioElement.play().then(() => {
               const duration = parseInt(audioElement.dataset.duration) || 10;
-              console.log(`🎵 Manual play: ${audioElement.dataset.scheduleId} for ${duration}s`);
+              console.log(`🎵 Dashboard: Manual play: ${audioElement.dataset.scheduleId} for ${duration}s`);
               
-              // Auto-stop after duration
+              // Auto-stop after duration - play once only, no looping
               setTimeout(() => {
                 audioElement.pause();
+                audioElement.currentTime = 0;
+                console.log(`🎵 Dashboard: Manual playback completed - stopped after ${duration}s`);
+                // Do not continue to next audio - play once only
               }, duration * 1000);
-              
             }).catch(error => {
-              console.error('❌ Failed to play audio:', error);
+              console.error('❌ Dashboard: Error playing audio:', error);
               toast('Failed to play audio', 'error');
             });
           }
@@ -1835,8 +2042,9 @@
       try {
         showLoading(true);
         
-        // Refresh the page to get updated schedules
-        window.location.reload();
+        // Just refresh audio schedules data, no page reload
+        await checkAudioSchedules();
+        toast('Audio schedules refreshed', 'success');
         
       } catch (error) {
         console.error('❌ Error refreshing audio schedules:', error);
@@ -1848,11 +2056,8 @@
 
     // Initialize audio scheduling when page loads
     document.addEventListener('DOMContentLoaded', function() {
-      // Initialize audio scheduling system if there are active schedules
-      const audioScheduleContainer = document.getElementById('audioScheduleContainer');
-      if (audioScheduleContainer && audioScheduleContainer.children.length > 0) {
-        setTimeout(initAudioSchedulingSystem, 1000);
-      }
+      // Initialize audio scheduling system always - it will check for schedules
+      setTimeout(initAudioSchedulingSystem, 1000);
     });
 
     // Clean up intervals when page unloads
@@ -1864,6 +2069,93 @@
         currentlyPlayingAudio.element.pause();
       }
     });
+
+    // Audio popup functions for dashboard
+    function showAudioPopup(audioData) {
+      // Remove existing popup
+      hideAudioPopup();
+      
+      const popup = document.createElement('div');
+      popup.id = 'dashboardAudioPopup';
+      popup.innerHTML = `
+        <div style="
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          padding: 15px 20px;
+          border-radius: 12px;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+          z-index: 9999;
+          min-width: 280px;
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255,255,255,0.2);
+          animation: slideInRight 0.3s ease-out;
+        ">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="
+              width: 40px;
+              height: 40px;
+              background: rgba(255,255,255,0.2);
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              animation: pulse 2s infinite;
+            ">
+              <i class="bi bi-music-note-beamed" style="font-size: 18px;"></i>
+            </div>
+            <div style="flex: 1;">
+              <div style="font-weight: 600; font-size: 14px; margin-bottom: 2px;">
+                🎵 Audio Dashboard
+              </div>
+              <div style="font-size: 12px; opacity: 0.9;">
+                ${audioData.name} (${audioData.duration}s)
+              </div>
+            </div>
+            <button onclick="hideAudioPopup()" style="
+              background: rgba(255,255,255,0.2);
+              border: none;
+              color: white;
+              width: 24px;
+              height: 24px;
+              border-radius: 50%;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            ">×</button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(popup);
+      
+      // Add animations
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes slideInRight {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.1); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    function hideAudioPopup() {
+      const popup = document.getElementById('dashboardAudioPopup');
+      if (popup) {
+        popup.remove();
+      }
+    }
+
+    // Make functions globally available
+    window.hideAudioPopup = hideAudioPopup;
 
     // Debug functions
     window.checkAudioSchedules = checkAudioSchedules;

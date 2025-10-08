@@ -17,7 +17,7 @@ class ProcessScheduleJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $tries = 2;
-    public $timeout = 30;
+    public $timeout = 120;
 
     public function handle(): void
     {
@@ -44,13 +44,18 @@ class ProcessScheduleJob implements ShouldQueue
 
     private function processActiveSchedules($now, $currentDate, $currentTime, $currentDay)
     {
-        $activeSchedules = Schedule::with('media')
+        // Optimize query with limit and specific time filtering
+        $activeSchedules = Schedule::with(['media' => function($query) {
+                $query->select('id', 'name', 'type', 'user_id', 'show_on_landing');
+            }])
+            ->select('id', 'media_id', 'is_active', 'start_date', 'day_of_week', 'time')
             ->where('is_active', true)
             ->where('start_date', '<=', $currentDate)
             ->where(function($query) use ($currentDay) {
                 $query->whereNull('day_of_week')
                       ->orWhere('day_of_week', $currentDay);
             })
+            ->limit(50) // Prevent processing too many schedules at once
             ->get();
 
         foreach ($activeSchedules as $schedule) {

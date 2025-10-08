@@ -11,14 +11,13 @@ class Schedule extends Model
     protected $fillable = [
         'media_id',
         'start_date',
+        'end_date',
         'day_of_week',
         'time',
-        'layout_type',
+        'layout_position',
         'layout_positions',
-        'display_duration',
-        'auto_rotate',
-        'layout_settings',
         'is_active',
+        'auto_rotate'
     ];
 
     protected $casts = [
@@ -27,7 +26,6 @@ class Schedule extends Model
         'layout_positions' => 'array',
         'layout_settings' => 'array',
         'auto_rotate' => 'boolean',
-        'is_active' => 'boolean',
     ];
 
     // Relationships
@@ -35,6 +33,7 @@ class Schedule extends Model
     {
         return $this->belongsTo(Media::class);
     }
+
 
     // Helper methods
     public function isActive($date = null)

@@ -1,37 +1,128 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="csrf-token" content="{{ csrf_token() }}">
+  @include('components.global-audio-system')
   <title>Jadwal Tambodia</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="{{ asset('js/layout-management.js') }}"></script>
+  <script src="{{ asset('js/schedule-management.js') }}"></script>
 </head>
 
 <style>
     body {
-      background-color: #405672;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: #2f3a55;
-      min-height: 100vh;
       margin: 0;
       padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f8f9fa;
+      overflow-x: hidden;
+      height: 100vh;
+    }
+
+    @keyframes pageLoad {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Smooth transitions for all interactive elements */
+    * {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Force dropdown to appear below select element */
+    #namaFile {
+      position: relative !important;
+      z-index: 1 !important;
+    }
+
+    /* Ensure dropdown options appear below */
+    #namaFile option {
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Fix for Bootstrap select dropdown positioning */
+    .form-section {
+      position: relative;
+      z-index: auto;
+      overflow: visible;
+    }
+
+    /* Ensure dropdown menu appears below the select */
+    select.form-select {
+      position: relative;
+      z-index: 1;
+    }
+
+    select.form-select:focus {
+      z-index: 2;
+    }
+
+    /* Page transition overlay */
+    .page-transition {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, #1f9e76, #58cbaa);
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.4s ease;
+    }
+
+    .page-transition.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .transition-content {
+      text-align: center;
+      color: white;
+    }
+
+    .transition-spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     .sidebar {
       background: linear-gradient(180deg, #E7FFEA 0%, #ffffff 50%, #dcedff 100%);
       border-right: none;
-      min-height: 100vh;
+      height: 100vh;
       width: 250px;
       display: flex;
       flex-direction: column;
-      position: fixed;
+      position: fixed !important;
       left: 0;
       top: 0;
-      bottom: 0;
       z-index: 1000;
-      overflow: hidden;
+      overflow-y: auto;
+      overflow-x: hidden;
     }
     
     .sidebar-header {
@@ -74,6 +165,7 @@
       flex: 1;
       overflow-y: auto;
       padding: 1rem 0;
+      max-height: calc(100vh - 120px);
     }
 
     .nav-link.active {
@@ -109,12 +201,13 @@
     }
     
     main.content-area {
-      margin-left: 240px;
+      margin-left: 250px;
       padding: 1.75rem 2rem 2rem 2rem;
       min-height: 100vh;
       background: linear-gradient(90deg, #ffffff, #e9edfa);
       box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
       position: relative;
+      overflow-y: auto;
     }
     
     .header-top {
@@ -230,13 +323,15 @@
     /* Table Styling */
     .table-container {
       border-radius: 12px;
-      overflow: hidden;
+      overflow-x: auto;
+      overflow-y: hidden;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
       border: 1px solid #e9ecef;
     }
 
     table {
       width: 100%;
+      min-width: 1000px; /* Reduced minimum width for better responsiveness */
       border-collapse: collapse;
       background-color: #ffffff;
       margin: 0;
@@ -249,21 +344,49 @@
     thead th {
       color: #3b82f6;
       font-weight: 600;
-      padding: 1rem;
+      padding: 0.75rem 0.5rem;
       text-align: left;
       border: none;
       user-select: none;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      white-space: nowrap;
     }
 
     tbody td {
-      padding: 1rem;
+      padding: 0.75rem 0.5rem;
       border-bottom: 1px solid #f1f5f9;
       color: #475569;
       vertical-align: middle;
     }
+    
+    /* Allow text wrapping for media names */
+    .media-selection-table tbody td:nth-child(2) {
+      white-space: normal;
+      word-wrap: break-word;
+    }
+    
+    /* Keep other columns nowrap */
+    .media-selection-table tbody td:not(:nth-child(2)) {
+      white-space: nowrap;
+    }
+
+    /* Specific column widths for better layout - Scheduled Media Table */
+    #scheduledTable thead th:nth-child(1) { width: 20%; } /* Media Name */
+    #scheduledTable thead th:nth-child(2) { width: 10%; } /* Type */
+    #scheduledTable thead th:nth-child(3) { width: 12%; } /* Start Date */
+    #scheduledTable thead th:nth-child(4) { width: 10%; } /* Day */
+    #scheduledTable thead th:nth-child(5) { width: 10%; } /* Time */
+    #scheduledTable thead th:nth-child(6) { width: 18%; } /* Position */
+    #scheduledTable thead th:nth-child(7) { width: 10%; } /* Status */
+    #scheduledTable thead th:nth-child(8) { width: 10%; } /* Actions */
+    
+    /* Media Selection Table */
+    .media-selection-table thead th:nth-child(1) { width: 8%; }  /* Checkbox */
+    .media-selection-table thead th:nth-child(2) { width: 50%; } /* Media Name */
+    .media-selection-table thead th:nth-child(3) { width: 20%; } /* Type */
+    .media-selection-table thead th:nth-child(4) { width: 22%; } /* Status */
 
     tbody tr {
       transition: all 0.2s ease;
@@ -486,9 +609,228 @@
       margin-bottom: 1rem;
       opacity: 0.5;
     }
+
+    /* Layout Status Styles */
+    .layout-status-container {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .current-layout-preview {
+      background: rgba(11, 11, 11, 0.9);
+      border-radius: 8px;
+      padding: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .preview-grid-status {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: repeat(3, 1fr);
+      gap: 8px;
+      max-width: 100%;
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 16px;
+      border: 1px solid #e9ecef;
+    }
+
+    .preview-grid-item-status {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80px;
+      padding: 12px 8px;
+      text-align: center;
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+
+    .preview-grid-item-status.occupied {
+      background: linear-gradient(135deg, #1f9e76 0%, #16a085 100%);
+      color: white;
+      border-color: #1f9e76;
+      box-shadow: 0 0 12px rgba(31, 158, 118, 0.6);
+    }
+
+    .preview-grid-item-status.scheduled {
+      background: linear-gradient(135deg, #ffc107 0%, #ff8c00 100%);
+      color: white;
+      border-color: #ffc107;
+      box-shadow: 0 0 12px rgba(255, 193, 7, 0.6);
+    }
+
+    /* Position specific styling for status grid */
+    .preview-grid-item-status:nth-child(1) { 
+      grid-column: 1; 
+      grid-row: 1; 
+    }
+    
+    .preview-grid-item-status:nth-child(2) { 
+      grid-column: 2; 
+      grid-row: 1; 
+    }
+    
+    .preview-grid-item-status:nth-child(3) { 
+      grid-column: 1; 
+      grid-row: 2; 
+    }
+    
+    .preview-grid-item-status:nth-child(4) { 
+      grid-column: 2; 
+      grid-row: 2; 
+    }
+    
+    .preview-grid-item-status:nth-child(5) { 
+      grid-column: 1; 
+      grid-row: 3; 
+    }
+    
+    .preview-grid-item-status:nth-child(6) { 
+      grid-column: 2; 
+      grid-row: 3; 
+    }
+
+    .position-info {
+      text-align: center;
+      line-height: 1.1;
+      margin-top: 2px;
+    }
+
+    .position-type {
+      font-size: 7px;
+      font-weight: bold;
+      margin-bottom: 1px;
+    }
+
+    .position-status {
+      font-size: 6px;
+      opacity: 0.9;
+    }
+
+    .layout-legend h6 {
+      color: #2c3a67;
+      font-size: 0.9rem;
+    }
+
+    /* Background & Description Management Styles */
+    .background-preview-container {
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+      background: #f8f9fa;
+      transition: all 0.3s ease;
+    }
+
+    .preview-grid-item-status {
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+      background: #f8f9fa;
+      transition: all 0.3s ease;
+    }
+
+    .preview-grid-item-status.filled {
+      border-color: #20c997;
+      background: #e8f5f0;
+    }
+
+    .preview-grid-item-status.empty {
+      border-color: #dee2e6;
+      background: #f8f9fa;
+    }
+
+    .position-status.filled {
+      color: #0f5132;
+      font-weight: 500;
+      font-size: 0.75rem;
+      line-height: 1.2;
+      word-break: break-word;
+    }
+
+    .position-status.empty {
+      color: #6c757d;
+      font-size: 0.75rem;
+      line-height: 1.2;
+    }
+
+    .position-status span {
+      display: block;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .preview-position-label {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #495057;
+      margin-bottom: 4px;
+    }
+
+    .position-type {
+      font-size: 0.7rem;
+      color: #6c757d;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-bottom: 4px;
+    }
+
+    .background-preview-container.has-preview {
+      border-color: #1f9e76;
+      background: #fff;
+    }
+
+    .background-preview-container img {
+      max-width: 100%;
+      max-height: 180px;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .background-preview-container video {
+      max-width: 100%;
+      max-height: 180px;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .current-settings-container {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      border: 1px solid #dee2e6;
+    }
+
+    .current-setting-item {
+      margin-bottom: 10px;
+    }
+
+    .current-setting-item:last-child {
+      margin-bottom: 0;
+    }
+
+    #descriptionCharCount {
+      font-weight: 500;
+    }
 </style>
 
 <body>
+  <!-- Page Transition Overlay -->
+  <div class="page-transition" id="pageTransition">
+    <div class="transition-content">
+      <div class="transition-spinner"></div>
+      <p>Loading...</p>
+    </div>
+  </div>
+
   <nav class="sidebar">
     <div class="sidebar-header d-flex align-items-center gap-2">
       <img src="{{ asset('img/Desain tanpa judul.svg') }}" alt="Logo Tambodia" />
@@ -512,13 +854,8 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{{ route('layout.index') }}">
-            <i class="bi bi-grid-3x3-gap"></i> <span>Layout Manager</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link active" href="{{ route('schedule.index') }}">
-            <i class="bi bi-calendar3"></i> <span>Penjadwalan</span>
+          <a class="nav-link active" href="{{ route('jadwal') }}">
+            <i class="bi bi-calendar-event"></i> <span>Penjadwalan</span>
           </a>
         </li>
         <li class="nav-item">
@@ -535,7 +872,7 @@
 
   <main class="content-area">
     <div class="header-top">
-      <h2 class="section-header">Atur Jadwal Media dengan Posisi Layout</h2>
+      <h2 class="section-header">Penjadwalan Media & Pengaturan Layout</h2>
       <div class="user-badge" title="Logged in">
         <span class="status-indicator" aria-label="online status"></span>
         <span>{{ Auth::user()->name ?? 'User' }}</span>
@@ -568,9 +905,9 @@
                     @foreach($media as $item)
                       @if($item->schedules && $item->schedules->count() > 0)
                         @foreach($item->schedules as $schedule)
-                        <tr data-schedule-id="{{ $schedule->id }}">
+                        <tr data-schedule-id="{{ $schedule->id }}" data-media-id="{{ $item->id }}">
                           <td>
-                            <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center" style="max-width: 180px;">
                               @if($item->type === 'Audio')
                                 <i class="bi bi-music-note-beamed text-info me-2"></i>
                               @elseif($item->type === 'Video')
@@ -578,11 +915,11 @@
                               @else
                                 <i class="bi bi-image text-success me-2"></i>
                               @endif
-                              <span>{{ $item->name }}</span>
+                              <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $item->name }}">{{ $item->name }}</span>
                             </div>
                           </td>
                           <td>
-                            <span class="badge bg-{{ $item->type === 'Audio' ? 'info' : ($item->type === 'Video' ? 'danger' : 'success') }}">
+                            <span class="badge bg-{{ $item->type == 'Gambar' ? 'success' : ($item->type == 'Video' ? 'primary' : 'warning') }}">
                               {{ $item->type }}
                             </span>
                           </td>
@@ -603,14 +940,24 @@
                           </td>
                           <td>
                             @if($item->type === 'Audio')
-                              <span class="text-muted">Dashboard</span>
+                              <span class="badge bg-info">Audio</span>
                             @else
-                              @if($schedule->layout_positions && is_array($schedule->layout_positions))
-                                @foreach($schedule->layout_positions as $pos)
-                                  <span class="badge bg-warning text-dark me-1">{{ $pos }}</span>
-                                @endforeach
+                              @if($schedule->layout_position)
+                                <span class="badge bg-warning text-dark">
+                                  @php
+                                    $positionNames = [
+                                      1 => 'Square (Top Left)',
+                                      2 => 'Portrait (Top Right)', 
+                                      3 => 'Portrait (Middle Left)',
+                                      4 => 'Square (Middle Right)',
+                                      5 => 'Landscape (Bottom Left)',
+                                      6 => 'Landscape (Bottom Right)'
+                                    ];
+                                  @endphp
+                                  <i class="bi bi-grid-3x3 me-1"></i>{{ $positionNames[$schedule->layout_position] ?? 'Position ' . $schedule->layout_position }}
+                                </span>
                               @else
-                                <span class="text-muted">-</span>
+                                <span class="badge bg-secondary">No Position</span>
                               @endif
                             @endif
                           </td>
@@ -623,10 +970,14 @@
                           </td>
                           <td>
                             <div class="btn-group btn-group-sm">
-                              <button class="btn btn-outline-primary btn-sm" onclick="editSchedule({{ $schedule->id }})" title="Edit">
+                              <button class="btn btn-outline-primary btn-sm" 
+                                      onclick="editSchedule({{ $schedule->id }})" 
+                                      title="Edit Jadwal">
                                 <i class="bi bi-pencil"></i>
                               </button>
-                              <button class="btn btn-outline-danger btn-sm" onclick="deleteSchedule({{ $schedule->id }})" title="Hapus">
+                              <button class="btn btn-outline-danger btn-sm" 
+                                      onclick="deleteSchedule({{ $schedule->id }}, '{{ addslashes($item->name) }}')" 
+                                      title="Hapus Jadwal">
                                 <i class="bi bi-trash"></i>
                               </button>
                             </div>
@@ -637,7 +988,7 @@
                     @endforeach
                   @else
                     <tr>
-                      <td colspan="8" class="empty-state">
+                      <td colspan="9" class="empty-state">
                         <i class="bi bi-calendar-x"></i>
                         <div>Belum ada media yang dijadwalkan</div>
                         <small>Buat jadwal baru untuk media Anda</small>
@@ -650,7 +1001,46 @@
           </div>
         </div>
 
-        <div class="col-lg-7">
+        <!-- Landing Page Preview Section -->
+        <div class="col-12 mb-4">
+          <div class="content-card">
+            <h5><i class="bi bi-eye me-2"></i>Preview Landing Page</h5>
+            <div class="preview-container" style="border: 2px solid #e9ecef; border-radius: 12px; overflow: hidden; background: #f8f9fa;">
+              <div class="preview-header" style="background: linear-gradient(90deg, #1f9e76, #16a085); color: white; padding: 0.75rem 1rem; display: flex; justify-content: between; align-items: center;">
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-display"></i>
+                  <span class="fw-medium">Live Preview - Landing Page</span>
+                </div>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-sm btn-light" onclick="refreshPreview()" title="Refresh Preview">
+                    <i class="bi bi-arrow-clockwise"></i>
+                  </button>
+                  <button class="btn btn-sm btn-light" onclick="openLandingInNewTab()" title="Open in New Tab">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="preview-frame-container" style="position: relative; height: 600px; background: #0b0b0b; border-radius: 8px; overflow: hidden;">
+                <iframe 
+                  id="landingPreview" 
+                  src="{{ url('/') }}" 
+                  style="width: 100%; height: 100%; border: none; display: block; border-radius: 8px;"
+                  onload="handlePreviewLoad()"
+                ></iframe>
+                <div id="previewLoader" class="preview-loader" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                  <div class="spinner-border text-primary mb-2" role="status"></div>
+                  <small class="text-muted">Loading preview...</small>
+                </div>
+              </div>
+              <div class="preview-info" style="padding: 0.75rem 1rem; background: #f8f9fa; border-top: 1px solid #e9ecef; font-size: 0.85rem; color: #6c757d;">
+                <i class="bi bi-info-circle me-1"></i>
+                Preview akan otomatis update ketika jadwal berubah. Klik refresh untuk memperbarui secara manual.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12">
           <div class="content-card">
             <h5><i class="bi bi-table me-2"></i>Pilih Media untuk Dijadwalkan</h5>
             
@@ -660,7 +1050,7 @@
             </div>
             
             <div class="table-container">
-              <table>
+              <table class="media-selection-table">
                 <thead>
                   <tr>
                     <th class="icon-cell"><i class="bi bi-check-square"></i></th>
@@ -674,13 +1064,73 @@
                     @foreach($media as $item)
                     <tr data-id="{{ $item->id }}" class="media-row">
                       <td class="icon-cell">
-                        <input type="checkbox" name="select_row" value="{{ $item->id }}" class="checkbox-custom">
+                        <input type="checkbox" name="select_row" value="{{ $item->id }}" class="checkbox-custom" id="checkbox-{{ $item->id }}">
                       </td>
-                      <td>{{ $item->name }}</td>
-                      <td>{{ $item->type }}</td>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          @if($item->type === 'Audio')
+                            <i class="bi bi-music-note-beamed text-info me-2"></i>
+                          @elseif($item->type === 'Video')
+                            <i class="bi bi-play-circle text-danger me-2"></i>
+                          @else
+                            <i class="bi bi-image text-success me-2"></i>
+                          @endif
+                          <div>
+                            <div class="fw-medium">{{ $item->name }}</div>
+                            <small class="text-muted">{{ $item->created_at->format('d/m/Y H:i') }}</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="badge bg-{{ $item->type == 'Gambar' ? 'success' : ($item->type == 'Video' ? 'primary' : 'warning') }}">
+                          {{ $item->type }}
+                        </span>
+                      </td>
                       <td>
                         @if($item->schedules && $item->schedules->count() > 0)
-                          <span class="badge bg-success"><i class="bi bi-calendar-check me-1"></i>Terjadwal ({{ $item->schedules->count() }})</span>
+                          <div class="d-flex flex-column gap-1">
+                            @if($item->hasActiveSchedules())
+                              <span class="badge bg-success"><i class="bi bi-calendar-check me-1"></i>Aktif Terjadwal ({{ $item->schedules->count() }})</span>
+                              @php
+                                $activePositions = [];
+                                foreach($item->schedules as $schedule) {
+                                  if($schedule->layout_position != null) {
+                                    $activePositions[] = $schedule->layout_position;
+                                  }
+                                }
+                                $activePositions = array_unique($activePositions);
+                                sort($activePositions);
+                              @endphp
+                              @if(count($activePositions) > 0)
+                                <div class="mt-1">
+                                  <small class="text-muted">Posisi terisi:</small>
+                                  @foreach($activePositions as $pos)
+                                    <span class="badge badge-sm ms-1" style="background-color: #e8f5f0; color: #0f5132; border: 1px solid #20c997;">{{ $pos }}</span>
+                                  @endforeach
+                                </div>
+                              @endif
+                            @else
+                              <span class="badge bg-warning text-dark"><i class="bi bi-calendar-event me-1"></i>Terjadwal ({{ $item->schedules->count() }})</span>
+                              @php
+                                $scheduledPositions = [];
+                                foreach($item->schedules as $schedule) {
+                                  if($schedule->layout_position != null) {
+                                    $scheduledPositions[] = $schedule->layout_position;
+                                  }
+                                }
+                                $scheduledPositions = array_unique($scheduledPositions);
+                                sort($scheduledPositions);
+                              @endphp
+                              @if(count($scheduledPositions) > 0)
+                                <div class="mt-1">
+                                  <small class="text-muted">Posisi dijadwal:</small>
+                                  @foreach($scheduledPositions as $pos)
+                                    <span class="badge badge-sm ms-1" style="background-color: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6;">{{ $pos }}</span>
+                                  @endforeach
+                                </div>
+                              @endif
+                            @endif
+                          </div>
                         @else
                           <span class="badge bg-secondary"><i class="bi bi-calendar-x me-1"></i>Belum Dijadwal</span>
                         @endif
@@ -702,7 +1152,113 @@
           </div>
         </div>
         
-        <div class="col-lg-5">
+
+
+          <!-- Current Layout Status Card -->
+          <div class="content-card mb-3">
+            <h5><i class="bi bi-grid-3x3-gap me-2"></i>Status Layout Saat Ini</h5>
+            
+            <div class="layout-status-container">
+              <div class="current-layout-preview">
+                <div class="preview-grid-status">
+                  @php
+                    // Get all active schedules with positions
+                    $activeSchedules = App\Models\Schedule::where('start_date', '<=', now()->toDateString())
+                      ->where(function($query) {
+                          $query->whereNull('end_date')
+                                ->orWhere('end_date', '>=', now()->toDateString());
+                      })
+                      ->whereNotNull('layout_position')
+                      ->get();
+                    
+                    // Load media relationships separately
+                    $activeSchedules->load('media');
+                    
+                    // Group by position
+                    $positionStatus = [];
+                    foreach($activeSchedules as $schedule) {
+                      $pos = $schedule->layout_position;
+                      if (!isset($positionStatus[$pos])) {
+                        $positionStatus[$pos] = [];
+                      }
+                      $positionStatus[$pos][] = $schedule;
+                    }
+                    
+                    $positionTypes = [1 => 'Square', 2 => 'Portrait', 3 => 'Portrait', 4 => 'Square', 5 => 'Landscape', 6 => 'Landscape'];
+                  @endphp
+                  
+                  @for($position = 1; $position <= 3; $position++)
+                    <div class="preview-grid-item-status {{ isset($positionStatus[$position]) ? 'filled' : 'empty' }}" data-position="{{ $position }}">
+                      <div class="preview-position-label">{{ $position }}</div>
+                      <div class="position-info">
+                        <div class="position-type">{{ $positionTypes[$position] }}</div>
+                        @if(isset($positionStatus[$position]))
+                          @php $schedule = $positionStatus[$position][0]; @endphp
+                          <div class="position-status filled">
+                            <i class="bi bi-check-circle me-1" style="color: #20c997;"></i>
+                            <span>{{ Str::limit($schedule->media->name, 12) }}</span>
+                            @if(count($positionStatus[$position]) > 1)
+                              <br><small style="color: #fd7e14;">(+{{ count($positionStatus[$position]) - 1 }} lainnya)</small>
+                            @endif
+                          </div>
+                        @else
+                          <div class="position-status empty">
+                            <i class="bi bi-circle me-1" style="color: #adb5bd;"></i>
+                            <span>Kosong</span>
+                          </div>
+                        @endif
+                      </div>
+                    </div>
+                  @endfor
+                  @for($position = 4; $position <= 6; $position++)
+                    <div class="preview-grid-item-status {{ isset($positionStatus[$position]) ? 'filled' : 'empty' }}" data-position="{{ $position }}">
+                      <div class="preview-position-label">{{ $position }}</div>
+                      <div class="position-info">
+                        <div class="position-type">{{ $positionTypes[$position] }}</div>
+                        @if(isset($positionStatus[$position]))
+                          @php $schedule = $positionStatus[$position][0]; @endphp
+                          <div class="position-status filled">
+                            <i class="bi bi-check-circle me-1" style="color: #20c997;"></i>
+                            <span>{{ Str::limit($schedule->media->name, 12) }}</span>
+                            @if(count($positionStatus[$position]) > 1)
+                              <br><small style="color: #fd7e14;">(+{{ count($positionStatus[$position]) - 1 }} lainnya)</small>
+                            @endif
+                          </div>
+                        @else
+                          <div class="position-status empty">
+                            <i class="bi bi-circle me-1" style="color: #adb5bd;"></i>
+                            <span>Kosong</span>
+                          </div>
+                        @endif
+                      </div>
+                    </div>
+                  @endfor
+                </div>
+              </div>
+              
+              <div class="layout-legend mt-3">
+                <h6 class="mb-2"><i class="bi bi-info-circle me-2"></i>Keterangan Posisi Layout:</h6>
+                <div class="row">
+                  <div class="col-6">
+                    <small class="text-muted">
+                      <strong>Posisi 1 & 4:</strong> Square (1:1)<br>
+                      <strong>Posisi 2 & 3:</strong> Portrait (9:16)<br>
+                      <strong>Posisi 5 & 6:</strong> Landscape (16:9)
+                    </small>
+                  </div>
+                  <div class="col-6">
+                    <small class="text-muted">
+                      <strong>Status Posisi:</strong><br>
+                      <span class="badge bg-warning text-dark">Terjadwal</span> - Media dengan jadwal aktif<br>
+                      <span class="badge bg-info">Default Layout</span> - Media default tampil<br>
+                      <span class="badge bg-secondary">Kosong</span> - Tidak ada media
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="content-card">
             <h5><i class="bi bi-calendar-plus me-2"></i>Atur Jadwal & Posisi</h5>
             
@@ -721,14 +1277,13 @@
               
               <div class="row">
                 <div class="col-md-12">
-                  <div class="form-section">
-                    <label for="start_date" class="form-label">
-                      <i class="bi bi-calendar-event me-2"></i>Tanggal Mulai
-                    </label>
-                    <input type="date" class="form-control" id="start_date" name="start_date" required>
-                  </div>
-                </div>
+                <label for="start_date" class="form-label">
+                  <i class="bi bi-calendar-event me-2"></i>Tanggal Mulai
+                </label>
+                <input type="date" class="form-control" id="start_date" name="start_date" required>
               </div>
+            </div>
+          </div>
               
               <div class="form-section">
                 <label for="day_of_week" class="form-label">
@@ -746,46 +1301,47 @@
                 </select>
               </div>
               
-              <div class="form-section">
-                <label for="time" class="form-label">
-                  <i class="bi bi-clock me-2"></i>Waktu Tayang
-                </label>
-                <input type="time" class="form-control" id="time" name="time">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-section">
+                    <label for="time" class="form-label">
+                      <i class="bi bi-clock me-2"></i>Waktu Tayang
+                    </label>
+                    <input type="time" class="form-control" id="time" name="time">
+                    <small class="form-text text-muted">Kosongkan untuk sepanjang hari</small>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-section">
+                    <label for="end_date" class="form-label">
+                      <i class="bi bi-calendar-x me-2"></i>Tanggal Berakhir
+                    </label>
+                    <input type="date" class="form-control" id="end_date" name="end_date">
+                    <small class="form-text text-muted">Kosongkan untuk tidak ada batas waktu</small>
+                  </div>
+                </div>
               </div>
+
+
 
               <!-- Layout Position Section -->
               <div class="form-section">
                 <label for="layout_position" class="form-label">
                   <i class="bi bi-grid-3x3-gap me-2"></i>Posisi di Layout
+                  <small class="text-muted ms-2">Pilih lokasi tampilan media di landing page</small>
                 </label>
                 <select class="form-select" id="layout_position" name="layout_position" required>
                   <option value="">Pilih Posisi Layout</option>
-                  <option value="1">Posisi 1 - Kiri Atas (Square 1:1)</option>
-                  <option value="2">Posisi 2 - Kanan Atas (Portrait 9:16)</option>
-                  <option value="3">Posisi 3 - Kiri Tengah (Portrait 9:16)</option>
-                  <option value="4">Posisi 4 - Kanan Tengah (Square 1:1)</option>
-                  <option value="5">Posisi 5 - Kiri Bawah (Landscape 16:9)</option>
-                  <option value="6">Posisi 6 - Kanan Bawah (Landscape 16:9)</option>
+                  <option value="1">Posisi 1 (Square 1:1)</option>
+                  <option value="2">Posisi 2 (Portrait 9:16)</option>
+                  <option value="3">Posisi 3 (Portrait 9:16)</option>
+                  <option value="4">Posisi 4 (Square 1:1)</option>
+                  <option value="5">Posisi 5 (Landscape 16:9)</option>
+                  <option value="6">Posisi 6 (Landscape 16:9)</option>
                 </select>
               </div>
 
-              <div class="form-section" id="durationSection" style="display: none;">
-                <label for="display_duration" class="form-label">
-                  <i class="bi bi-stopwatch me-2"></i>Durasi Tampil (detik)
-                </label>
-                <input type="number" class="form-control" id="display_duration" name="display_duration" 
-                       min="1" max="300" value="10" placeholder="10">
-                <small class="form-text text-muted">Durasi audio akan diputar (1-300 detik)</small>
-              </div>
 
-              <div class="form-section">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="auto_rotate" name="auto_rotate" checked>
-                  <label class="form-check-label" for="auto_rotate">
-                    <i class="bi bi-arrow-repeat me-2"></i>Auto Rotate Media
-                  </label>
-                </div>
-              </div>
 
               <!-- Layout Preview Section -->
               <div class="form-section" id="layoutPreview">
@@ -807,13 +1363,345 @@
               </div>
             </form>
           </div>
+
+          <!-- Background & Description Management Section -->
+          <div class="content-card" style="margin-top: 2rem;">
+            <h5><i class="bi bi-palette me-2"></i>Pengaturan Background & Deskripsi</h5>
+            
+            <div id="layoutAlertContainer"></div>
+            
+            <!-- Background Management -->
+            <div class="form-section">
+              <label for="backgroundMedia" class="form-label">
+                <i class="bi bi-image me-2"></i>Background Landing Page
+              </label>
+              <select class="form-select" id="backgroundMedia">
+                <option value="">Memuat media...</option>
+              </select>
+              <small class="form-text text-muted">Pilih media untuk background landing page</small>
+            </div>
+
+            <!-- Background Preview -->
+            <div class="form-section" id="backgroundPreviewSection" style="display: none;">
+              <label class="form-label">
+                <i class="bi bi-eye me-2"></i>Preview Background
+              </label>
+              <div class="background-preview-container" id="backgroundPreviewContainer">
+                <!-- Preview will be loaded here -->
+              </div>
+            </div>
+
+            <!-- Description Management -->
+            <div class="form-section">
+              <label for="landingDescription" class="form-label">
+                <i class="bi bi-card-text me-2"></i>Deskripsi Landing Page
+              </label>
+              <textarea class="form-control" id="landingDescription" rows="4" maxlength="1000" 
+                        placeholder="Masukkan deskripsi untuk landing page..."></textarea>
+              <div class="d-flex justify-content-between mt-1">
+                <small class="form-text text-muted">Deskripsi yang akan ditampilkan di landing page</small>
+                <small class="text-muted">
+                  <span id="descriptionCharCount">0</span>/1000 karakter
+                </small>
+              </div>
+            </div>
+
+            <!-- Current Settings Display -->
+            <div class="form-section">
+              <label class="form-label">
+                <i class="bi bi-gear me-2"></i>Pengaturan Saat Ini
+              </label>
+              <div class="current-settings-container">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="current-setting-item">
+                      <strong>Background:</strong>
+                      <div id="currentBackground" class="text-muted">Memuat...</div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="current-setting-item">
+                      <strong>Deskripsi:</strong>
+                      <div id="currentDescription" class="text-muted">Memuat...</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="button-section">
+              <button type="button" class="btn btn-success" id="updateBackgroundBtn">
+                <i class="bi bi-image me-2"></i>Update Background
+              </button>
+              <button type="button" class="btn btn-success" id="updateDescriptionBtn">
+                <i class="bi bi-card-text me-2"></i>Update Deskripsi
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </main>
 
+
+
+
+  <!-- Edit Schedule Modal -->
+  <div class="modal fade" id="editScheduleModal" tabindex="-1" aria-labelledby="editScheduleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editScheduleModalLabel">
+            <i class="bi bi-pencil-square me-2"></i>Edit Jadwal Media
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editScheduleForm" method="POST">
+            @csrf
+            @method('PUT')
+            <input type="hidden" id="edit_schedule_id" name="schedule_id">
+            
+            <div class="form-section">
+              <label for="edit_media_name" class="form-label">
+                <i class="bi bi-file-earmark-text me-2"></i>Media
+              </label>
+              <input type="text" class="form-control" id="edit_media_name" readonly>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-section">
+                  <label for="edit_start_date" class="form-label">
+                    <i class="bi bi-calendar-event me-2"></i>Tanggal Mulai
+                  </label>
+                  <input type="date" class="form-control" id="edit_start_date" name="start_date" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-section">
+                  <label for="edit_day_of_week" class="form-label">
+                    <i class="bi bi-calendar-week me-2"></i>Hari dalam Seminggu
+                  </label>
+                  <select class="form-select" id="edit_day_of_week" name="day_of_week">
+                    <option value="">Semua Hari</option>
+                    <option value="senin">Senin</option>
+                    <option value="selasa">Selasa</option>
+                    <option value="rabu">Rabu</option>
+                    <option value="kamis">Kamis</option>
+                    <option value="jumat">Jumat</option>
+                    <option value="sabtu">Sabtu</option>
+                    <option value="minggu">Minggu</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-section">
+                  <label for="edit_time" class="form-label">
+                    <i class="bi bi-clock me-2"></i>Waktu Tayang
+                  </label>
+                  <input type="time" class="form-control" id="edit_time" name="time">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-section">
+                  <label for="edit_layout_position" class="form-label">
+                    <i class="bi bi-grid-3x3-gap me-2"></i>Posisi di Layout
+                    <small class="text-muted ms-2">Pilih lokasi tampilan media di landing page</small>
+                  </label>
+                  <select class="form-select" id="edit_layout_position" name="layout_position">
+                    <option value="">Pilih Posisi Layout</option>
+                    <option value="1">Posisi 1 - Kiri Atas (Square 1:1)</option>
+                    <option value="2">Posisi 2 - Kanan Atas (Portrait 9:16)</option>
+                    <option value="3">Posisi 3 - Kiri Tengah (Portrait 9:16)</option>
+                    <option value="4">Posisi 4 - Kanan Tengah (Square 1:1)</option>
+                    <option value="5">Posisi 5 - Kiri Bawah (Landscape 16:9)</option>
+                    <option value="6">Posisi 6 - Kanan Bawah (Landscape 16:9)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Layout Preview Section -->
+            <div class="form-section" id="editLayoutPreview">
+              <label class="form-label">
+                <i class="bi bi-eye me-2"></i>Preview Posisi Layout
+              </label>
+              <div class="layout-preview-container" id="editLayoutPreviewContainer">
+                <div class="preview-empty">Pilih posisi untuk melihat preview</div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle me-2"></i>Batal
+          </button>
+          <button type="button" class="btn btn-success" onclick="updateSchedule()">
+            <i class="bi bi-check-lg me-2"></i>Update Jadwal
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ asset('js/jadwal.js') }}"></script>
   <script>
+
+// Landing Page Preview Functions
+function refreshPreview() {
+    const iframe = document.getElementById('landingPreview');
+    const loader = document.getElementById('previewLoader');
+    
+    if (iframe && loader) {
+        loader.style.display = 'flex';
+        iframe.src = iframe.src; // Force reload
+    }
+}
+
+function openLandingInNewTab() {
+    window.open('{{ url("/") }}', '_blank');
+}
+
+function handlePreviewLoad() {
+    const loader = document.getElementById('previewLoader');
+    if (loader) {
+        setTimeout(() => {
+            loader.style.display = 'none';
+        }, 500);
+    }
+}
+
+// Auto-refresh preview when schedule changes
+function autoRefreshPreview() {
+    setTimeout(() => {
+        refreshPreview();
+    }, 1000);
+}
+
+// Function to select media by checkbox click
+function selectMediaByCheckbox(mediaId, mediaName, mediaType) {
+    console.log('selectMediaByCheckbox called:', mediaId, mediaName, mediaType);
+    
+    // Clear all other checkboxes first (only one selection allowed)
+    const allCheckboxes = document.querySelectorAll('input[name="select_row"]');
+    allCheckboxes.forEach(cb => {
+        if (cb.value !== mediaId) {
+            cb.checked = false;
+        }
+    });
+    
+    // Get form inputs - try multiple selectors
+    let mediaIdInput = document.getElementById('media_id');
+    let namaFileInput = document.getElementById('namaFile');
+    
+    // If not found, try alternative selectors
+    if (!mediaIdInput) {
+        mediaIdInput = document.querySelector('input[name="media_id"]');
+    }
+    if (!namaFileInput) {
+        namaFileInput = document.querySelector('input[name="nama_file"]') || document.querySelector('#namaFile');
+    }
+    
+    console.log('Form inputs found:', {
+        mediaIdInput: mediaIdInput ? 'found' : 'not found',
+        namaFileInput: namaFileInput ? 'found' : 'not found',
+        mediaIdInputId: mediaIdInput ? mediaIdInput.id : 'no id',
+        namaFileInputId: namaFileInput ? namaFileInput.id : 'no id'
+    });
+    
+    // Log all available inputs for debugging
+    const allInputs = document.querySelectorAll('input');
+    console.log('All inputs on page:', Array.from(allInputs).map(input => ({
+        id: input.id,
+        name: input.name,
+        type: input.type,
+        placeholder: input.placeholder
+    })));
+    
+    if (mediaIdInput && namaFileInput) {
+        const checkbox = document.querySelector(`input[name="select_row"][value="${mediaId}"]`);
+        
+        if (checkbox && checkbox.checked) {
+            // Media selected
+            mediaIdInput.value = mediaId;
+            namaFileInput.value = mediaName;
+            
+            console.log('Updated form fields:', {
+                mediaId: mediaIdInput.value,
+                namaFile: namaFileInput.value
+            });
+            
+            // Update form fields based on media type
+            updateFormFieldsForMediaType(mediaType);
+            
+            // Show success feedback
+            showAlert('Media berhasil dipilih: ' + mediaName, 'success');
+            
+            // Highlight selected row
+            const selectedRow = document.querySelector(`tr[data-id="${mediaId}"]`);
+            if (selectedRow) {
+                // Remove highlight from all rows
+                document.querySelectorAll('.media-row').forEach(row => {
+                    row.classList.remove('table-active');
+                });
+                // Add highlight to selected row
+                selectedRow.classList.add('table-active');
+            }
+        } else {
+            // Media deselected
+            mediaIdInput.value = '';
+            namaFileInput.value = '';
+            updateFormFieldsForMediaType('');
+            showAlert('Media selection cleared', 'info');
+            
+            // Remove highlight from all rows
+            document.querySelectorAll('.media-row').forEach(row => {
+                row.classList.remove('table-active');
+            });
+        }
+    } else {
+        console.error('❌ Form inputs not found');
+        console.error('mediaIdInput:', mediaIdInput);
+        console.error('namaFileInput:', namaFileInput);
+        showAlert('Error: Form tidak ditemukan', 'error');
+    }
+}
+
+// Function to select media by row click
+function selectMediaByRow(row) {
+    const mediaId = row.getAttribute('data-id');
+    const checkbox = row.querySelector('input[name="select_row"]');
+    const mediaNameElement = row.querySelector('.fw-medium');
+    const mediaTypeElement = row.querySelector('.badge');
+    
+    console.log('selectMediaByRow called for ID:', mediaId);
+    console.log('Found elements:', {checkbox, mediaNameElement, mediaTypeElement});
+    
+    if (mediaId && checkbox && mediaNameElement && mediaTypeElement) {
+        const mediaName = mediaNameElement.textContent.trim();
+        const mediaType = mediaTypeElement.textContent.trim();
+        
+        console.log('Extracted data:', {mediaId, mediaName, mediaType});
+        
+        // Toggle checkbox
+        checkbox.checked = !checkbox.checked;
+        
+        // Trigger the checkbox function to handle the selection
+        selectMediaByCheckbox(mediaId, mediaName, mediaType);
+    } else {
+        console.error('Missing required elements for media selection');
+        showAlert('Error: Tidak dapat memilih media', 'error');
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
+    console.log('DOM loaded, initializing media selection...');
+    
     const searchInput = document.getElementById("cariFile");
     const tableRows = document.querySelectorAll("table tbody tr");
     const checkboxes = document.querySelectorAll('input[name="select_row"]');
@@ -822,253 +1710,585 @@ document.addEventListener("DOMContentLoaded", function () {
     const scheduleForm = document.getElementById('scheduleForm');
     const layoutPositionSelect = document.getElementById('layout_position');
     
+    console.log('Found elements:');
+    console.log('- Checkboxes:', checkboxes.length);
+    console.log('- Media ID input:', mediaIdInput);
+    console.log('- Nama file input:', namaFileInput);
+    console.log('- Schedule form:', scheduleForm);
+    
     // Set today as default for date input
     const today = new Date().toISOString().split('T')[0];
-    document.getElementById('start_date').value = today;
+    const startDateInput = document.getElementById('start_date');
+    if (startDateInput) {
+        startDateInput.value = today;
+        console.log('Set start_date default value:', today);
+    }
+
+    // Load current layout status on page load
+    loadCurrentLayoutStatus();
 
     // Search functionality
-    searchInput.addEventListener("input", function () {
-        const keyword = searchInput.value.trim().toLowerCase();
+    if (searchInput) {
+        searchInput.addEventListener("input", function () {
+            const keyword = searchInput.value.trim().toLowerCase();
 
-        tableRows.forEach(row => {
-            if (row.cells.length > 1) {
-                const mediaName = row.cells[1].textContent.toLowerCase();
-                row.style.display = mediaName.includes(keyword) ? "" : "none";
-            }
-        });
-    });
-    
-    // Handle checkbox selection
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            // Uncheck all other checkboxes
-            checkboxes.forEach(cb => {
-                if (cb !== checkbox) {
-                    cb.checked = false;
+            tableRows.forEach(row => {
+                if (row.cells && row.cells.length > 1) {
+                    const mediaName = row.cells[1].textContent.toLowerCase();
+                    row.style.display = mediaName.includes(keyword) ? "" : "none";
                 }
             });
-            
-            if (checkbox.checked) {
-                const row = checkbox.closest('tr');
-                const mediaId = row.getAttribute('data-id');
-                const mediaName = row.cells[1].textContent;
-                const mediaType = row.cells[2].textContent;
-                
-                // Set values in the form
-                mediaIdInput.value = mediaId;
-                namaFileInput.value = mediaName;
-                
-                // Show/hide fields based on media type
-                updateFormFieldsForMediaType(mediaType);
-            } else {
-                // Clear form if unchecked
-                mediaIdInput.value = '';
-                namaFileInput.value = '';
-                // Reset form fields visibility
-                updateFormFieldsForMediaType('');
-            }
         });
-    });
-
-    // Layout position change handler
-    layoutPositionSelect.addEventListener('change', function() {
-        updateLayoutPreview(this.value);
-    });
-
-    function updateLayoutPreview(position) {
-        const container = document.getElementById('layoutPreviewContainer');
-        
-        if (!position) {
-            container.className = 'layout-preview-container';
-            container.innerHTML = '<div class="preview-empty">Pilih posisi untuk melihat preview</div>';
-            return;
-        }
-
-        container.className = 'layout-preview-container has-preview';
-        
-        const positionLabels = {
-            1: 'Square',
-            2: 'Portrait', 
-            3: 'Portrait',
-            4: 'Square',
-            5: 'Landscape',
-            6: 'Landscape'
-        };
-        
-        let previewHTML = '<div class="layout-preview">';
-        previewHTML += '<div class="preview-grid">';
-        
-        // Create 6 grid items with proper styling
-        for (let i = 1; i <= 6; i++) {
-            const isActive = i == position;
-            const label = positionLabels[i];
-            previewHTML += `
-                <div class="preview-grid-item ${isActive ? 'active' : ''}">
-                    <div class="preview-position-label">${i}</div>
-                    <div style="text-align: center; line-height: 1.2; margin-top: 8px;">
-                        <div style="font-size: 9px; font-weight: bold;">${label}</div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        previewHTML += '</div></div>';
-        container.innerHTML = previewHTML;
     }
     
-    // Form submission
-    scheduleForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        if (!mediaIdInput.value) {
-            alert('Silakan pilih media terlebih dahulu');
-            return;
-        }
-
-        // Get selected media type
-        const selectedRow = document.querySelector('input[name="select_row"]:checked')?.closest('tr');
-        const mediaType = selectedRow ? selectedRow.cells[2].textContent : '';
-
-        // Validate based on media type
-        if (mediaType === 'Audio') {
-            const durationInput = document.getElementById('display_duration');
-            if (!durationInput.value || durationInput.value < 1 || durationInput.value > 300) {
-                alert('Silakan masukkan durasi audio yang valid (1-300 detik)');
-                return;
+    // Add click handlers to table rows for media selection
+    const mediaRows = document.querySelectorAll('.media-selection-table tbody tr[data-id]');
+    console.log('Found media rows:', mediaRows.length);
+    
+    // Also check for media-row class as backup
+    const mediaRowsBackup = document.querySelectorAll('.media-row[data-id]');
+    console.log('Found media-row elements:', mediaRowsBackup.length);
+    
+    const allMediaRows = mediaRows.length > 0 ? mediaRows : mediaRowsBackup;
+    console.log('Using media rows:', allMediaRows.length);
+    
+    allMediaRows.forEach(row => {
+        // Add click handler to row (but not to checkbox)
+        row.addEventListener('click', function(e) {
+            // Don't trigger if clicking on checkbox directly
+            if (e.target.type !== 'checkbox') {
+                console.log('Row clicked, calling selectMediaByRow');
+                selectMediaByRow(this);
             }
-        } else {
-            if (!layoutPositionSelect.value) {
-                alert('Silakan pilih posisi layout');
-                return;
+        });
+        
+        // Add style for clickable rows
+        row.style.cursor = 'pointer';
+        row.title = 'Klik untuk memilih media';
+    });
+    
+    // Handle checkbox changes directly
+    const allCheckboxes = checkboxes.length > 0 ? checkboxes : document.querySelectorAll('input[name="select_row"]');
+    console.log('Found checkboxes:', allCheckboxes.length);
+    
+    if (allCheckboxes.length > 0) {
+        console.log('Setting up checkbox listeners...');
+        
+        allCheckboxes.forEach((checkbox) => {
+            checkbox.addEventListener('change', function(e) {
+                e.stopPropagation(); // Prevent row click
+                console.log('Checkbox changed:', this.value, this.checked);
+                
+                const mediaId = this.value;
+                const row = this.closest('tr');
+                const mediaNameElement = row.querySelector('.fw-medium') || row.querySelector('td:nth-child(2)');
+                const mediaTypeElement = row.querySelector('.badge') || row.querySelector('td:nth-child(3)');
+                
+                console.log('Found elements:', {
+                    mediaNameElement: mediaNameElement ? mediaNameElement.textContent.trim() : 'not found',
+                    mediaTypeElement: mediaTypeElement ? mediaTypeElement.textContent.trim() : 'not found'
+                });
+                
+                if (mediaNameElement && mediaTypeElement) {
+                    const mediaName = mediaNameElement.textContent.trim();
+                    const mediaType = mediaTypeElement.textContent.trim();
+                    
+                    // Call selection function
+                    selectMediaByCheckbox(mediaId, mediaName, mediaType);
+                } else {
+                    console.error('Could not find media name or type elements in row');
+                }
+            });
+        });
+    } else {
+        console.warn('No checkboxes found!');
+    }
+
+    // Layout position change handler
+    if (layoutPositionSelect) {
+        layoutPositionSelect.addEventListener('change', function() {
+            updateLayoutPreview(this.value);
+        });
+    }
+    
+    // Edit layout position change handler
+    const editLayoutPositionSelect = document.getElementById('edit_layout_position');
+    if (editLayoutPositionSelect) {
+        editLayoutPositionSelect.addEventListener('change', function() {
+            updateEditLayoutPreview(this.value);
+        });
+    }
+
+    console.log('✅ Media selection initialization complete');
+});
+
+    // Function to load current layout status
+    function loadCurrentLayoutStatus() {
+        // Initialize position status
+        const positionStatus = {
+            1: { status: 'Kosong', mediaName: null, source: null },
+            2: { status: 'Kosong', mediaName: null, source: null },
+            3: { status: 'Kosong', mediaName: null, source: null },
+            4: { status: 'Kosong', mediaName: null, source: null },
+            5: { status: 'Kosong', mediaName: null, source: null },
+            6: { status: 'Kosong', mediaName: null, source: null }
+        };
+
+        // First, check for scheduled media
+        const scheduledRows = document.querySelectorAll('#scheduledTable tbody tr[data-schedule-id]');
+        scheduledRows.forEach(row => {
+            const positionCell = row.cells[5]; // Position column
+            const mediaNameCell = row.cells[0]; // Media name column
+            const statusCell = row.cells[6]; // Status column
+            
+            if (positionCell && mediaNameCell) {
+                const positionBadges = positionCell.querySelectorAll('.badge');
+                const mediaName = mediaNameCell.querySelector('span')?.textContent || '';
+                const isActive = statusCell.querySelector('.badge.bg-success') !== null;
+                
+                positionBadges.forEach(badge => {
+                    const position = parseInt(badge.textContent);
+                    if (position >= 1 && position <= 6) {
+                        positionStatus[position] = {
+                            status: isActive ? 'Terjadwal' : 'Nonaktif',
+                            mediaName: mediaName,
+                            source: 'schedule'
+                        };
+                    }
+                });
             }
-        }
-        
-        // Validate start date
-        const startDate = document.getElementById('start_date').value;
-        if (!startDate) {
-            alert('Silakan pilih tanggal mulai');
-            return;
-        }
-        
-        // Submit form via AJAX
-        const formData = new FormData(scheduleForm);
-        
-        // Get CSRF token
-        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        
-        fetch(scheduleForm.action, {
-            method: 'POST',
-            body: formData,
+        });
+
+        // Then, check for default layout media (show_on_landing = true)
+        // Make AJAX call to get current default layout media
+        fetch('/api/layout/current-status', {
+            method: 'GET',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': token
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
             credentials: 'same-origin'
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
-                alert(data.message);
-                // Reset form
-                scheduleForm.reset();
-                mediaIdInput.value = '';
-                namaFileInput.value = '';
-                // Uncheck all checkboxes
-                checkboxes.forEach(cb => {
-                    cb.checked = false;
+            if (data.success && data.defaultMedia) {
+                // Process default layout media
+                data.defaultMedia.forEach(media => {
+                    const position = media.layout_order;
+                    if (position >= 1 && position <= 6) {
+                        // Only set if position is not already occupied by scheduled media
+                        if (positionStatus[position].status === 'Kosong') {
+                            positionStatus[position] = {
+                                status: 'Default Layout',
+                                mediaName: media.name,
+                                source: 'default'
+                            };
+                        }
+                    }
                 });
-                // Set today as default for date input
-                document.getElementById('start_date').value = today;
-                // Reset preview
-                updateLayoutPreview('');
-                
-                // Refresh current schedule page after successful save
-                setTimeout(() => {
-                    location.reload();
-                }, 1000);
-            } else {
-                alert(data.message || 'Terjadi kesalahan saat menyimpan jadwal');
             }
+            
+            // Update the layout status display
+            updateLayoutStatusDisplay(positionStatus);
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan saat menyimpan jadwal');
+            console.error('Error loading default layout status:', error);
+            // Update display with scheduled media only
+            updateLayoutStatusDisplay(positionStatus);
         });
-    });
-    
-    // Reset button
-    document.getElementById('resetButton').addEventListener('click', function() {
-        mediaIdInput.value = '';
-        namaFileInput.value = '';
-        // Uncheck all checkboxes
-        checkboxes.forEach(cb => {
-            cb.checked = false;
-        });
-        // Reset layout preview
-        updateLayoutPreview('');
-        // Reset form fields visibility
-        updateFormFieldsForMediaType('');
-    });
+    }
 
-    // Function to update form fields based on media type
-    function updateFormFieldsForMediaType(mediaType) {
-        const layoutPositionSection = document.getElementById('layout_position').closest('.form-section');
-        const durationSection = document.getElementById('durationSection');
-        const layoutPreviewSection = document.getElementById('layoutPreview');
-        const layoutPositionSelect = document.getElementById('layout_position');
-        const durationInput = document.getElementById('display_duration');
-
-        if (mediaType === 'Audio') {
-            // For Audio: Hide layout position and preview, show duration
-            layoutPositionSection.style.display = 'none';
-            layoutPreviewSection.style.display = 'none';
-            durationSection.style.display = 'block';
+    // Function to update the layout status display
+    function updateLayoutStatusDisplay(positionStatus) {
+        for (let i = 1; i <= 6; i++) {
+            const statusElement = document.getElementById(`status-${i}`);
+            const gridItem = document.querySelector(`[data-position="${i}"]`);
             
-            // Make duration required and layout position not required
-            durationInput.required = true;
-            layoutPositionSelect.required = false;
-            layoutPositionSelect.value = '';
-            
-            // Clear layout preview
-            updateLayoutPreview('');
-            
-        } else if (mediaType === 'Gambar' || mediaType === 'Video') {
-            // For Visual media: Show layout position and preview, hide duration
-            layoutPositionSection.style.display = 'block';
-            layoutPreviewSection.style.display = 'block';
-            durationSection.style.display = 'none';
-            
-            // Make layout position required and duration not required
-            layoutPositionSelect.required = true;
-            durationInput.required = false;
-            durationInput.value = '10'; // Default value
-            
-        } else {
-            // Default state: hide all optional fields
-            layoutPositionSection.style.display = 'block';
-            layoutPreviewSection.style.display = 'block';
-            durationSection.style.display = 'none';
-            
-            // Reset requirements
-            layoutPositionSelect.required = true;
-            durationInput.required = false;
-            layoutPositionSelect.value = '';
-            durationInput.value = '10';
-            
-            // Clear layout preview
-            updateLayoutPreview('');
+            if (statusElement && gridItem) {
+                const status = positionStatus[i];
+                statusElement.textContent = status.status;
+                
+                // Update visual styling
+                gridItem.classList.remove('occupied', 'scheduled');
+                if (status.status === 'Terjadwal') {
+                    gridItem.classList.add('scheduled');
+                } else if (status.status === 'Default Layout') {
+                    gridItem.classList.add('occupied');
+                } else if (status.status !== 'Kosong') {
+                    gridItem.classList.add('occupied');
+                }
+                
+                // Add tooltip with media name if available
+                if (status.mediaName) {
+                    const sourceText = status.source === 'schedule' ? 'Terjadwal' : 'Default Layout';
+                    gridItem.title = `${status.mediaName} - ${sourceText}`;
+                } else {
+                    gridItem.title = `Posisi ${i} - ${status.status}`;
+                }
+            }
         }
+    }
+
+// Function to show alert messages
+function showAlert(message, type) {
+    const alertContainer = document.getElementById('alertContainer');
+    if (alertContainer) {
+        const alertHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+        alertContainer.innerHTML = alertHTML;
+        setTimeout(() => {
+            alertContainer.innerHTML = '';
+        }, 3000);
+    }
+}
+
+// Function to update layout preview
+function updateLayoutPreview(position) {
+    const container = document.getElementById('layoutPreviewContainer');
+    
+    if (!container) return;
+    
+    if (!position) {
+        container.className = 'layout-preview-container';
+        container.innerHTML = '<div class="preview-empty">Pilih posisi untuk melihat preview</div>';
+        return;
+    }
+
+    container.className = 'layout-preview-container has-preview';
+    
+    const positionLabels = {
+        1: 'Square',
+        2: 'Portrait', 
+        3: 'Portrait',
+        4: 'Square',
+        5: 'Landscape',
+        6: 'Landscape'
+    };
+    
+    let previewHTML = '<div class="layout-preview">';
+    previewHTML += '<div class="preview-grid">';
+    
+    // Create 6 grid items with proper styling
+    for (let i = 1; i <= 6; i++) {
+        const isActive = i == position;
+        const label = positionLabels[i];
+        previewHTML += `
+            <div class="preview-grid-item ${isActive ? 'active' : ''}">
+                <div class="preview-position-label">${i}</div>
+                <div style="text-align: center; line-height: 1.2; margin-top: 8px;">
+                    <div style="font-size: 9px; font-weight: bold;">${label}</div>
+                </div>
+            </div>
+        `;
+    }
+    
+    previewHTML += '</div></div>';
+    container.innerHTML = previewHTML;
+}
+
+// Form submission handler
+document.addEventListener('DOMContentLoaded', function() {
+    const scheduleForm = document.getElementById('scheduleForm');
+    const mediaIdInput = document.getElementById('media_id');
+    
+    if (scheduleForm) {
+        scheduleForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!mediaIdInput.value) {
+                showAlert('Silakan pilih media terlebih dahulu', 'warning');
+                return;
+            }
+
+            // Get selected media type
+            const selectedRow = document.querySelector('input[name="select_row"]:checked')?.closest('tr');
+            const mediaType = selectedRow ? selectedRow.cells[2].textContent.trim() : '';
+            const layoutPositionSelect = document.getElementById('layout_position');
+
+            // Audio validation - no duration needed anymore
+            if (mediaType === 'Audio') {
+                // Audio duration is now automatically detected from file
+                console.log('Audio selected - duration will be auto-detected');
+            } else {
+                // For Gambar & Video, layout position is required
+                if (!layoutPositionSelect || !layoutPositionSelect.value) {
+                    showAlert('Silakan pilih posisi layout untuk media visual', 'warning');
+                    return;
+                }
+            }
+            
+            // Validate start date
+            const startDate = document.getElementById('start_date').value;
+            console.log('Start date value before validation:', startDate);
+            if (!startDate) {
+                showAlert('Silakan pilih tanggal mulai', 'warning');
+                return;
+            }
+            
+            // Submit form via AJAX
+            const formData = new FormData(scheduleForm);
+            
+            // Debug form data
+            console.log('Form data entries:');
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
+            
+            // Validate required fields before submission
+            if (!formData.get('media_id')) {
+                showAlert('Media ID tidak ditemukan', 'error');
+                return;
+            }
+            
+            // Get CSRF token
+            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            console.log('CSRF token:', token ? 'found' : 'not found');
+            
+            fetch(scheduleForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': token
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    // Reset form
+                    scheduleForm.reset();
+                    mediaIdInput.value = '';
+                    const namaFileInput = document.getElementById('namaFile');
+                    namaFileInput.value = '';
+                    // Uncheck all checkboxes
+                    const checkboxes = document.querySelectorAll('input[name="select_row"]');
+                    checkboxes.forEach(cb => {
+                        cb.checked = false;
+                    });
+                    // Remove row highlights
+                    document.querySelectorAll('.media-row').forEach(row => {
+                        row.classList.remove('table-active');
+                    });
+                    // Set today as default for date input
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('start_date').value = today;
+                    // Reset preview
+                    updateLayoutPreview('');
+                    
+                    // Refresh current schedule page after successful save
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showAlert(data.message || 'Terjadi kesalahan saat menyimpan jadwal', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                showAlert('Terjadi kesalahan saat menyimpan jadwal: ' + error.message, 'error');
+            });
+        });
     }
 });
 
-// Functions for schedule management
-function editSchedule(scheduleId) {
-    // TODO: Implement edit functionality
-    alert('Edit jadwal ID: ' + scheduleId + ' (akan diimplementasikan)');
+// Function to update form fields based on media type
+function updateFormFieldsForMediaType(mediaType) {
+    const layoutPositionSection = document.getElementById('layout_position')?.closest('.form-section');
+    const layoutPreviewSection = document.getElementById('layoutPreview');
+    const layoutPositionSelect = document.getElementById('layout_position');
+
+    if (!layoutPositionSection || !layoutPositionSelect) {
+        console.error('Required form elements not found');
+        return;
+    }
+
+    if (mediaType === 'Audio') {
+        // For Audio: Hide layout position and preview (duration auto-detected)
+        layoutPositionSection.style.display = 'none';
+        if (layoutPreviewSection) layoutPreviewSection.style.display = 'none';
+        
+        // Audio doesn't need layout position
+        layoutPositionSelect.required = false;
+        layoutPositionSelect.value = '';
+        
+        // Update layout preview to show audio info
+        updateLayoutPreview('');
+        
+    } else if (mediaType === 'Gambar' || mediaType === 'Video') {
+        // For Visual media: Show layout position and preview
+        layoutPositionSection.style.display = 'block';
+        if (layoutPreviewSection) layoutPreviewSection.style.display = 'block';
+        
+        // Make layout position required for visual media
+        layoutPositionSelect.required = true;
+        
+    } else {
+        // Default state: show layout fields for visual media
+        layoutPositionSection.style.display = 'block';
+        if (layoutPreviewSection) layoutPreviewSection.style.display = 'block';
+        
+        // Reset requirements
+        layoutPositionSelect.required = false;
+        layoutPositionSelect.value = '';
+        
+        // Clear layout preview
+        updateLayoutPreview('');
+    }
+    
+    console.log('Form updated for media type:', mediaType);
 }
 
-function deleteSchedule(scheduleId) {
-    if (confirm('Apakah Anda yakin ingin menghapus jadwal ini?')) {
+function editSchedule(scheduleId) {
+    // Get schedule data via AJAX
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    
+    fetch(`/schedule/${scheduleId}`, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': token
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            populateEditForm(data.schedule);
+            showEditModal();
+        } else {
+            alert('Gagal memuat data jadwal');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat memuat data jadwal');
+    });
+}
+
+function populateEditForm(schedule) {
+    // Set form action to update
+    const editForm = document.getElementById('editScheduleForm');
+    editForm.action = `/schedule/${schedule.id}`;
+    
+    // Populate form fields
+    document.getElementById('edit_media_name').value = schedule.media.name;
+    document.getElementById('edit_start_date').value = schedule.start_date;
+    document.getElementById('edit_day_of_week').value = schedule.day_of_week || '';
+    document.getElementById('edit_time').value = schedule.time || '';
+    
+    // Set layout position if available
+    if (schedule.layout_position) {
+        document.getElementById('edit_layout_position').value = schedule.layout_position;
+        updateEditLayoutPreview(schedule.layout_position);
+    } else {
+        document.getElementById('edit_layout_position').value = '';
+        updateEditLayoutPreview('');
+    }
+    
+    // Store schedule ID for form submission
+    document.getElementById('edit_schedule_id').value = schedule.id;
+}
+
+function showEditModal() {
+    const modal = new bootstrap.Modal(document.getElementById('editScheduleModal'));
+    modal.show();
+}
+
+function updateEditLayoutPreview(position) {
+    const container = document.getElementById('editLayoutPreviewContainer');
+    
+    if (!position) {
+        container.className = 'layout-preview-container';
+        container.innerHTML = '<div class="preview-empty">Pilih posisi untuk melihat preview</div>';
+        return;
+    }
+
+    container.className = 'layout-preview-container has-preview';
+    
+    const positionLabels = {
+        1: 'Square',
+        2: 'Portrait', 
+        3: 'Portrait',
+        4: 'Square',
+        5: 'Landscape',
+        6: 'Landscape'
+    };
+    
+    let previewHTML = '<div class="layout-preview">';
+    previewHTML += '<div class="preview-grid">';
+    
+    // Create 6 grid items with proper styling
+    for (let i = 1; i <= 6; i++) {
+        const isActive = i == position;
+        const label = positionLabels[i];
+        previewHTML += `
+            <div class="preview-grid-item ${isActive ? 'active' : ''}">
+                <div class="preview-position-label">${i}</div>
+                <div style="text-align: center; line-height: 1.2; margin-top: 8px;">
+                    <div style="font-size: 9px; font-weight: bold;">${label}</div>
+                </div>
+            </div>
+        `;
+    }
+    
+    previewHTML += '</div></div>';
+    container.innerHTML = previewHTML;
+}
+
+// Function to update schedule
+function updateSchedule() {
+    const editForm = document.getElementById('editScheduleForm');
+    const formData = new FormData(editForm);
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const scheduleId = document.getElementById('edit_schedule_id').value;
+    
+    fetch(`/schedule/${scheduleId}`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': token
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editScheduleModal'));
+            modal.hide();
+            // Refresh page to show updated data
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        } else {
+            alert(data.message || 'Gagal mengupdate jadwal');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat mengupdate jadwal');
+    });
+}
+
+function deleteSchedule(scheduleId, mediaName = '') {
+    const confirmMessage = mediaName ? 
+        `Apakah Anda yakin ingin menghapus jadwal untuk media "${mediaName}"?\n\nMedia ini akan dihilangkan dari landing page.` : 
+        'Apakah Anda yakin ingin menghapus jadwal ini?';
+        
+    if (confirm(confirmMessage)) {
         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         
         fetch(`/schedule/${scheduleId}`, {
@@ -1101,7 +2321,351 @@ function deleteSchedule(scheduleId) {
         });
     }
 }
+
+// Page transition and animation functions
+function showPageTransition() {
+    const transition = document.getElementById('pageTransition');
+    if (transition) {
+        transition.classList.add('active');
+    }
+}
+
+function hidePageTransition() {
+    const transition = document.getElementById('pageTransition');
+    if (transition) {
+        transition.classList.remove('active');
+    }
+}
+
+// Add staggered animation to cards and elements
+function animateElements() {
+    const cards = document.querySelectorAll('.card, .form-section, .table-container');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.style.animation = 'slideInUp 0.6s ease-out forwards';
+    });
+}
+
+// Handle navigation with transitions
+document.addEventListener('DOMContentLoaded', function() {
+    // Hide page transition after load
+    setTimeout(hidePageTransition, 100);
+    
+    // Animate elements
+    setTimeout(animateElements, 300);
+    
+    // Add transition to navigation links
+    const navLinks = document.querySelectorAll('a[href]');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
+                e.preventDefault();
+                showPageTransition();
+                setTimeout(() => {
+                    window.location.href = href;
+                }, 400);
+            }
+        });
+    });
+});
+
+// Add CSS for element animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .card, .form-section, .table-container {
+        opacity: 0;
+    }
+`;
+document.head.appendChild(style);
+
+// Background & Description Management Functions
+$(document).ready(function() {
+    let allMedia = [];
+    
+    // Load initial data for background & description
+    console.log('Document ready - initializing layout management'); // Debug log
+    loadLayoutSettings();
+    loadMediaOptions();
+    
+    // Character counter for description
+    $('#landingDescription').on('input', function() {
+        const length = $(this).val().length;
+        $('#descriptionCharCount').text(length);
+        
+        if (length > 950) {
+            $('#descriptionCharCount').addClass('text-warning');
+        } else if (length === 1000) {
+            $('#descriptionCharCount').addClass('text-danger');
+        } else {
+            $('#descriptionCharCount').removeClass('text-warning text-danger');
+        }
+    });
+    
+    // Background media selection change
+    $('#backgroundMedia').on('change', function() {
+        const mediaId = $(this).val();
+        if (mediaId) {
+            const selectedMedia = allMedia.find(m => m.id == mediaId);
+            if (selectedMedia) {
+                showBackgroundPreview(selectedMedia);
+            }
+        } else {
+            hideBackgroundPreview();
+        }
+    });
+    
+    // Update background button
+    $('#updateBackgroundBtn').on('click', function() {
+        const mediaId = $('#backgroundMedia').val();
+        if (!mediaId) {
+            showLayoutAlert('Pilih media untuk background terlebih dahulu', 'warning');
+            return;
+        }
+        updateBackground(mediaId);
+    });
+    
+    // Update description button
+    $('#updateDescriptionBtn').on('click', function() {
+        const description = $('#landingDescription').val().trim();
+        if (!description) {
+            showLayoutAlert('Masukkan deskripsi terlebih dahulu', 'warning');
+            return;
+        }
+        updateDescription(description);
+    });
+    
+    function loadMediaOptions() {
+        console.log('Loading media options...'); // Debug log
+        console.log('Checking if backgroundMedia element exists:', $('#backgroundMedia').length); // Debug log
+        
+        $.get('/api/media/user')
+            .done(function(response) {
+                console.log('Media API response:', response); // Debug log
+                if (response.success) {
+                    allMedia = response.media;
+                    const select = $('#backgroundMedia');
+                    
+                    if (select.length === 0) {
+                        console.error('backgroundMedia select element not found!');
+                        return;
+                    }
+                    
+                    select.empty();
+                    select.append('<option value="">Pilih Media untuk Background</option>');
+                    
+                    console.log('Found media items:', allMedia.length); // Debug log
+                    let addedCount = 0;
+                    allMedia.forEach(function(media) {
+                        if (media.type === 'Gambar' || media.type === 'Video') {
+                            select.append(`<option value="${media.id}">${media.name} (${media.type})</option>`);
+                            console.log('Added media option:', media.name, media.type); // Debug log
+                            addedCount++;
+                        }
+                    });
+                    
+                    console.log('Total options added to dropdown:', addedCount); // Debug log
+                    
+                    if (addedCount === 0) {
+                        console.log('No suitable media found for background'); // Debug log
+                        select.append('<option value="" disabled>Tidak ada gambar/video tersedia</option>');
+                        showLayoutAlert('Tidak ada media gambar/video yang tersedia', 'warning');
+                    }
+                } else {
+                    console.error('Failed to load media:', response);
+                    showLayoutAlert('Gagal memuat daftar media', 'error');
+                }
+            })
+            .fail(function(xhr, status, error) {
+                console.error('AJAX Error loading media:', xhr.responseText);
+                console.error('Status:', status, 'Error:', error);
+                showLayoutAlert('Gagal memuat daftar media: ' + error, 'error');
+            });
+    }
+    
+    function loadLayoutSettings() {
+        $.get('/layout/settings')
+            .done(function(response) {
+                if (response.success) {
+                    // Update current background display
+                    if (response.background_media) {
+                        $('#currentBackground').html(`
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-${response.background_media.type === 'Video' ? 'play-circle' : 'image'} me-2"></i>
+                                ${response.background_media.name}
+                            </div>
+                        `);
+                        
+                        // Set selected option in dropdown
+                        $('#backgroundMedia').val(response.background_media.id);
+                        showBackgroundPreview(response.background_media);
+                    } else {
+                        $('#currentBackground').text('Tidak ada background');
+                    }
+                    
+                    // Update current description display
+                    if (response.description) {
+                        $('#currentDescription').text(response.description.substring(0, 100) + (response.description.length > 100 ? '...' : ''));
+                        $('#landingDescription').val(response.description);
+                        $('#descriptionCharCount').text(response.description.length);
+                    } else {
+                        $('#currentDescription').text('Tidak ada deskripsi');
+                    }
+                } else {
+                    console.error('Failed to load layout settings:', response);
+                    showLayoutAlert('Gagal memuat pengaturan layout', 'error');
+                }
+            })
+            .fail(function(xhr, status, error) {
+                console.error('AJAX Error loading layout settings:', xhr.responseText);
+                showLayoutAlert('Gagal memuat pengaturan layout: ' + error, 'error');
+            });
+    }
+    
+    function showBackgroundPreview(media) {
+        const container = $('#backgroundPreviewContainer');
+        const section = $('#backgroundPreviewSection');
+        
+        let previewHtml = '';
+        if (media.type === 'Gambar') {
+            previewHtml = `<img src="/storage/${media.file_path}" alt="${media.name}">`;
+        } else if (media.type === 'Video') {
+            previewHtml = `<video controls muted><source src="/storage/${media.file_path}" type="video/mp4"></video>`;
+        }
+        
+        container.html(previewHtml).addClass('has-preview');
+        section.show();
+    }
+    
+    function hideBackgroundPreview() {
+        const container = $('#backgroundPreviewContainer');
+        const section = $('#backgroundPreviewSection');
+        
+        container.html('').removeClass('has-preview');
+        section.hide();
+    }
+    
+    function updateBackground(mediaId) {
+        const btn = $('#updateBackgroundBtn');
+        const originalText = btn.html();
+        
+        btn.prop('disabled', true).html('<i class="spinner-border spinner-border-sm me-2"></i>Updating...');
+        
+        $.ajax({
+            url: '/layout/background',
+            method: 'POST',
+            data: {
+                media_id: mediaId,
+                _token: $('meta[name="csrf-token"]').attr('content')
+            },
+            dataType: 'json'
+        })
+        .done(function(response) {
+            console.log('Background update response:', response);
+            if (response.success) {
+                showLayoutAlert(response.message, 'success');
+                loadLayoutSettings(); // Refresh current settings
+            } else {
+                showLayoutAlert(response.message || 'Gagal update background', 'error');
+            }
+        })
+        .fail(function(xhr, status, error) {
+            console.error('Background update error:', xhr.responseText);
+            let errorMsg = 'Terjadi kesalahan saat update background';
+            try {
+                const errorResponse = JSON.parse(xhr.responseText);
+                if (errorResponse.message) {
+                    errorMsg = errorResponse.message;
+                }
+            } catch (e) {
+                errorMsg += ': ' + error;
+            }
+            showLayoutAlert(errorMsg, 'error');
+        })
+        .always(function() {
+            btn.prop('disabled', false).html(originalText);
+        });
+    }
+    
+    function updateDescription(description) {
+        const btn = $('#updateDescriptionBtn');
+        const originalText = btn.html();
+        
+        btn.prop('disabled', true).html('<i class="spinner-border spinner-border-sm me-2"></i>Updating...');
+        
+        $.ajax({
+            url: '/layout/description',
+            method: 'POST',
+            data: {
+                description: description,
+                _token: $('meta[name="csrf-token"]').attr('content')
+            },
+            dataType: 'json'
+        })
+        .done(function(response) {
+            console.log('Description update response:', response);
+            if (response.success) {
+                showLayoutAlert(response.message, 'success');
+                loadLayoutSettings(); // Refresh current settings
+            } else {
+                showLayoutAlert(response.message || 'Gagal update deskripsi', 'error');
+            }
+        })
+        .fail(function(xhr, status, error) {
+            console.error('Description update error:', xhr.responseText);
+            let errorMsg = 'Terjadi kesalahan saat update deskripsi';
+            try {
+                const errorResponse = JSON.parse(xhr.responseText);
+                if (errorResponse.message) {
+                    errorMsg = errorResponse.message;
+                }
+            } catch (e) {
+                errorMsg += ': ' + error;
+            }
+            showLayoutAlert(errorMsg, 'error');
+        })
+        .always(function() {
+            btn.prop('disabled', false).html(originalText);
+        });
+    }
+    
+    function showLayoutAlert(message, type) {
+        const alertClass = type === 'success' ? 'alert-success' : 
+                          type === 'warning' ? 'alert-warning' : 'alert-danger';
+        const iconClass = type === 'success' ? 'bi-check-circle' : 
+                         type === 'warning' ? 'bi-exclamation-triangle' : 'bi-x-circle';
+        
+        const alertHtml = `
+            <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                <i class="bi ${iconClass} me-2"></i>${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        $('#layoutAlertContainer').html(alertHtml);
+        
+        // Auto dismiss after 5 seconds
+        setTimeout(function() {
+            $('.alert').fadeOut();
+        }, 5000);
+    }
+});
+
 </script>
+
+  </main>
+
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
