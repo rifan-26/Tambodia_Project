@@ -990,12 +990,58 @@
       <!-- Media Grid -->
       <div class="section-content">
         <div class="media-grid" id="mediaContainer">
-            <!-- Media cards will be rendered here -->
+          @forelse($media as $item)
+            <div class="media-card" data-id="{{ $item->id }}">
+              <div class="media-card-header">
+                <h5 class="media-title mb-0">{{ $item->name }}</h5>
+                <span class="media-badge {{ strtolower($item->type) }}">{{ $item->type }}</span>
+              </div>
+              <div class="media-card-body">
+                <div class="media-date">
+                  <i class="bi bi-calendar3 me-1"></i>{{ $item->created_at ? $item->created_at->format('Y-m-d') : $item->date }}
+                </div>
+                <div class="media-preview">
+                  @if($item->type === 'Gambar')
+                    <img src="{{ asset('storage/' . $item->file_path) }}" alt="{{ $item->name }}" class="img-fluid rounded"/>
+                  @elseif($item->type === 'Video')
+                    <video class="w-100 rounded" controls preload="metadata">
+                      <source src="{{ asset('storage/' . $item->file_path) }}" type="video/mp4">
+                      Browser Anda tidak mendukung pemutar video.
+                    </video>
+                  @elseif($item->type === 'Audio')
+                    <div class="audio-player-container">
+                      <audio class="js-player" controls preload="metadata">
+                        <source src="{{ asset('storage/' . $item->file_path) }}" type="audio/mpeg">
+                        Browser Anda tidak mendukung pemutar audio.
+                      </audio>
+                    </div>
+                  @endif
+                </div>
+                <div class="d-flex align-items-center justify-content-between">
+                  <div class="form-check">
+                    <input class="form-check-input checkbox-enhanced media-checkbox" type="checkbox" value="{{ $item->id }}" data-id="{{ $item->id }}">
+                    <label class="form-check-label">Select</label>
+                  </div>
+                  <div class="media-actions">
+                    <button class="btn-enhanced btn-preview" data-action="preview" data-id="{{ $item->id }}" data-type="{{ $item->type }}" data-src="{{ asset('storage/' . $item->file_path) }}" data-name="{{ $item->name }}">
+                      <i class="bi bi-eye"></i> Preview
+                    </button>
+                    <button class="btn-enhanced btn-delete" data-action="delete" data-id="{{ $item->id }}">
+                      <i class="bi bi-trash"></i> Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          @empty
+            <div class="empty-state w-100">
+              <i class="bi bi-folder-x"></i>
+              <div>No media found.</div>
+            </div>
+          @endforelse
         </div>
       </div>
     </div>
-
-    
   </main>
 
   <!-- Scripts -->
@@ -1032,7 +1078,7 @@
       if (/^(?:https?:)?\/\//i.test(p)) return p; // external URL (e.g., YouTube, CDN)
       p = p.replace(/^\/+/, '');
       p = p.replace(/^public\//, '');
-      return `${window.location.origin}/media/${p}`;
+      return `${window.location.origin}/storage/${p}`;
     }
 
     function guessMimeFromPath(path, fallback) {
@@ -1172,28 +1218,104 @@
       if (el) el.textContent = val;
     }
 
-    function renderMediaGrid(items) {
-      const container = document.getElementById('mediaContainer');
-      if (!container) return;
-      try { console.debug('[renderMediaGrid] items:', Array.isArray(items) ? items.length : 'non-array'); } catch (_) {}
-      if (!items.length) {
-        container.innerHTML = `
-          <div class="empty-state w-100">
-            <i class="bi bi-folder-x"></i>
-            <div>No media found.</div>
-          </div>`;
-        // Ensure container is visible even when empty
-        container.style.display = 'grid';
-        return;
+    async function checkFileExists(url) {
+      try {
+        const response = await fetch(url, { method: 'HEAD' });
+        return response.ok;
+      } catch (e) {
+        console.error('File check error:', e);
+        return false;
       }
-      container.innerHTML = items.map(m => mediaCardTemplate(m)).join('');
-      // Ensure the grid is visible after re-render
-      container.style.display = 'grid';
-      try { console.debug('[renderMediaGrid] rendered cards:', container.children.length); } catch (_) {}
-      // Make sure cards are visible (animation CSS sets opacity:0 by default)
-      container.querySelectorAll('.media-card').forEach(card => { card.style.opacity = '1'; });
-      // Trigger entrance animation for newly inserted cards
-      try { requestAnimationFrame(() => animateCards()); } catch (_) {}
+    }
+
+    let isProcessing = false;
+
+    async function renderMediaGrid(items) {
+      const container = document.getElementById('mediaContainer');
+      if (!container || isProcessing) return;
+      
+      try {
+        isProcessing = true;
+        showLoading(true);
+        
+        console.debug('[renderMediaGrid] items:', Array.isArray(items) ? items.length : 'non-array');
+        
+        if (!items.length) {
+          container.innerHTML = `
+            <div class="empty-state w-100">
+              <i class="bi bi-folder-x"></i>
+              <div>No media found.</div>
+            </div>`;
+          container.style.display = 'grid';
+          return;
+        }
+
+        // Process items in batches to prevent too many simultaneous requests
+        const batchSize = 3;
+        const validItems = [];
+        const itemsToDelete = [];
+
+        for (let i = 0; i < items.length; i += batchSize) {
+          const batch = items.slice(i, i + batchSize);
+          const checkResults = await Promise.all(
+            batch.map(async (item) => {
+              const fileUrl = `${window.location.origin}/storage/${item.file_path}`;
+              const exists = await checkFileExists(fileUrl);
+              return { item, exists };
+            })
+          );
+
+          checkResults.forEach(({ item, exists }) => {
+            if (exists) {
+              validItems.push(item);
+            } else {
+              itemsToDelete.push(item);
+            }
+          });
+        }
+
+        // Delete invalid items one at a time
+        if (itemsToDelete.length > 0) {
+          console.log(`Found ${itemsToDelete.length} invalid items to remove`);
+          for (const item of itemsToDelete) {
+            try {
+              await deleteMedia(item.id);
+              await new Promise(resolve => setTimeout(resolve, 500)); // Add delay between deletions
+            } catch (e) {
+              console.error('Auto-delete failed:', e);
+            }
+          }
+        }
+      try {
+        // Only render if we still have the container
+        if (container) {
+          container.innerHTML = validItems.map(m => mediaCardTemplate(m)).join('');
+          // Update state with only valid items
+          state.media = validItems;
+          
+          // Ensure the grid is visible after re-render
+          container.style.display = 'grid';
+          console.debug('[renderMediaGrid] rendered cards:', container.children.length);
+          
+          // Make sure cards are visible
+          container.querySelectorAll('.media-card').forEach(card => { 
+            card.style.opacity = '1'; 
+          });
+          
+          // Trigger animations
+          requestAnimationFrame(() => animateCards());
+          
+          // Update stats with valid items only
+          updateStats(validItems);
+        }
+      } catch (e) {
+        console.error('Render error:', e);
+      } finally {
+        // Always reset processing flag and hide loading
+        isProcessing = false;
+        showLoading(false);
+      }
+      
       // Bind card controls
       container.querySelectorAll('.media-checkbox').forEach(cb => {
         cb.addEventListener('change', updateSelectedCount);
@@ -1210,9 +1332,14 @@
       container.querySelectorAll('[data-action="delete"]').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           const id = e.currentTarget.dataset.id;
-          if (!confirm('Delete this media?')) return;
+          if (!confirm('Apakah Anda yakin ingin menghapus media ini?')) return;
+          
           await deleteMedia(id);
-          await refreshMedia();
+          
+          // Only refresh the entire grid if there are no media items left
+          if (document.querySelectorAll('.media-card').length === 0) {
+            await refreshMedia();
+          }
         });
       });
     }
@@ -1305,8 +1432,21 @@
       }
     }
 
-    async function refreshMedia() { return fetchMedia({}); }
-    function applyAdvancedFilters() { fetchMedia({}); }
+    async function refreshMedia() { 
+      try {
+        showLoading(true);
+        await fetchMedia({});
+      } catch (e) {
+        console.error('Refresh error:', e);
+        toast('Error refreshing media list', 'error');
+      } finally {
+        showLoading(false);
+      }
+    }
+    
+    function applyAdvancedFilters() { 
+      fetchMedia({}); 
+    }
 
     async function toggleLanding(mediaIds, desiredStatus = null) {
       if (!mediaIds || !mediaIds.length) return toast('Please select media first', 'error');
@@ -1347,21 +1487,72 @@
     }
 
     async function deleteMedia(id) {
+      if (!id) {
+        toast('Invalid media ID', 'error');
+        return false;
+      }
+      
       try {
         showLoading(true);
-        const res = await fetch(API.destroy(id), {
+        
+        // Find the media item in state
+        const mediaItem = state.media.find(m => m.id === id);
+        if (mediaItem) {
+          // Check if file exists before attempting delete
+          const fileUrl = `${window.location.origin}/storage/${mediaItem.file_path}`;
+          const exists = await checkFileExists(fileUrl);
+          if (!exists) {
+            console.log('File already missing, proceeding with database cleanup');
+          }
+        }
+        
+        const res = await fetch(`/dashboard/media/${id}`, {
           method: 'DELETE',
           headers: {
-            'X-CSRF-TOKEN': CSRF_TOKEN,
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
             'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
           },
+          credentials: 'same-origin'
         });
+
+        if (!res.ok) {
+          const json = await res.json();
+          throw new Error(json.message || 'Failed to delete media');
+        }
+
         const json = await res.json();
-        if (!json.success) throw new Error(json.message || 'Failed to delete media');
-        toast(json.message || 'Media deleted');
+        
+        // Remove the media from state immediately
+        state.media = state.media.filter(m => m.id !== id);
+        
+        // Remove the card from DOM
+        const card = document.querySelector(`.media-card[data-id="${id}"]`);
+        if (card) {
+          card.remove();
+        }
+        
+        // Update stats and UI
+        updateStats(state.media);
+        updateSelectedCount();
+        
+        toast(json.message || 'Media deleted', 'success');
+        return true;
       } catch (e) {
-        console.error(e);
-        toast('Error deleting media', 'error');
+        console.error('Delete error:', e);
+        if (e.message.includes('not found') || e.message.includes('tidak ditemukan')) {
+          // If media is not found, remove it from the UI anyway
+          const card = document.querySelector(`.media-card[data-id="${id}"]`);
+          if (card) {
+            card.remove();
+            state.media = state.media.filter(m => m.id !== id);
+            updateStats(state.media);
+            updateSelectedCount();
+          }
+        }
+        toast('Error deleting media: ' + (e.message || 'Unknown error'), 'error');
+        return false;
       } finally {
         showLoading(false);
       }
