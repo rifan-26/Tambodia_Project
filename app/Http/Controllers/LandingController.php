@@ -11,92 +11,56 @@ class LandingController extends Controller
 {
     public function index()
     {
-<<<<<<< HEAD
-        try {
-            // Increase execution time limit for this specific request
-            set_time_limit(60);
-            
-            // Optimize query by selecting only necessary columns and limiting results
-            $layoutImages = Media::select('id', 'name', 'file_path', 'type', 'layout_order')
-                ->where('show_on_landing', true)
-                ->whereIn('type', ['Gambar', 'Video'])
-                ->whereNotNull('layout_order')
-                ->orderBy('layout_order', 'asc')
-                ->limit(6) // Only get first 6 items for the grid
-                ->get();
-
-            // Get layout settings with caching
-            $layoutSetting = cache()->remember('layout_setting', 300, function () {
-                return LayoutSetting::first();
-            });
-            
-            $description = $layoutSetting && $layoutSetting->description 
-                ? $layoutSetting->description 
-                : 'Kami adalah lembaga resmi pemerintah yang bertugas menyelenggarakan kegiatan statistik di wilayah Sumatera Utara. BPS hadir untuk memberikan data akurat, terpercaya, dan terkini.';
-            
-            // Get background image efficiently
-            $backgroundImage = null;
-            if ($layoutSetting && $layoutSetting->background_image_id) {
-                $backgroundImage = cache()->remember("background_image_{$layoutSetting->background_image_id}", 300, function () use ($layoutSetting) {
-                    return Media::select('id', 'file_path')->find($layoutSetting->background_image_id);
-                });
-            }
-
-            // For backward compatibility, set media to layoutImages
-            $media = $layoutImages;
-
-            return view('landingpage', compact('media', 'layoutImages', 'description', 'backgroundImage'));
-            
-        } catch (\Exception $e) {
-            // Log the error and return a fallback view
-            \Log::error('Landing page error: ' . $e->getMessage());
-            
-            return view('landingpage', [
-                'media' => collect([]),
-                'layoutImages' => collect([]),
-                'description' => 'Kami adalah lembaga resmi pemerintah yang bertugas menyelenggarakan kegiatan statistik di wilayah Sumatera Utara. BPS hadir untuk memberikan data akurat, terpercaya, dan terkini.',
-                'backgroundImage' => null
-            ]);
-        }
-=======
-        // Get active schedules and media with conflict resolution
-        $activeSchedules = $this->getActiveSchedule();
-        $media = $this->getScheduledMedia($activeSchedules);
-
-        // Always use scheduled media if available, otherwise fallback to default
-        if ($media && $media->isNotEmpty()) {
-            $layoutImages = $media;
-        } else {
-            // Use default layout media
-            $layoutImages = Media::where('show_on_landing', true)
-                ->whereIn('type', ['Gambar', 'Video'])
-                ->whereNotNull('layout_order')
-                ->orderBy('layout_order', 'asc')
-                ->get();
-        }
-
-        // Get all media for backward compatibility
-        $media = $layoutImages;
-
-        // Get layout settings (background and description)
-        $layoutSettings = LayoutSetting::first();
-        
-        // Get active scheduled background or fallback to default
-        $activeBackground = $this->getActiveScheduledBackground();
-        $backgroundImage = $activeBackground ? $activeBackground->media : ($layoutSettings ? $layoutSettings->backgroundMedia : null);
-        
-        // Get active description from schedule descriptions or fallback to layout description
-        $activeDescription = $this->getActiveScheduleDescription();
-        $description = $activeDescription ? $activeDescription->description : ($layoutSettings ? $layoutSettings->description : null);
-
-        // Set default values
-        $layoutConfig = [
-            'type' => 'grid',
-            'duration' => 10,
-            'settings' => []
+        // Return default data immediately if database is not accessible
+        $defaultData = [
+            'media' => collect([]),
+            'backgroundImage' => null,
+            'description' => 'Kami adalah lembaga resmi pemerintah yang bertugas menyelenggarakan kegiatan statistik di wilayah Sumatera Utara. BPS hadir untuk memberikan data akurat, terpercaya, dan terkini.',
+            'activeSchedules' => collect([]),
+            'layoutConfig' => ['type' => 'grid', 'duration' => 10, 'settings' => []]
         ];
 
-        return view('landingpage', compact('media', 'backgroundImage', 'description', 'activeSchedules', 'layoutConfig'));
+        try {
+            // Quick database connection test
+            \DB::connection()->getPdo();
+            
+            // If connection successful, try to load data quickly
+            $layoutImages = \DB::table('media')
+                ->select('id', 'name', 'file_path', 'type', 'layout_order')
+                ->where('show_on_landing', 1)
+                ->whereIn('type', ['Gambar', 'Video'])
+                ->whereNotNull('layout_order')
+                ->orderBy('layout_order', 'asc')
+                ->limit(6)
+                ->get();
+
+            $layoutSettings = \DB::table('layout_settings')->first();
+            
+            $backgroundImage = null;
+            if ($layoutSettings && $layoutSettings->background_image_id) {
+                $backgroundImage = \DB::table('media')
+                    ->select('id', 'file_path')
+                    ->where('id', $layoutSettings->background_image_id)
+                    ->first();
+            }
+            
+            $description = $layoutSettings && $layoutSettings->description 
+                ? $layoutSettings->description 
+                : $defaultData['description'];
+
+            return view('landingpage', [
+                'media' => $layoutImages,
+                'backgroundImage' => $backgroundImage,
+                'description' => $description,
+                'activeSchedules' => collect([]),
+                'layoutConfig' => ['type' => 'grid', 'duration' => 10, 'settings' => []]
+            ]);
+            
+        } catch (\Exception $e) {
+            // Database unavailable - return default view
+            \Log::error('Landing page DB error: ' . $e->getMessage());
+            return view('landingpage', $defaultData);
+        }
     }
 
     /**
@@ -448,6 +412,5 @@ class LandingController extends Controller
             'has_active_audio' => false,
             'audio_schedules' => []
         ]);
->>>>>>> 9a6c69e2a1bd83d6b0e92dbb88248bc8155fdf2d
     }
 }

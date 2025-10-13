@@ -1462,9 +1462,9 @@
         } else {
           const yt = isYouTube(src) ? youtubeId(src) : null;
           if(yt){
-            html = `<div class=\"ratio ratio-16x9\" style=\"width:100%; max-width:1000px;\"><iframe src=\"https://www.youtube.com/embed/${'${yt}'}?autoplay=1\" title=\"${'${name}'}\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe></div>`;
+            html = `<div class="ratio ratio-16x9" style="width:100%; max-width:1000px;"><iframe src="https://www.youtube.com/embed/${yt}?autoplay=1" title="${name}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
           } else {
-            html = `<video controls autoplay playsinline style=\"width:100%; max-width:1000px; max-height:85vh;\"><source src=\"${'${src}'}\">Browser Anda tidak mendukung pemutar video.</video>`;
+            html = `<video controls autoplay playsinline style="width:100%; max-width:1000px; max-height:85vh;"><source src="${src}">Browser Anda tidak mendukung pemutar video.</video>`;
           }
         }
         this.container.innerHTML = html;
