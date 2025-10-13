@@ -11,7 +11,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('media_id')->constrained()->onDelete('cascade');
             $table->date('start_date');
-            $table->date('end_date');
+            $table->date('end_date')->nullable();
             $table->enum('day_of_week', ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'])->nullable();
             $table->time('time')->nullable();
             $table->timestamps();

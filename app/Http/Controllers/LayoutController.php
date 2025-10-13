@@ -5,175 +5,125 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Media;
 use App\Models\LayoutSetting;
-use App\Models\Log;
+use App\Models\LayoutTemplate;
+use App\Models\Schedule;
+use App\Models\ScheduledBackground;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class LayoutController extends Controller
 {
-    public function index()
-    {
-        // Get images and videos for the layout selector
-        $media = Media::where('user_id', Auth::id())
-            ->whereIn('type', ['Gambar', 'Video'])
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        // Get current layout settings
-        $layoutSetting = LayoutSetting::where('user_id', Auth::id())->first();
-        $description = $layoutSetting ? $layoutSetting->description : 'Kami adalah lembaga resmi pemerintah yang bertugas menyelenggarakan kegiatan statistik di wilayah Sumatera Utara. BPS hadir untuk memberikan data akurat, terpercaya, dan terkini.';
-
-        // Get current layout images
-        $layoutImages = Media::where('user_id', Auth::id())
-            ->where('show_on_landing', true)
-            ->orderBy('layout_order', 'asc')
-            ->get();
-
-        // Get all images currently displayed on landing page (from all users)
-        $allLayoutImages = Media::where('show_on_landing', true)
-            ->whereNotNull('layout_order')
-            ->orderBy('layout_order', 'asc')
-            ->get();
-
-        // Create a map of positions and their current images
-        $positionMap = [];
-        for ($i = 1; $i <= 6; $i++) {
-            $positionMap[$i] = $allLayoutImages->where('layout_order', $i)->first();
-        }
-
-        return view('layout', compact('media', 'description', 'layoutImages', 'positionMap'));
-    }
-
-    public function updateBackground(Request $request)
+    /**
+     * Get current layout status including default layout media
+     */
+    public function getCurrentLayoutStatus()
     {
         try {
-            // Allow null background_image_id for clearing background
-            $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
-                'background_image_id' => 'nullable|integer|exists:media,id'
-            ]);
+            // Get default layout media (show_on_landing = true with layout_order)
+            $defaultMedia = Media::where('show_on_landing', true)
+                ->whereIn('type', ['Gambar', 'Video'])
+                ->whereNotNull('layout_order')
+                ->orderBy('layout_order', 'asc')
+                ->get(['id', 'name', 'type', 'layout_order']);
 
-            if ($validator->fails()) {
-                return response()->json(['success' => false, 'message' => $validator->errors()->first()], 422);
-            }
+            // Get scheduled backgrounds
+            $scheduledBackgrounds = ScheduledBackground::where('user_id', Auth::id())
+                ->with('media')
+                ->orderBy('start_date', 'desc')
+                ->orderBy('day_of_week')
+                ->orderBy('time')
+                ->get();
 
-            // Get or create layout setting
-            $layoutSetting = LayoutSetting::firstOrCreate(
-                ['user_id' => Auth::id()],
-                ['description' => 'Default description']
-            );
-
-            // Update background image (can be null to clear)
-            $layoutSetting->background_image_id = $request->background_image_id;
-            $layoutSetting->save();
-
-            $message = $request->background_image_id ? 'Background berhasil diperbarui' : 'Background berhasil dihapus';
-            return response()->json(['success' => true, 'message' => $message]);
-
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
-        }
-    }
-
-    public function updateLayout(Request $request)
-    {
-        try {
-            $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
-                'description' => 'nullable|string|max:1000',
-                'images' => 'nullable|array', // Allow empty array
-                'images.*.position' => 'required|integer|min:1|max:6',
-                'images.*.image_id' => 'required|integer|exists:media,id',
-                'images.*.order' => 'required|integer|min:1'
-            ], [
-                'description.max' => 'Deskripsi maksimal 1000 karakter',
-                'images.array' => 'Data gambar harus berupa array',
-                'images.*.position.required' => 'Posisi gambar harus disediakan',
-                'images.*.position.integer' => 'Posisi gambar harus berupa angka',
-                'images.*.position.min' => 'Posisi gambar minimal 1',
-                'images.*.position.max' => 'Posisi gambar maksimal 6',
-                'images.*.image_id.required' => 'ID gambar harus disediakan',
-                'images.*.image_id.integer' => 'ID gambar harus berupa angka',
-                'images.*.image_id.exists' => 'Gambar tidak ditemukan',
-                'images.*.order.required' => 'Urutan harus disediakan',
-                'images.*.order.integer' => 'Urutan harus berupa angka',
-                'images.*.order.min' => 'Urutan minimal 1'
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $validator->errors()->first(),
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
-            $description = $request->input('description', '');
-            $images = $request->input('images', []); // Default to empty array
-            
-            // Use transaction to ensure data integrity
-            DB::transaction(function() use ($description, $images) {
-                // First, reset all media to not show on landing and clear layout order
-                Media::where('user_id', Auth::id())
-                    ->update([
-                        'show_on_landing' => false,
-                        'layout_order' => null
-                    ]);
-                
-                // Then update the selected images (if any)
-                if (!empty($images)) {
-                    foreach ($images as $imageData) {
-                        // Check if this position already has an image from any user
-                        $existingImage = Media::where('layout_order', $imageData['order'])
-                            ->where('show_on_landing', true)
-                            ->first();
-                        
-                        if ($existingImage) {
-                            // Remove the existing image from this position
-                            $existingImage->update([
-                                'show_on_landing' => false,
-                                'layout_order' => null
-                            ]);
-                        }
-                        
-                        // Set the new image to this position
-                        Media::where('id', $imageData['image_id'])
-                            ->where('user_id', Auth::id())
-                            ->update([
-                                'show_on_landing' => true,
-                                'layout_order' => $imageData['order']
-                            ]);
-                    }
-                }
-                
-                // Store layout description in layout_settings table
-                LayoutSetting::updateOrCreate(
-                    ['user_id' => Auth::id()],
-                    ['description' => $description]
-                );
-            });
-
-            // Log the action
-            $imageCount = count($images);
-            $logMessage = $imageCount > 0 
-                ? "Updated landing page layout with {$imageCount} images" 
-                : 'Updated landing page layout (no media)';
-            Log::createLog(Auth::id(), 'Update Layout', $logMessage);
-
-            $responseMessage = $imageCount > 0 
-                ? 'Layout berhasil disimpan dan diterapkan ke landing page!' 
-                : 'Layout berhasil disimpan (tanpa media)!';
-            
             return response()->json([
                 'success' => true,
-                'message' => $responseMessage
+                'defaultMedia' => $defaultMedia,
+                'scheduledBackgrounds' => $scheduledBackgrounds
             ]);
-
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Error updating layout: ' . $e->getMessage());
             
+        } catch (\Exception $e) {
             return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat menyimpan layout'
+                'success' => false, 
+                'message' => 'Gagal memuat status layout',
+                'defaultMedia' => [],
+                'scheduledBackgrounds' => []
             ], 500);
         }
+    }
+
+
+    /**
+     * Get currently active schedule
+     */
+    private function getActiveSchedule()
+    {
+        $now = now();
+        $currentDay = strtolower($now->format('l')); // Get day name in English
+        $currentTime = $now->format('H:i:s');
+        
+        // Map English day names to Indonesian
+        $dayMap = [
+            'monday' => 'senin',
+            'tuesday' => 'selasa', 
+            'wednesday' => 'rabu',
+            'thursday' => 'kamis',
+            'friday' => 'jumat',
+            'saturday' => 'sabtu',
+            'sunday' => 'minggu'
+        ];
+        
+        $indonesianDay = $dayMap[$currentDay] ?? null;
+        
+        if (!$indonesianDay) {
+            return null;
+        }
+        
+        // Find all active schedules for current day and time
+        $activeSchedules = Schedule::where('day_of_week', $indonesianDay)
+            ->where('time', '<=', $currentTime)
+            ->whereDate('start_date', '<=', $now->toDateString())
+            ->where('is_active', true)
+            ->get();
+            
+        return $activeSchedules->isNotEmpty() ? $activeSchedules : null;
+    }
+
+    /**
+     * Get media for scheduled display
+     */
+    private function getScheduledMedia($schedules)
+    {
+        if (!$schedules) {
+            return collect();
+        }
+        
+        // Handle collection of schedules
+        if ($schedules instanceof \Illuminate\Database\Eloquent\Collection) {
+            $media = collect();
+            $position = 1;
+            
+            foreach ($schedules as $schedule) {
+                if ($schedule->media_id) {
+                    $mediaItem = Media::find($schedule->media_id);
+                    if ($mediaItem) {
+                        $mediaItem->layout_order = $position;
+                        $media->push($mediaItem);
+                        $position++;
+                    }
+                }
+            }
+            
+            return $media;
+        }
+        
+        // Handle single schedule (backward compatibility)
+        if ($schedules->media_id) {
+            $mediaItem = Media::find($schedules->media_id);
+            if ($mediaItem) {
+                $mediaItem->layout_order = 1;
+                return collect([$mediaItem]);
+            }
+        }
+        
+        return collect();
     }
 }
