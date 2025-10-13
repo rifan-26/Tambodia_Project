@@ -146,29 +146,45 @@
       gap: 0.5rem;
       box-shadow: 0 2px 8px rgb(0 0 0 / 0.15);
     }
-    
     .user-badge .status-indicator {
       width: 16px;
       height: 16px;
       background-color: #44d69e;
       border-radius: 50%;
-      box-shadow: 0 0 6px #44d69eaa;
     }
-    
-    .card {
-      border: none;
-      border-radius: 16px;
-      background: white;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 10px 40px rgba(0,0,0,0.03);
-      transition: all 0.3s ease;
+    .grid-item {
+      position: relative;
+      width: 100%;
+      background: #f8f9fa;
+      border-radius: 12px;
       overflow: hidden;
+      cursor: pointer;
+      border: 2px solid #e9ecef;
+      transition: all 0.2s ease;
     }
     
-    .card:hover {
-      box-shadow: 0 4px 6px rgba(0,0,0,0.07), 0 20px 50px rgba(0,0,0,0.05);
-      transform: translateY(-2px);
+    .grid-item::before {
+      content: '';
+      display: block;
+      padding-bottom: 100%;
     }
     
+    .grid-item > * {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+    
+    .grid-item:hover {
+      border-color: #667eea;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .grid-item.has-media {
+      border-color: #10b981;
+    }
     .card-header {
       background: linear-gradient(135deg, #f8fafb 0%, #ffffff 100%) !important;
       border-bottom: 1px solid rgba(0,0,0,0.06);
@@ -298,64 +314,69 @@
       transition: all 0.4s ease;
     }
     
-    .background-selector:hover i {
-      transform: scale(1.1) translateY(-5px);
-    }
-    
     .background-selector.has-image {
-      padding: 0;
-      border-style: solid;
-      border-color: var(--primary);
-      position: relative;
+      padding: 0 !important;
+      border-style: solid !important;
+      border-color: var(--primary) !important;
+      position: relative !important;
     }
     
     .background-selector.has-image::before {
-      display: none;
+      display: none !important;
     }
     
     .background-selector img,
-    .background-selector video {
-      width: 100%;
-      height: 300px;
-      object-fit: cover;
-      border-radius: 14px;
+    .background-selector video,
+    .background-selector iframe {
+      width: 100% !important;
+      height: 300px !important;
+      object-fit: cover !important;
+      border-radius: 14px !important;
+      display: block !important;
     }
     
-    .background-selector .remove-bg {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: rgba(220, 38, 38, 0.95);
-      color: white;
-      border: 2px solid white;
-      border-radius: 50%;
-      width: 44px;
-      height: 44px;
-      cursor: pointer;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-      transition: all 0.3s ease;
-      font-size: 1.2rem;
+    .remove-bg {
+      position: absolute !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) !important;
+      background: rgba(220, 38, 38, 0.95) !important;
+      color: white !important;
+      border: 3px solid white !important;
+      border-radius: 50% !important;
+      width: 50px !important;
+      height: 50px !important;
+      font-size: 1.5rem !important;
+      cursor: pointer !important;
+      z-index: 100 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
+      transition: all 0.3s ease !important;
+      opacity: 0 !important;
+    }
+    
+    .background-selector:hover .remove-bg {
+      opacity: 1 !important;
     }
     
     .background-selector .remove-bg:hover {
-      background: rgba(185, 28, 28, 1);
-      transform: scale(1.15) rotate(90deg);
-      box-shadow: 0 6px 20px rgba(220, 38, 38, 0.6);
-      border-color: #fff;
+      background: rgba(185, 28, 28, 1) !important;
+      transform: translate(-50%, -50%) scale(1.2) rotate(90deg) !important;
+      box-shadow: 0 6px 20px rgba(220, 38, 38, 0.6) !important;
     }
     
     .background-selector .remove-bg:active {
-      transform: scale(1.05) rotate(90deg);
-      box-shadow: 0 3px 10px rgba(220, 38, 38, 0.5);
+      transform: translate(-50%, -50%) scale(1.1) rotate(90deg) !important;
+      box-shadow: 0 3px 10px rgba(220, 38, 38, 0.5) !important;
     }
     
     /* Grid Layout - Rapih & Proporsional */
     .grid-container {
       display: grid;
+      grid-template-columns: repeat(2, minmax(300px, 1fr));
+      grid-template-rows: repeat(3, minmax(150px, 1fr));
       grid-template-columns: 1fr 1fr;
       grid-template-rows: 150px 150px 150px 100px;
       gap: 0.75rem;
@@ -455,86 +476,101 @@
       transform: scale(1.05);
     }
     
-    .grid-item .position-badge {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-      color: white;
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      border: 2px solid white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 1.1rem;
-      z-index: 5;
-      box-shadow: 0 4px 15px rgba(31, 158, 118, 0.4);
-      transition: all 0.3s ease;
+    .remove-item {
+      position: absolute !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) !important;
+      background: rgba(220, 38, 38, 0.95) !important;
+      color: white !important;
+      border: 3px solid white !important;
+      border-radius: 50% !important;
+      width: 50px !important;
+      height: 50px !important;
+      cursor: pointer !important;
+      z-index: 100 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      font-size: 1.5rem !important;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
+      transition: all 0.3s ease !important;
+      opacity: 0 !important;
     }
     
-    .grid-item:hover .position-badge {
-      transform: scale(1.1);
-    }
-    
-    .grid-item .remove-item {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: rgba(220, 38, 38, 0.9);
-      color: white;
-      border: 2px solid white;
-      border-radius: 6px;
-      padding: 6px 12px;
-      cursor: pointer;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-      transition: all 0.2s ease;
-      opacity: 1;
+    .grid-item:hover .remove-item {
+      opacity: 1 !important;
     }
 
-    .grid-item .remove-item:hover {
-      background: rgba(185, 28, 28, 1);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.5);
-      border-color: #fff;
+    .remove-item:hover {
+      background: rgba(185, 28, 28, 1) !important;
+      transform: translate(-50%, -50%) scale(1.2) rotate(90deg) !important;
+      box-shadow: 0 6px 20px rgba(220, 38, 38, 0.6) !important;
+    }
+    
+    .remove-item:active {
+      transform: translate(-50%, -50%) scale(1.1) rotate(90deg) !important;
+      box-shadow: 0 3px 10px rgba(220, 38, 38, 0.5) !important;
     }
 
-    .grid-item .remove-item:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
-    }
-
-    .grid-item .remove-item i {
-      font-size: 0.9rem;
+    .remove-item i {
+      font-size: 1.5rem !important;
+      pointer-events: none !important;
     }
     
-    .grid-item .placeholder {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      color: #9ca3af;
-      font-size: 0.85rem;
-      font-weight: 500;
-      gap: 0.5rem;
+    .position-badge {
+      position: absolute !important;
+      top: 10px !important;
+      left: 10px !important;
+      background: rgba(0, 0, 0, 0.7) !important;
+      color: white !important;
+      width: 32px !important;
+      height: 32px !important;
+      border-radius: 50% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      font-weight: 700 !important;
+      font-size: 1rem !important;
+      z-index: 5 !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
     }
     
-    .grid-item .placeholder i {
-      font-size: 1.8rem;
-      opacity: 0.5;
+    /* Always show delete button on mobile/touch devices */
+    @media (hover: none) {
+      .grid-item .remove-item {
+        display: flex !important;
+      }
     }
     
-    /* Preview Section */
+    .placeholder {
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 1rem !important;
+      padding: 2rem !important;
+      z-index: 1 !important;
+      text-align: center !important;
+      color: #a0aec0 !important;
+    }
+    
+    .placeholder i {
+      font-size: 2.5rem !important;
+      opacity: 0.5 !important;
+    }
+    
+    .placeholder p {
+      margin: 0 !important;
+      font-size: 0.9rem !important;
+      font-weight: 500 !important;
+    }
+    
     .preview-section {
       background: linear-gradient(135deg, #ffffff 0%, #f8fafb 100%);
       border: none;
@@ -782,6 +818,35 @@
         grid-template-columns: 1fr;
       }
     }
+    
+    /* Custom Confirm Modal Styling */
+    #confirmModal .modal-dialog {
+      animation: modalSlideDown 0.3s ease-out;
+    }
+    
+    @keyframes modalSlideDown {
+      from {
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    #confirmModal .btn-danger:hover {
+      background: #c82333 !important;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4) !important;
+      transition: all 0.2s ease;
+    }
+    
+    #confirmModal .btn-secondary:hover {
+      background: #5a6268 !important;
+      transform: translateY(-2px);
+      transition: all 0.2s ease;
+    }
   </style>
 </head>
 <body>
@@ -862,6 +927,17 @@
               <p class="text-dark fw-bold mb-1">Klik area lalu pilih media yang ingin ditampilkan</p>
               <p class="text-muted small">Untuk menambahkan gambar background</p>
             </div>
+            <div class="mt-2">
+              <small class="text-success fw-bold">
+                <i class="bi bi-check-circle-fill me-1"></i> 
+                Auto-Save: Hapus background otomatis update landing page
+              </small>
+              <br>
+              <small class="text-muted mt-1 d-block">
+                <i class="bi bi-info-circle me-1"></i> 
+                Klik tombol "✕" pada background untuk menghapus, file tetap tersimpan
+              </small>
+            </div>
           </div>
         </div>
 
@@ -915,16 +991,21 @@
             </div>
             <div class="d-flex gap-2 mt-3">
               <button class="btn btn-outline-danger" onclick="clearAllGridMedia()" style="flex: 0 0 auto;">
-                <i class="bi bi-trash me-2"></i>Hapus Semua
+                <i class="bi bi-trash me-2"></i>Hapus Semua Grid
               </button>
               <button class="btn btn-success w-100" onclick="saveLayout()">
                 <i class="fas fa-save me-2"></i>Simpan Layout
               </button>
             </div>
             <div class="mt-2">
-              <small class="text-muted">
-                <i class="bi bi-info-circle"></i> 
-                Klik "Hapus Semua" untuk menghapus semua media, lalu klik "Simpan Layout" untuk menyimpan perubahan.
+              <small class="text-success fw-bold">
+                <i class="bi bi-check-circle-fill me-1"></i> 
+                Auto-Save: Hapus media otomatis update landing page
+              </small>
+              <br>
+              <small class="text-muted mt-1 d-block">
+                <i class="bi bi-info-circle me-1"></i> 
+                Media hanya dihapus dari layout, file tetap tersimpan dan bisa ditambahkan lagi
               </small>
             </div>
           </div>
@@ -932,6 +1013,36 @@
       </div>
     </div>
   </main>
+
+<!-- Custom Confirmation Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+      <div class="modal-header" style="border-bottom: 1px solid #e9ecef; padding: 20px 25px;">
+        <h5 class="modal-title" id="confirmModalTitle" style="font-weight: 600; color: #dc3545;">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          Konfirmasi Hapus
+        </h5>
+      </div>
+      <div class="modal-body" style="padding: 25px;">
+        <div id="confirmModalMessage" style="font-size: 1rem; color: #495057; margin-bottom: 20px;">
+          <!-- Message will be inserted here -->
+        </div>
+        <div id="confirmModalDetails" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #0d6efd;">
+          <!-- Details will be inserted here -->
+        </div>
+      </div>
+      <div class="modal-footer" style="border-top: 1px solid #e9ecef; padding: 15px 25px; gap: 10px;">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="padding: 10px 25px; border-radius: 8px;">
+          <i class="bi bi-x-circle me-1"></i> Tidak
+        </button>
+        <button type="button" class="btn btn-danger" id="confirmModalYes" style="padding: 10px 30px; border-radius: 8px;">
+          <i class="bi bi-check-circle me-1"></i> Ya, Hapus
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Media Selection Modal (Background) -->
 <div class="modal fade" id="backgroundModal" tabindex="-1">
@@ -1045,7 +1156,7 @@ function initializeGrid() {
                 <div class="position-badge">${i}</div>
                 <div class="placeholder">
                     <i class="fas fa-plus-circle"></i>
-                    Klik untuk pilih media
+                    <p>Klik untuk pilih media</p>
                 </div>
             </div>
         `);
@@ -1347,7 +1458,9 @@ function selectGridMedia(mediaId) {
 
 // Set background
 function setBackground(media) {
-    console.log('setBackground called for media:', media);
+    console.log('🎨 setBackground called for media:', media);
+    console.log('📝 Media type:', media.type);
+    console.log('📂 File path:', media.file_path);
     
     layoutData.background = media;
     const selector = $('#backgroundSelector');
@@ -1355,9 +1468,13 @@ function setBackground(media) {
     const isVideo = media.type === 'Video';
     const isYouTube = media.file_path && (media.file_path.includes('youtube.com') || media.file_path.includes('youtu.be'));
     
+    console.log('🎬 Is Video?', isVideo);
+    console.log('📺 Is YouTube?', isYouTube);
+    
     let mediaElement;
     
     if (isYouTube) {
+        console.log('✅ Using YouTube embed');
         // YouTube video - convert to embed
         let embedUrl = media.file_path;
         if (embedUrl.includes('youtu.be/')) {
@@ -1369,10 +1486,16 @@ function setBackground(media) {
         }
         mediaElement = `<iframe src="${embedUrl}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
     } else if (isVideo) {
+        console.log('✅ Using Video tag');
         mediaElement = `<video src="/storage/${media.file_path}" autoplay muted loop></video>`;
     } else {
-        mediaElement = `<img src="/storage/${media.file_path}" alt="${media.name}">`;
+        console.log('✅ Using IMG tag for image');
+        const imgPath = `/storage/${media.file_path}`;
+        console.log('🖼️ Image path:', imgPath);
+        mediaElement = `<img src="${imgPath}" alt="${media.name}" style="width: 100%; height: 300px; object-fit: cover; border-radius: 14px;">`;
     }
+    
+    console.log('📝 Generated mediaElement:', mediaElement);
     
     selector.html(`
         ${mediaElement}
@@ -1382,14 +1505,34 @@ function setBackground(media) {
     `).addClass('has-image');
     selector.attr('onclick', '');
     
-    console.log('Background set successfully');
+    console.log('✅ Background set successfully');
+    console.log('🔍 Selector HTML:', selector.html());
 }
 
 // Remove background
 function removeBackground(event) {
     event.stopPropagation();
     
-    console.log('Removing background:', layoutData.background ? layoutData.background.name : 'none');
+    const bgName = layoutData.background ? layoutData.background.name : 'Background';
+    
+    showConfirmModal(
+        'Hapus Background',
+        `Apakah Anda yakin ingin menghapus <strong>"${bgName}"</strong> dari background?`,
+        [
+            'Background hilang dari Landing Page',
+            'File tetap tersimpan dan bisa ditambahkan lagi',
+            'Perubahan akan langsung disimpan'
+        ],
+        function() {
+            // Callback when user clicks "Ya, Hapus"
+            executeRemoveBackground(bgName);
+        }
+    );
+}
+
+// Execute remove background (separated for modal callback)
+function executeRemoveBackground(bgName) {
+    console.log('🗑️ Removing background:', bgName);
     
     const removedBg = layoutData.background;
     layoutData.background = null;
@@ -1402,8 +1545,29 @@ function removeBackground(event) {
     `).removeClass('has-image');
     selector.attr('onclick', 'openBackgroundModal()');
     
-    console.log('Background removed:', removedBg ? removedBg.name : 'none');
-    showNotification('Background dihapus');
+    console.log('✅ Background removed from layout (file still exists)');
+    
+    // AUTO-SAVE: Update landing page immediately
+    console.log('💾 Auto-saving background removal...');
+    
+    $('#loadingOverlay').addClass('show');
+    
+    $.ajax({
+        url: '/layout/background',
+        method: 'POST',
+        data: { media_id: null },
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+    })
+    .done(function(response) {
+        $('#loadingOverlay').removeClass('show');
+        console.log('✅ Background removal saved:', response);
+        showNotification('Background dihapus dari landing page');
+    })
+    .fail(function(xhr, status, error) {
+        $('#loadingOverlay').removeClass('show');
+        console.error('❌ Failed to save background removal:', status, error);
+        alert('Gagal menyimpan perubahan!\n\nError: ' + error + '\n\nSilakan coba lagi atau refresh halaman.');
+    });
 }
 
 // Set grid media
@@ -1435,13 +1599,25 @@ function setGridMedia(position, media) {
         mediaElement = `<img src="/storage/${media.file_path}" alt="${media.name}">`;
     }
     
+    // Update HTML with media and delete button
     gridItem.html(`
         <div class="position-badge">${position}</div>
         ${mediaElement}
-        <button class="remove-item" onclick="removeGridMedia(event, ${position})">
-            <i class="bi bi-trash"></i> Hapus
-        </button>
     `).addClass('has-media');
+    
+    // Add delete button with jQuery event handler (more reliable than onclick)
+    const deleteBtn = $(`
+        <button class="remove-item">
+            <i class="fas fa-times"></i>
+        </button>
+    `);
+    
+    deleteBtn.on('click', function(e) {
+        e.stopPropagation();
+        removeGridMedia(e, position);
+    });
+    
+    gridItem.append(deleteBtn);
     
     // Autoplay video if it's a local video
     if (isVideo && !isYouTube) {
@@ -1458,10 +1634,30 @@ function setGridMedia(position, media) {
 function removeGridMedia(event, position) {
     event.stopPropagation();
     
-    console.log('Removing media from grid position:', position);
+    const removedMedia = layoutData.gridItems[position];
+    const mediaName = removedMedia ? removedMedia.name : 'Media';
+    
+    showConfirmModal(
+        'Hapus Media dari Grid',
+        `Apakah Anda yakin ingin menghapus <strong>"${mediaName}"</strong> dari posisi ${position}?`,
+        [
+            'Media hilang dari Landing Page',
+            'Media hilang dari Grid Layout',
+            'File tetap tersimpan dan bisa ditambahkan lagi',
+            'Perubahan akan langsung disimpan'
+        ],
+        function() {
+            // Callback when user clicks "Ya, Hapus"
+            executeRemoveGridMedia(position, mediaName);
+        }
+    );
+}
+
+// Execute remove grid media (separated for modal callback)
+function executeRemoveGridMedia(position, mediaName) {
+    console.log('🗑️ Removing media from grid position:', position);
     
     // Remove from layoutData
-    const removedMedia = layoutData.gridItems[position];
     delete layoutData.gridItems[position];
     
     // Reset grid item UI
@@ -1470,51 +1666,76 @@ function removeGridMedia(event, position) {
         <div class="position-badge">${position}</div>
         <div class="placeholder">
             <i class="fas fa-plus-circle"></i>
-            Klik untuk pilih media
+            <p>Klik untuk pilih media</p>
         </div>
     `).removeClass('has-media');
     
     // Re-attach click handler
     gridItem.attr('onclick', `openGridMediaModal(${position})`);
     
-    console.log('Media removed from position', position, ':', removedMedia ? removedMedia.name : 'none');
-    showNotification(`Media dihapus dari posisi ${position}`);
+    console.log('✅ Media removed from layout (file still exists):', mediaName);
+    
+    // AUTO-SAVE: Update landing page immediately
+    console.log('💾 Auto-saving to update landing page...');
+    saveLayout();
 }
 
 // Clear all grid media
 function clearAllGridMedia() {
-    if (confirm('Apakah Anda yakin ingin menghapus semua media dari grid?')) {
-        console.log('Clearing all grid media');
-        
-        // Count current media
-        const mediaCount = Object.keys(layoutData.gridItems).length;
-        
-        // Clear all grid items
-        for (let i = 1; i <= 6; i++) {
-            if (layoutData.gridItems[i]) {
-                delete layoutData.gridItems[i];
-                
-                const gridItem = $(`.grid-item[data-position="${i}"]`);
-                gridItem.html(`
-                    <div class="position-badge">${i}</div>
-                    <div class="placeholder">
-                        <i class="fas fa-plus-circle"></i>
-                        Klik untuk pilih media
-                    </div>
-                `).removeClass('has-media');
-                gridItem.attr('onclick', `openGridMediaModal(${i})`);
-            }
-        }
-        
-        console.log(`Cleared ${mediaCount} media from grid`);
-        showNotification(`${mediaCount} media dihapus dari grid`);
+    const mediaCount = Object.keys(layoutData.gridItems).length;
+    
+    if (mediaCount === 0) {
+        showNotification('Grid sudah kosong!');
+        return;
     }
+    
+    showConfirmModal(
+        'Hapus Semua Media dari Grid',
+        `Apakah Anda yakin ingin menghapus <strong>SEMUA ${mediaCount} media</strong> dari grid layout?`,
+        [
+            'Semua media hilang dari Landing Page',
+            'Grid Layout dikosongkan',
+            'File tetap tersimpan dan bisa ditambahkan lagi',
+            'Perubahan akan langsung disimpan'
+        ],
+        function() {
+            // Callback when user clicks "Ya, Hapus"
+            executeClearAllGridMedia(mediaCount);
+        }
+    );
+}
+
+// Execute clear all grid media (separated for modal callback)
+function executeClearAllGridMedia(mediaCount) {
+    console.log('🗑️ Clearing all grid media from layout');
+    
+    // Clear all grid items
+    for (let i = 1; i <= 6; i++) {
+        if (layoutData.gridItems[i]) {
+            delete layoutData.gridItems[i];
+            
+            const gridItem = $(`.grid-item[data-position="${i}"]`);
+            gridItem.html(`
+                <div class="position-badge">${i}</div>
+                <div class="placeholder">
+                    <i class="fas fa-plus-circle"></i>
+                    <p>Klik untuk pilih media</p>
+                </div>
+            `).removeClass('has-media');
+            gridItem.attr('onclick', `openGridMediaModal(${i})`);
+        }
+    }
+    
+    console.log(`✅ Cleared ${mediaCount} media from layout (files still exist)`);
+    
+    // AUTO-SAVE: Update landing page immediately
+    console.log('💾 Auto-saving to update landing page...');
+    saveLayout();
 }
 
 // Save description
 function saveDescription() {
     const description = $('#descriptionTextarea').val();
-    
     $.ajax({
         url: '/layout/description',
         method: 'POST',
@@ -1562,31 +1783,28 @@ function saveLayout() {
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
     });
     promises.push(bgPromise);
-    
-    // Save grid layout - collect media IDs in order by position
     const mediaIds = [];
     for (let i = 1; i <= 6; i++) {
         if (layoutData.gridItems[i]) {
             mediaIds.push(layoutData.gridItems[i].id);
-            console.log(`Position ${i}: Media ID ${layoutData.gridItems[i].id} - ${layoutData.gridItems[i].name}`);
         }
     }
     
-    // IMPORTANT: Always send layout update, even if empty (to clear media from landing page)
+    // IMPORTANT: Always send layout update with media_ids field (even if empty array)
     console.log('Saving grid with', mediaIds.length, 'media items:', mediaIds);
+    
     const layoutPromise = $.ajax({
         url: '/layout/update',
         method: 'POST',
-        data: { 
-            media_ids: mediaIds.length > 0 ? mediaIds : [] 
-        },
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+        data: { media_ids: mediaIds },  // Always send media_ids field
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+        contentType: 'application/x-www-form-urlencoded; charset=UTF-8'
     })
     .done(function(response) {
-        console.log('Layout update response:', response);
+        console.log('✅ Layout update response:', response);
     })
     .fail(function(xhr, status, error) {
-        console.error('Layout update failed:', status, error);
+        console.error('❌ Layout update failed:', status, error);
         console.error('Response:', xhr.responseText);
     });
     promises.push(layoutPromise);
@@ -1678,6 +1896,38 @@ function showNotification(message) {
     setTimeout(() => {
         $('#successNotification').removeClass('show');
     }, 3000);
+}
+
+// Show custom confirmation modal
+function showConfirmModal(title, message, details, onConfirm) {
+    $('#confirmModalTitle').html(`<i class="bi bi-exclamation-triangle-fill me-2"></i>${title}`);
+    $('#confirmModalMessage').html(message);
+    
+    // Build details HTML
+    let detailsHtml = '';
+    if (Array.isArray(details)) {
+        detailsHtml = details.map(detail => `
+            <div style="display: flex; align-items: flex-start; margin-bottom: 8px;">
+                <i class="bi bi-check-circle-fill me-2" style="color: #0d6efd; font-size: 1.1rem; flex-shrink: 0;"></i>
+                <span>${detail}</span>
+            </div>
+        `).join('');
+    } else {
+        detailsHtml = details;
+    }
+    
+    $('#confirmModalDetails').html(detailsHtml);
+    
+    // Remove old event handlers and add new one
+    $('#confirmModalYes').off('click').on('click', function() {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
+        modal.hide();
+        onConfirm();
+    });
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+    modal.show();
 }
 
 // Hide notification

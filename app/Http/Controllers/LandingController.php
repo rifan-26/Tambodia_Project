@@ -11,24 +11,22 @@ class LandingController extends Controller
 {
     public function index()
     {
-        // Get active schedules and media with conflict resolution
+        // Get active schedules
         $activeSchedules = $this->getActiveSchedule();
-        $media = $this->getScheduledMedia($activeSchedules);
+        $scheduledMedia = $this->getScheduledMedia($activeSchedules);
 
-        // Always use scheduled media if available, otherwise fallback to default
-        if ($media && $media->isNotEmpty()) {
-            $layoutImages = $media;
-        } else {
-            // Use default layout media
-            $layoutImages = Media::where('show_on_landing', true)
-                ->whereIn('type', ['Gambar', 'Video'])
-                ->whereNotNull('layout_order')
-                ->orderBy('layout_order', 'asc')
-                ->get();
-        }
+        // Get default layout media (all positions 1-6)
+        $defaultLayoutMedia = Media::where('show_on_landing', true)
+            ->whereIn('type', ['Gambar', 'Video'])
+            ->whereNotNull('layout_order')
+            ->orderBy('layout_order', 'asc')
+            ->get();
+
+        // Merge: Replace only scheduled positions, keep default for others
+        $finalMedia = $this->mergeLayoutWithSchedule($defaultLayoutMedia, $scheduledMedia);
 
         // Get all media for backward compatibility
-        $media = $layoutImages;
+        $media = $finalMedia;
 
         // Get layout settings (background and description)
         $layoutSettings = LayoutSetting::first();
@@ -214,6 +212,41 @@ class LandingController extends Controller
         ];
 
         return $days[$dayNumber] ?? null;
+    }
+
+    /**
+     * Merge default layout with scheduled media
+     * - Scheduled media replaces only specific positions
+     * - Default layout media fills remaining positions
+     */
+    private function mergeLayoutWithSchedule($defaultMedia, $scheduledMedia)
+    {
+        // Create position map from default layout (positions 1-6)
+        $positionMap = [];
+        foreach ($defaultMedia as $media) {
+            if ($media->layout_order) {
+                $positionMap[$media->layout_order] = $media;
+            }
+        }
+        
+        // Override with scheduled media (only replace scheduled positions)
+        foreach ($scheduledMedia as $media) {
+            if ($media->layout_order) {
+                $positionMap[$media->layout_order] = $media;
+                \Log::info("🔄 Merged: Position {$media->layout_order} replaced with scheduled media: {$media->name}");
+            }
+        }
+        
+        // Convert back to collection, sorted by position
+        ksort($positionMap);
+        $mergedCollection = collect(array_values($positionMap));
+        
+        \Log::info('📋 Final merged layout', [
+            'total_positions' => $mergedCollection->count(),
+            'positions' => $mergedCollection->pluck('layout_order', 'name')->toArray()
+        ]);
+        
+        return $mergedCollection;
     }
 
     /**

@@ -35,7 +35,42 @@ class DashboardController extends Controller
         
         $media = $query->orderBy('created_at', 'desc')->get();
         
-        return view('Dashboard', compact('media'));
+        // Get active audio schedules for dashboard
+        $activeAudioSchedules = $this->getActiveAudioSchedules();
+        
+        return view('Dashboard', compact('media', 'activeAudioSchedules'));
+    }
+    
+    /**
+     * Get currently active audio schedules
+     */
+    private function getActiveAudioSchedules()
+    {
+        $currentDate = now()->format('Y-m-d');
+        $currentTime = now()->format('H:i');
+        $indonesianDay = $this->getIndonesianDay();
+
+        return \App\Models\Schedule::join('media', 'schedules.media_id', '=', 'media.id')
+            ->where('media.type', 'Audio')
+            ->where('start_date', '<=', $currentDate)
+            ->where(function($query) use ($currentDate) {
+                $query->whereNull('end_date')
+                      ->orWhere('end_date', '>=', $currentDate);
+            })
+            ->where(function($query) use ($indonesianDay) {
+                $query->whereNull('day_of_week')
+                      ->orWhere('day_of_week', $indonesianDay);
+            })
+            ->where(function($query) use ($currentTime) {
+                $query->whereNull('time')
+                      ->orWhere('time', '=', $currentTime)
+                      ->orWhere('time', '<=', $currentTime);
+            })
+            ->select('schedules.*')
+            ->with('media')
+            ->orderBy('schedules.start_date', 'desc')
+            ->orderBy('schedules.time', 'desc')
+            ->get();
     }
 
     public function pegawai(Request $request)
