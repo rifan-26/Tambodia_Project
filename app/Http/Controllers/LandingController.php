@@ -11,58 +11,6 @@ class LandingController extends Controller
 {
     public function index()
     {
-<<<<<<< HEAD
-        // Return default data immediately if database is not accessible
-        $defaultData = [
-            'media' => collect([]),
-            'backgroundImage' => null,
-            'description' => 'Kami adalah lembaga resmi pemerintah yang bertugas menyelenggarakan kegiatan statistik di wilayah Sumatera Utara. BPS hadir untuk memberikan data akurat, terpercaya, dan terkini.',
-            'activeSchedules' => collect([]),
-            'layoutConfig' => ['type' => 'grid', 'duration' => 10, 'settings' => []]
-        ];
-
-        try {
-            // Quick database connection test
-            \DB::connection()->getPdo();
-            
-            // If connection successful, try to load data quickly
-            $layoutImages = \DB::table('media')
-                ->select('id', 'name', 'file_path', 'type', 'layout_order')
-                ->where('show_on_landing', 1)
-                ->whereIn('type', ['Gambar', 'Video'])
-                ->whereNotNull('layout_order')
-                ->orderBy('layout_order', 'asc')
-                ->limit(6)
-                ->get();
-
-            $layoutSettings = \DB::table('layout_settings')->first();
-            
-            $backgroundImage = null;
-            if ($layoutSettings && $layoutSettings->background_image_id) {
-                $backgroundImage = \DB::table('media')
-                    ->select('id', 'file_path')
-                    ->where('id', $layoutSettings->background_image_id)
-                    ->first();
-            }
-            
-            $description = $layoutSettings && $layoutSettings->description 
-                ? $layoutSettings->description 
-                : $defaultData['description'];
-
-            return view('landingpage', [
-                'media' => $layoutImages,
-                'backgroundImage' => $backgroundImage,
-                'description' => $description,
-                'activeSchedules' => collect([]),
-                'layoutConfig' => ['type' => 'grid', 'duration' => 10, 'settings' => []]
-            ]);
-            
-        } catch (\Exception $e) {
-            // Database unavailable - return default view
-            \Log::error('Landing page DB error: ' . $e->getMessage());
-            return view('landingpage', $defaultData);
-        }
-=======
         // Get active schedules
         $activeSchedules = $this->getActiveSchedule();
         $scheduledMedia = $this->getScheduledMedia($activeSchedules);
@@ -99,7 +47,6 @@ class LandingController extends Controller
         ];
 
         return view('landingpage', compact('media', 'backgroundImage', 'description', 'activeSchedules', 'layoutConfig'));
->>>>>>> 3978418ae0940b0600213bda9526f6c6519fe3cc
     }
 
     /**
