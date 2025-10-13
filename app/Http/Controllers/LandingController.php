@@ -11,6 +11,7 @@ class LandingController extends Controller
 {
     public function index()
     {
+<<<<<<< HEAD
         // Return default data immediately if database is not accessible
         $defaultData = [
             'media' => collect([]),
@@ -61,6 +62,44 @@ class LandingController extends Controller
             \Log::error('Landing page DB error: ' . $e->getMessage());
             return view('landingpage', $defaultData);
         }
+=======
+        // Get active schedules
+        $activeSchedules = $this->getActiveSchedule();
+        $scheduledMedia = $this->getScheduledMedia($activeSchedules);
+
+        // Get default layout media (all positions 1-6)
+        $defaultLayoutMedia = Media::where('show_on_landing', true)
+            ->whereIn('type', ['Gambar', 'Video'])
+            ->whereNotNull('layout_order')
+            ->orderBy('layout_order', 'asc')
+            ->get();
+
+        // Merge: Replace only scheduled positions, keep default for others
+        $finalMedia = $this->mergeLayoutWithSchedule($defaultLayoutMedia, $scheduledMedia);
+
+        // Get all media for backward compatibility
+        $media = $finalMedia;
+
+        // Get layout settings (background and description)
+        $layoutSettings = LayoutSetting::first();
+        
+        // Get active scheduled background or fallback to default
+        $activeBackground = $this->getActiveScheduledBackground();
+        $backgroundImage = $activeBackground ? $activeBackground->media : ($layoutSettings ? $layoutSettings->backgroundMedia : null);
+        
+        // Get active description from schedule descriptions or fallback to layout description
+        $activeDescription = $this->getActiveScheduleDescription();
+        $description = $activeDescription ? $activeDescription->description : ($layoutSettings ? $layoutSettings->description : null);
+
+        // Set default values
+        $layoutConfig = [
+            'type' => 'grid',
+            'duration' => 10,
+            'settings' => []
+        ];
+
+        return view('landingpage', compact('media', 'backgroundImage', 'description', 'activeSchedules', 'layoutConfig'));
+>>>>>>> 3978418ae0940b0600213bda9526f6c6519fe3cc
     }
 
     /**
@@ -226,6 +265,41 @@ class LandingController extends Controller
         ];
 
         return $days[$dayNumber] ?? null;
+    }
+
+    /**
+     * Merge default layout with scheduled media
+     * - Scheduled media replaces only specific positions
+     * - Default layout media fills remaining positions
+     */
+    private function mergeLayoutWithSchedule($defaultMedia, $scheduledMedia)
+    {
+        // Create position map from default layout (positions 1-6)
+        $positionMap = [];
+        foreach ($defaultMedia as $media) {
+            if ($media->layout_order) {
+                $positionMap[$media->layout_order] = $media;
+            }
+        }
+        
+        // Override with scheduled media (only replace scheduled positions)
+        foreach ($scheduledMedia as $media) {
+            if ($media->layout_order) {
+                $positionMap[$media->layout_order] = $media;
+                \Log::info("🔄 Merged: Position {$media->layout_order} replaced with scheduled media: {$media->name}");
+            }
+        }
+        
+        // Convert back to collection, sorted by position
+        ksort($positionMap);
+        $mergedCollection = collect(array_values($positionMap));
+        
+        \Log::info('📋 Final merged layout', [
+            'total_positions' => $mergedCollection->count(),
+            'positions' => $mergedCollection->pluck('layout_order', 'name')->toArray()
+        ]);
+        
+        return $mergedCollection;
     }
 
     /**

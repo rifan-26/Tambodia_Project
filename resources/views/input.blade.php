@@ -1145,7 +1145,15 @@
           card.classList.add('selected');
           jenisMediaInput.value = card.dataset.type;
           // adjust accept
-          const accept = card.dataset.type==='image' ? 'image/*' : card.dataset.type==='video' ? 'video/*' : 'audio/*';
+          let accept = '';
+          if (card.dataset.type === 'image') {
+            accept = 'image/*,.jpg,.jpeg,.png,.gif,.webp,.bmp';
+          } else if (card.dataset.type === 'video') {
+            accept = 'video/*,.mp4,.mpeg,.mpg,.mov,.webm,.avi,.mkv';
+          } else if (card.dataset.type === 'audio') {
+            accept = 'audio/*,.mp3,.wav,.ogg,.aac,.flac,.m4a';
+          }
+          console.log('🎵 Setting file accept:', accept, 'for type:', card.dataset.type);
           qs('#fileUpload').setAttribute('accept', accept);
           // Toggle UI for video link mode
           const uploadArea = qs('#uploadArea');
@@ -1535,7 +1543,21 @@
           }
         });
       }
-
+      
+      // File selection & preview
+      fileUploadInput.addEventListener('change', function(){
+        console.log('📁 File input changed:', this.files.length, 'files');
+        if(!this.files.length) return;
+        const f=this.files[0];
+        console.log('📄 File selected:', {
+          name: f.name,
+          type: f.type,
+          size: f.size,
+          jenisMedia: jenisMediaInput.value
+        });
+        nextBtn.disabled = !canProceed();
+      });
+      
       // Handle main background checkbox - only allow for images and videos
       if (setAsMainBackgroundCheckbox) {
         setAsMainBackgroundCheckbox.addEventListener('change', function() {

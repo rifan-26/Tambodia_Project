@@ -176,6 +176,14 @@ class MediaController extends Controller
             }
 
             if (!$isVideoLink) {
+                // Log request details for debugging
+                \Log::info('📁 Upload attempt', [
+                    'has_file' => $request->hasFile('file'),
+                    'files_count' => count($request->allFiles()),
+                    'media_type' => $mediaType,
+                    'file_input_name' => 'file'
+                ]);
+                
                 // Early check: ensure PHP upload is valid (helps diagnose php.ini limits/temp dir issues)
                 if (!$file || !$file->isValid()) {
                     $phpError = $file ? $file->getError() : UPLOAD_ERR_NO_FILE;
@@ -189,21 +197,45 @@ class MediaController extends Controller
                         UPLOAD_ERR_EXTENSION => 'Upload dibatalkan oleh ekstensi PHP',
                         default => 'Gagal mengunggah file'
                     };
+                    
+                    // Enhanced logging
+                    \Log::error('❌ Upload failed', [
+                        'error_code' => $phpError,
+                        'error_message' => $phpErrorMsg,
+                        'has_file_object' => !is_null($file),
+                        'is_valid' => $file ? $file->isValid() : false,
+                        'upload_max_filesize' => ini_get('upload_max_filesize'),
+                        'post_max_size' => ini_get('post_max_size'),
+                        'tmp_dir' => ini_get('upload_tmp_dir')
+                    ]);
+                    
                     if ($request->ajax()) {
                         return response()->json([
                             'success' => false,
-                            'message' => 'The file failed to upload.',
-                            'errors' => [ 'file' => ['The file failed to upload.'] ],
+                            'message' => $phpErrorMsg,
+                            'errors' => [ 'file' => [$phpErrorMsg] ],
                             'php_upload_error_code' => $phpError,
                             'php_upload_error_message' => $phpErrorMsg,
+                            'debug' => [
+                                'upload_max_filesize' => ini_get('upload_max_filesize'),
+                                'post_max_size' => ini_get('post_max_size'),
+                                'has_file' => !is_null($file),
+                                'is_valid' => $file ? $file->isValid() : false
+                            ],
                             'hints' => [
                                 'Periksa upload_max_filesize dan post_max_size pada php.ini',
                                 'Pastikan upload_tmp_dir tersedia dan writable',
                             ]
                         ], 422);
                     }
-                    return redirect()->back()->withErrors(['file' => 'The file failed to upload.'])->withInput();
+                    return redirect()->back()->withErrors(['file' => $phpErrorMsg])->withInput();
                 }
+                
+                \Log::info('✅ File validation passed', [
+                    'filename' => $file->getClientOriginalName(),
+                    'size' => $file->getSize(),
+                    'mime' => $file->getMimeType()
+                ]);
             }
             
             // Validate file type matches selected media type (skip for video link)

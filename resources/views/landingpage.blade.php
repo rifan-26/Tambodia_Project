@@ -530,32 +530,42 @@
   </script>
   <div class="container-left" role="main" aria-label="Welcome page for BPS Sumatera Utara">
     
-    @if($backgroundImage && $backgroundImage->type === 'Video')
-      @php
-        $isYouTube = strpos($backgroundImage->file_path, 'youtube.com') !== false || strpos($backgroundImage->file_path, 'youtu.be') !== false;
-        $videoId = '';
-        if ($isYouTube) {
-          preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $backgroundImage->file_path, $matches);
-          $videoId = $matches[1] ?? '';
-        }
-      @endphp
-      
-      @if($isYouTube && $videoId)
-        <!-- YouTube background video -->
-        <iframe class="background-video youtube-bg" 
-                src="https://www.youtube.com/embed/{{ $videoId }}?autoplay=1&mute=1&loop=1&playlist={{ $videoId }}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&enablejsapi=1"
-                frameborder="0" 
-                allow="autoplay; encrypted-media" 
-                allowfullscreen>
-        </iframe>
-        <div class="video-overlay"></div>
-      @elseif(!$isYouTube)
-        <!-- Background video for local files -->
-        <video class="background-video" autoplay muted loop playsinline preload="auto">
-          <source src="{{ asset('storage/' . $backgroundImage->file_path) }}" type="video/mp4">
-          <source src="{{ asset('storage/' . $backgroundImage->file_path) }}" type="video/webm">
-          <source src="{{ asset('storage/' . $backgroundImage->file_path) }}" type="video/ogg">
-        </video>
+    @if($backgroundImage)
+      @if($backgroundImage->type === 'Video')
+        @php
+          $isYouTube = strpos($backgroundImage->file_path, 'youtube.com') !== false || strpos($backgroundImage->file_path, 'youtu.be') !== false;
+          $videoId = '';
+          if ($isYouTube) {
+            preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $backgroundImage->file_path, $matches);
+            $videoId = $matches[1] ?? '';
+          }
+        @endphp
+        
+        @if($isYouTube && $videoId)
+          <!-- YouTube background video -->
+          <iframe class="background-video youtube-bg" 
+                  src="https://www.youtube.com/embed/{{ $videoId }}?autoplay=1&mute=1&loop=1&playlist={{ $videoId }}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&enablejsapi=1"
+                  frameborder="0" 
+                  allow="autoplay; encrypted-media" 
+                  allowfullscreen>
+          </iframe>
+          <div class="video-overlay"></div>
+        @else
+          <!-- Background video for local files -->
+          <video class="background-video" autoplay muted loop playsinline preload="auto">
+            <source src="{{ asset('storage/' . $backgroundImage->file_path) }}" type="video/mp4">
+            <source src="{{ asset('storage/' . $backgroundImage->file_path) }}" type="video/webm">
+            <source src="{{ asset('storage/' . $backgroundImage->file_path) }}" type="video/ogg">
+          </video>
+          <div class="video-overlay"></div>
+        @endif
+      @elseif($backgroundImage->type === 'Gambar')
+        <!-- Background image -->
+        <div class="background-image" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;">
+          <img src="{{ asset('storage/' . $backgroundImage->file_path) }}" 
+               alt="Background" 
+               style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
         <div class="video-overlay"></div>
       @endif
     @endif

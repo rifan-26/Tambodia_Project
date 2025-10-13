@@ -136,13 +136,14 @@ class LayoutController_clean extends Controller
     public function updateLayoutSettings(Request $request): JsonResponse
     {
         try {
-            // Validate - allow empty array for clearing layout
-            $request->validate([
-                'media_ids'   => 'present|array',  // Changed from 'required' to 'present'
+            // Validate - allow missing field or empty array for clearing layout
+            $validated = $request->validate([
+                'media_ids'   => 'sometimes|array',  // 'sometimes' = optional field
                 'media_ids.*' => 'nullable|exists:media,id'
             ]);
 
-            $mediaIds = array_filter($request->input('media_ids', [])); // Remove null/empty values
+            // Get media_ids from validated data, default to empty array if not present
+            $mediaIds = isset($validated['media_ids']) ? array_filter($validated['media_ids']) : [];
             
             Log::info('Updating layout settings', [
                 'media_ids' => $mediaIds,
