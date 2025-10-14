@@ -1,27 +1,31 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Middleware;
 
+use Closure;
 use Illuminate\Http\Request;
-use App\Models\User; // model default laravel
+use Illuminate\Support\Facades\Auth;
 
-class SuperAdminController extends Controller
+class SuperadminMiddleware
 {
-    public function index(Request $request)
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @return mixed
+     */
+    public function handle(Request $request, Closure $next)
     {
-        $keyword = $request->input('keyword');
-
-        $query = User::query()->where('role', 'admin');
-
-        if ($keyword) {
-            $query->where('name', 'like', '%' . $keyword . '%');
+        if (!Auth::check()) {
+            return redirect('/login');
         }
 
-        $admins = $query->orderBy('created_at', 'desc')->get();
+        $user = Auth::user();
+        if ($user->role !== 'superadmin') {
+            abort(403, 'Unauthorized - Superadmin access required');
+        }
 
-        return view('superadmin.dashboard', [
-            'admins' => $admins,
-            'keyword' => $keyword
-        ]);
+        return $next($request);
     }
 }
