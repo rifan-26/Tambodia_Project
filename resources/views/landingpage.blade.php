@@ -24,7 +24,7 @@
     }
 
     .container-left {
-      display: relative;
+      position: relative;
       height: 100vh;
       width: 100vw;
       overflow: hidden;
@@ -70,12 +70,15 @@
       position: absolute;
       top: 0;
       left: 0;
-      width: 100%;
+      width: 65%;
       height: 100%;
       background: none;
       z-index: 2;
       padding: 60px 80px;
       color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     /* Video overlay */
@@ -92,20 +95,16 @@
     .left-section h1 {
       font-family: 'Playfair Display', serif;
       font-weight: 450;
-      font-size: clamp(2rem, 5vw, 4rem);
+      font-size: clamp(2rem, 4.5vw, 3.5rem);
       line-height: 1.2;
-      letter-spacing: 1px; /* spasi antar huruf */
-      margin-top: 220px; /* sedikit lebih rapat ke atas */
+      letter-spacing: 1px;
+      margin-top: 0;
       margin-bottom: 20px;
-      max-width: 650px;
+      max-width: 100%;
       color: #fff;
       text-shadow:
         0 4px 10px rgba(0, 0, 0, 0.6),
         0 0 25px rgba(0, 0, 0, 0.4);
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
     }
 
     .left-section p {
@@ -139,21 +138,23 @@
 
     /* Right section with images grid */
     .right-section {
-      position: absolute;
+      position: fixed;
       top: 0;
       right: 0;
-      width: 30%;   /* sesuaikan lebar gallery */
-      height: 100%;
-      flex: 1.5;
-      padding: 20px;
+      width: 30%;
+      max-width: 500px;
+      min-width: 350px;
+      height: 100vh;
+      padding: 1.5rem 1rem;
       display: flex;
       flex-direction: column;
       z-index: 2;
       overflow: hidden;
-      background: rgba(0, 0, 0, 0.3); /* semi transparan */
-      backdrop-filter: blur(12px);    /* blur area di belakang */
-      -webkit-backdrop-filter: blur(12px); /* untuk Safari */
-      border-left: 1px solid rgba(255,255,255,0.1);
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border-left: 1px solid rgba(255,255,255,0.15);
+      box-shadow: -5px 0 20px rgba(0, 0, 0, 0.3);
     }
 
     .right-section::before {
@@ -232,10 +233,13 @@
     /* ===== LAYOUT GRID SYSTEM ===== */
     .layout-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(2, 1fr);
       grid-template-rows: repeat(4, 1fr);
-      gap: 1rem;
+      gap: 0.75rem;
+      width: 100%;
       height: 100%;
+      padding: 0;
+      align-content: stretch;
     }
 
     /* ===== GRID POSITIONING & ASPECT RATIOS ===== */
@@ -243,70 +247,72 @@
     .layout-item[data-order="1"] {
       grid-column: 1;
       grid-row: 1;
-      aspect-ratio: 1/1;
-      height: auto;
+      width: 100%;
+      height: 100%;
     }
 
     /* Position 2: Top Right - Portrait (9:16) */
     .layout-item[data-order="2"] {
       grid-column: 2;
       grid-row: 1 / 3;
+      width: 100%;
+      height: 100%;
       aspect-ratio: 9/16;
-      height: auto;
     }
 
     /* Position 3: Middle Left - Portrait (9:16) */
     .layout-item[data-order="3"] {
       grid-column: 1;
       grid-row: 2 / 4;
+      width: 100%;
+      height: 100%;
       aspect-ratio: 9/16;
-      height: auto;
     }
 
     /* Position 4: Middle Right - Square (1:1) */
     .layout-item[data-order="4"] {
       grid-column: 2;
       grid-row: 3;
-      aspect-ratio: 1/1;
-      height: auto;
+      width: 100%;
+      height: 100%;
     }
 
     /* Position 5: Bottom Left - Landscape (16:9) */
     .layout-item[data-order="5"] {
       grid-column: 1;
       grid-row: 4;
-      aspect-ratio: 16/9;
-      height: auto;
+      width: 100%;
+      height: 100%;
     }
 
     /* Position 6: Bottom Right - Landscape (16:9) */
     .layout-item[data-order="6"] {
       grid-column: 2;
       grid-row: 4;
-      aspect-ratio: 16/9;
-      height: auto;
+      width: 100%;
+      height: 100%;
     }
 
     /* ===== LAYOUT ITEM STYLING ===== */
     .layout-item {
       position: relative;
-      background: white;
-      border: 3px solid #ffffff;
-      border-radius: 12px;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+      background: #1a1a1a;
+      border: 2px solid #ffffff;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
       overflow: hidden;
       cursor: pointer;
       transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 120px;
+      display: block;
+      width: 100%;
+      contain: layout style paint;
     }
 
     .layout-item:hover {
       border-color: #1f9e76;
-      box-shadow: 0 6px 20px rgba(31, 158, 118, 0.2);
-      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(31, 158, 118, 0.3);
+      transform: scale(1.02);
+      z-index: 10;
     }
 
     /* ===== MODAL STYLING ===== */
@@ -340,56 +346,50 @@
 
     /* ===== MEDIA CONTENT STYLING ===== */
     .layout-item img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
       width: 100%;
       height: 100%;
       object-fit: cover;
+      object-position: center;
     }
 
     .layout-item video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
       width: 100%;
       height: 100%;
       object-fit: cover;
+      object-position: center;
     }
 
     .layout-item .youtube-video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
       width: 100%;
       height: 100%;
       border: none;
-      border-radius: 8px;
     }
 
     /* ===== ASPECT RATIO CONTROL ===== */
-    /* Square Content (1:1) - Positions 1 & 4 */
-    .layout-item[data-order="1"] img,
-    .layout-item[data-order="1"] video,
-    .layout-item[data-order="1"] .youtube-video,
-    .layout-item[data-order="4"] img,
-    .layout-item[data-order="4"] video,
-    .layout-item[data-order="4"] .youtube-video {
-      aspect-ratio: 1/1;
+    /* Ensure all media fills container properly */
+    .layout-item img,
+    .layout-item video,
+    .layout-item .youtube-video {
       object-fit: cover;
+      object-position: center;
     }
 
-    /* Portrait Content (9:16) - Positions 2 & 3 */
-    .layout-item[data-order="2"] img,
-    .layout-item[data-order="2"] video,
-    .layout-item[data-order="2"] .youtube-video,
-    .layout-item[data-order="3"] img,
-    .layout-item[data-order="3"] video,
-    .layout-item[data-order="3"] .youtube-video {
-      aspect-ratio: 9/16;
-      object-fit: cover;
-    }
-
-    /* Landscape Content (16:9) - Positions 5 & 6 */
-    .layout-item[data-order="5"] img,
-    .layout-item[data-order="5"] video,
-    .layout-item[data-order="5"] .youtube-video,
-    .layout-item[data-order="6"] img,
-    .layout-item[data-order="6"] video,
-    .layout-item[data-order="6"] .youtube-video {
-      aspect-ratio: 16/9;
-      object-fit: cover;
+    /* Prevent media overflow */
+    .layout-item * {
+      max-width: 100%;
+      max-height: 100%;
     }
 
     /* ===== OVERLAY ELEMENTS ===== */
@@ -410,108 +410,146 @@
     }
 
     .layout-item .layout-order {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: #1f9e76;
-      color: white;
-      width: 25px;
-      height: 25px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: bold;
-      z-index: 2;
+      display: none; /* Hide position numbers in production */
+    }
+
+    /* Empty slot styling */
+    .layout-item.empty-slot {
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+      background: transparent;
+      border: none;
+    }
+
+    /* ===== SCROLLBAR STYLING ===== */
+    .right-section::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .right-section::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 3px;
+    }
+
+    .right-section::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+
+    .right-section::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* ===== RESPONSIVE DESIGN ===== */
+    @media (max-width: 1400px) {
+      .right-section {
+        width: 32%;
+        min-width: 320px;
+      }
+      
+      .left-section {
+        width: 63%;
+        padding: 50px 60px;
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .right-section {
+        width: 35%;
+        min-width: 300px;
+        padding: 1.25rem 0.75rem;
+      }
+      
+      .left-section {
+        width: 60%;
+        padding: 40px 50px;
+      }
+      
+      .layout-grid {
+        gap: 0.6rem;
+      }
     }
 
     @media (max-width: 900px) {
       .container {
         flex-direction: column;
       }
-      .left-section, .right-section {
-        flex: none;
+      
+      .left-section {
+        position: relative;
         width: 100%;
-        height: auto;
+        height: 50vh;
         padding: 30px 20px;
       }
-      .left-section h1 {
-        font-size: 2.5rem;
-      }
+      
       .right-section {
-        flex-wrap: wrap;
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        grid-gap: 12px;
+        position: relative;
+        width: 100%;
+        height: 50vh;
+        max-width: none;
+        min-width: auto;
         padding: 20px;
-        max-height: none;
+        border-left: none;
+        border-top: 1px solid rgba(255,255,255,0.15);
       }
-      .img-large-blue {
-        grid-column: span 3;
-        height: 250px;
+      
+      .layout-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
       }
-      .img-large-blue img {
-        height: 100%;
+      
+      .left-section h1 {
+        font-size: 2rem;
       }
-      .right-column-small, .small-image-row, .bottom-row {
-        grid-column: span 3;
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-        margin-bottom: 12px;
-      }
-      .right-column-small img,
-      .small-image-row img,
-      .bottom-row img {
-        height: 150px;
-        border: none;
-        box-shadow: 0 0 5px rgba(0,0,0,0.3);
-        border-radius: 6px;
+      
+      .left-section p {
+        font-size: 1rem;
       }
     }
 
-    /* ===== RESPONSIVE DESIGN ===== */
     @media (max-width: 768px) {
       .layout-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
         grid-template-rows: auto;
-        height: auto;
-        gap: 12px;
+        gap: 0.5rem;
       }
       
-      .layout-item {
-        min-height: 100px;
-      }
-      
-      /* Reset grid positioning for mobile */
-      .layout-item:nth-child(1),
-      .layout-item:nth-child(2),
-      .layout-item:nth-child(3),
-      .layout-item:nth-child(4),
-      .layout-item:nth-child(5),
-      .layout-item:nth-child(6) {
-        grid-column: span 1;
-        grid-row: auto;
+      /* Optimize item positioning for portrait grid */
+      .layout-item:nth-child(1) {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        aspect-ratio: 1/1 !important;
       }
 
-      /* Maintain aspect ratios on mobile */
-      .layout-item:nth-child(1),
-      .layout-item:nth-child(4) {
-        aspect-ratio: 1/1;
-        height: auto;
+      .layout-item:nth-child(2) {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        aspect-ratio: 1/1 !important;
       }
-      
-      .layout-item:nth-child(2),
+
       .layout-item:nth-child(3) {
-        aspect-ratio: 9/16;
-        height: auto;
+        grid-column: 1 !important;
+        grid-row: 2 !important;
+        aspect-ratio: 1/1 !important;
       }
-      
-      .layout-item:nth-child(5),
+
+      .layout-item:nth-child(4) {
+        grid-column: 2 !important;
+        grid-row: 2 !important;
+        aspect-ratio: 1/1 !important;
+      }
+
+      .layout-item:nth-child(5) {
+        grid-column: 1 !important;
+        grid-row: 3 !important;
+        aspect-ratio: 16/9 !important;
+      }
+
       .layout-item:nth-child(6) {
-        aspect-ratio: 16/9;
-        height: auto;
+        grid-column: 2 !important;
+        grid-row: 3 !important;
+        aspect-ratio: 16/9 !important;
       }
     }
   </style>
@@ -608,8 +646,7 @@
                    data-media-type="{{ $mediaItem->type }}"
                    data-media-path="{{ $mediaItem->file_path }}"
                    data-media-name="{{ $mediaItem->name }}"
-                   data-youtube-id="{{ $videoId }}"
-                   style="cursor: pointer; grid-area: auto;">
+                   data-youtube-id="{{ $videoId }}">
                 <div class="layout-order">{{ $mediaItem->layout_order }}</div>
               @if($mediaItem->type === 'Gambar')
                 <img src="{{ asset('storage/' . $mediaItem->file_path) }}" alt="{{ $mediaItem->name }}" title="{{ $mediaItem->name }}">
@@ -633,7 +670,7 @@
               </div>
             @else
               <!-- Empty grid position -->
-              <div class="layout-item" style="opacity: 0; pointer-events: none;"></div>
+              <div class="layout-item empty-slot" data-order="{{ $position }}"></div>
             @endif
           @endfor
         </div>
