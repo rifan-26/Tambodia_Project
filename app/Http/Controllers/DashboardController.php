@@ -84,6 +84,17 @@ class DashboardController extends Controller
         $totalPegawai = User::where('role', 'pegawai')->count();
         $totalSuperadmin = User::where('role', 'superadmin')->count();
         $recentLogs = Log::with('user')->latest()->take(10)->get();
+        
+        $mediaByType = [
+            'Gambar' => Media::where('type', 'Gambar')->count(),
+            'Video' => Media::where('type', 'Video')->count(),
+            'Audio' => Media::where('type', 'Audio')->count(),
+        ];
+        
+        // Get all users for the admin table (both superadmin and pegawai) - oldest first
+        $admins = User::orderBy('created_at', 'asc')->get();
+        
+        return view('superadmin', compact('totalMedia', 'totalPegawai', 'totalSuperadmin', 'recentLogs', 'mediaByType', 'admins'));
     }
 
     public function destroy($id)
@@ -114,16 +125,6 @@ class DashboardController extends Controller
                 'message' => 'Media tidak ditemukan atau tidak memiliki akses'
             ], 404);
         }
-        $mediaByType = [
-            'Gambar' => Media::where('type', 'Gambar')->count(),
-            'Video' => Media::where('type', 'Video')->count(),
-            'Audio' => Media::where('type', 'Audio')->count(),
-        ];
-        
-        // Get all users for the admin table (both superadmin and pegawai) - oldest first
-        $admins = User::orderBy('created_at', 'asc')->get();
-        
-        return view('superadmin', compact('totalMedia', 'totalPegawai', 'totalSuperadmin', 'recentLogs', 'mediaByType', 'admins'));
     }
 
     /**
