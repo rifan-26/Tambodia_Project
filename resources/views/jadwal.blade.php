@@ -1292,9 +1292,9 @@
               </div>
 
               <!-- Layout Position Section -->
-              <div class="form-section">
+              <div class="form-section" id="layoutPositionSection">
                 <label for="layout_position" class="form-label">Posisi di Layout</label>
-                <select class="form-select" id="layout_position" name="layout_position" required>
+                <select class="form-select" id="layout_position" name="layout_position">
                   <option value="">Pilih Posisi Layout</option>
                   <option value="1">Posisi 1 (Square 1:1)</option>
                   <option value="2">Posisi 2 (Portrait 9:16)</option>
@@ -1401,7 +1401,7 @@
               </div>
             </div>
             
-            <div class="form-section">
+            <div class="form-section" id="editLayoutPositionSection">
               <label for="edit_layout_position" class="form-label">
                 <i class="bi bi-grid-3x3-gap me-2"></i>Posisi di Layout
                 <small class="text-muted ms-2">Pilih lokasi tampilan media di landing page</small>
@@ -1582,8 +1582,8 @@ function selectMediaByCheckbox(mediaId, mediaName, mediaType) {
 function selectMediaByRow(row) {
     const mediaId = row.getAttribute('data-id');
     const checkbox = row.querySelector('input[name="select_row"]');
-    const mediaNameElement = row.querySelector('.fw-medium');
-    const mediaTypeElement = row.querySelector('.badge');
+    const mediaNameElement = row.querySelector('div div:first-child');
+    const mediaTypeElement = row.querySelector('small');
     
     console.log('selectMediaByRow called for ID:', mediaId);
     console.log('Found elements:', {checkbox, mediaNameElement, mediaTypeElement});
@@ -1628,6 +1628,13 @@ document.addEventListener("DOMContentLoaded", function () {
     if (startDateInput) {
         startDateInput.value = today;
         console.log('Set start_date default value:', today);
+    }
+
+    // Initialize layout position section - hide by default
+    const layoutPositionSection = document.getElementById('layoutPositionSection');
+    if (layoutPositionSection) {
+        layoutPositionSection.style.display = 'none';
+        console.log('Layout position section hidden by default');
     }
 
     // Load current layout status on page load
@@ -1687,8 +1694,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 
                 const mediaId = this.value;
                 const row = this.closest('tr');
-                const mediaNameElement = row.querySelector('.fw-medium') || row.querySelector('td:nth-child(2)');
-                const mediaTypeElement = row.querySelector('.badge') || row.querySelector('td:nth-child(3)');
+                const mediaNameElement = row.querySelector('div div:first-child') || row.querySelector('td:nth-child(2) div div:first-child');
+                const mediaTypeElement = row.querySelector('small') || row.querySelector('td:nth-child(2) small');
                 
                 console.log('Found elements:', {
                     mediaNameElement: mediaNameElement ? mediaNameElement.textContent.trim() : 'not found',
@@ -1912,13 +1919,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Get selected media type
             const selectedRow = document.querySelector('input[name="select_row"]:checked')?.closest('tr');
-            const mediaType = selectedRow ? selectedRow.cells[2].textContent.trim() : '';
+            const mediaType = selectedRow ? selectedRow.cells[1].querySelector('small').textContent.trim() : '';
             const layoutPositionSelect = document.getElementById('layout_position');
 
-            // Audio validation - no duration needed anymore
+            console.log('Form submission - Media type detected:', mediaType);
+            console.log('Selected row:', selectedRow);
+            console.log('Layout position select:', layoutPositionSelect);
+
+            // Audio validation - no layout position needed
             if (mediaType === 'Audio') {
                 // Audio duration is now automatically detected from file
                 console.log('Audio selected - duration will be auto-detected');
+                // Skip layout position validation for audio
             } else {
                 // For Gambar & Video, layout position is required
                 if (!layoutPositionSelect || !layoutPositionSelect.value) {
@@ -2010,9 +2022,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Function to update form fields based on media type
 function updateFormFieldsForMediaType(mediaType) {
-    const layoutPositionSection = document.getElementById('layout_position')?.closest('.form-section');
+    console.log('updateFormFieldsForMediaType called with mediaType:', mediaType);
+    
+    const layoutPositionSection = document.getElementById('layoutPositionSection');
     const layoutPreviewSection = document.getElementById('layoutPreview');
     const layoutPositionSelect = document.getElementById('layout_position');
+
+    console.log('Found elements:', {
+        layoutPositionSection: layoutPositionSection ? 'found' : 'not found',
+        layoutPreviewSection: layoutPreviewSection ? 'found' : 'not found',
+        layoutPositionSelect: layoutPositionSelect ? 'found' : 'not found'
+    });
 
     if (!layoutPositionSection || !layoutPositionSelect) {
         console.error('Required form elements not found');
@@ -2021,6 +2041,7 @@ function updateFormFieldsForMediaType(mediaType) {
 
     if (mediaType === 'Audio') {
         // For Audio: Hide layout position and preview (duration auto-detected)
+        console.log('Hiding layout position section for Audio');
         layoutPositionSection.style.display = 'none';
         if (layoutPreviewSection) layoutPreviewSection.style.display = 'none';
         
@@ -2033,6 +2054,7 @@ function updateFormFieldsForMediaType(mediaType) {
         
     } else if (mediaType === 'Gambar' || mediaType === 'Video') {
         // For Visual media: Show layout position and preview
+        console.log('Showing layout position section for', mediaType);
         layoutPositionSection.style.display = 'block';
         if (layoutPreviewSection) layoutPreviewSection.style.display = 'block';
         
@@ -2041,6 +2063,7 @@ function updateFormFieldsForMediaType(mediaType) {
         
     } else {
         // Default state: show layout fields for visual media
+        console.log('Default state - showing layout position section');
         layoutPositionSection.style.display = 'block';
         if (layoutPreviewSection) layoutPreviewSection.style.display = 'block';
         
@@ -2094,13 +2117,44 @@ function populateEditForm(schedule) {
     document.getElementById('edit_day_of_week').value = schedule.day_of_week || '';
     document.getElementById('edit_time').value = schedule.time || '';
     
-    // Set layout position if available
-    if (schedule.layout_position) {
-        document.getElementById('edit_layout_position').value = schedule.layout_position;
-        updateEditLayoutPreview(schedule.layout_position);
-    } else {
-        document.getElementById('edit_layout_position').value = '';
+    // Handle layout position based on media type
+    const mediaType = schedule.media.type;
+    const editLayoutPositionSection = document.getElementById('editLayoutPositionSection');
+    const editLayoutPreviewSection = document.getElementById('editLayoutPreview');
+    const editLayoutPositionSelect = document.getElementById('edit_layout_position');
+    
+    if (mediaType === 'Audio') {
+        // For Audio: Hide layout position and preview
+        if (editLayoutPositionSection) editLayoutPositionSection.style.display = 'none';
+        if (editLayoutPreviewSection) editLayoutPreviewSection.style.display = 'none';
+        
+        // Audio doesn't need layout position
+        if (editLayoutPositionSelect) {
+            editLayoutPositionSelect.required = false;
+            editLayoutPositionSelect.value = '';
+        }
+        
+        // Clear layout preview
         updateEditLayoutPreview('');
+        
+    } else {
+        // For Visual media: Show layout position and preview
+        if (editLayoutPositionSection) editLayoutPositionSection.style.display = 'block';
+        if (editLayoutPreviewSection) editLayoutPreviewSection.style.display = 'block';
+        
+        // Make layout position required for visual media
+        if (editLayoutPositionSelect) {
+            editLayoutPositionSelect.required = true;
+            
+            // Set layout position if available
+            if (schedule.layout_position) {
+                editLayoutPositionSelect.value = schedule.layout_position;
+                updateEditLayoutPreview(schedule.layout_position);
+            } else {
+                editLayoutPositionSelect.value = '';
+                updateEditLayoutPreview('');
+            }
+        }
     }
     
     // Store schedule ID for form submission
