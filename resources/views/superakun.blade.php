@@ -190,6 +190,18 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+.custom-modal .btn-delete-confirm {
+  background: linear-gradient(135deg, #ff5252, #d32f2f);
+  color: white;
+  box-shadow: 0 4px 12px rgba(255, 82, 82, 0.3);
+}
+
+.custom-modal .btn-delete-confirm:hover {
+  background: linear-gradient(135deg, #d32f2f, #b71c1c);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 82, 82, 0.4);
+}
+
 /* ===== Animation ===== */
 @keyframes modalFadeIn {
   from { opacity: 0; transform: scale(0.9) translateY(20px); }
@@ -679,10 +691,24 @@
   </div>
 </div>
 
+<!-- Modal Konfirmasi Delete -->
+<div id="deleteModal" class="modal-overlay">
+  <div class="custom-modal">
+    <h3>Konfirmasi Hapus</h3>
+    <p style="text-align: center; color: #6c757d; margin-bottom: 20px; font-size: 1rem;">
+      Apakah Anda yakin ingin menghapus admin ini?
+    </p>
+    <div class="modal-buttons">
+      <button type="button" class="btn-cancel" onclick="closeDeleteModal()">Batal</button>
+      <button type="button" class="btn-delete-confirm" onclick="confirmDelete()">Hapus</button>
+    </div>
+  </div>
+</div>
 
 <script>
   let rowBeingEdited = null;
   let editingAdminId = null;
+  let deletingAdminId = null;
 
   // CSRF Token untuk AJAX requests
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
@@ -724,6 +750,15 @@
     }, 300);
   }
 
+  function closeDeleteModal() {
+    const modal = document.getElementById("deleteModal");
+    modal.querySelector('.custom-modal').classList.remove('show');
+    setTimeout(() => {
+      modal.style.display = "none";
+    }, 300);
+    deletingAdminId = null;
+  }
+
   // === ADD ADMIN ===
   document.querySelector('.add-admin').addEventListener('click', function() {
     const modal = document.getElementById("addModal");
@@ -734,10 +769,24 @@
   });
 
   // Submit Tambah Admin via AJAX
+  let isSubmittingAdd = false;
   document.getElementById('addForm').addEventListener('submit', function(e) {
     e.preventDefault();
+    
+    // Prevent double submit
+    if (isSubmittingAdd) {
+      return;
+    }
+    
     const form = this;
+    const submitBtn = form.querySelector('.btn-save');
     const formData = new FormData(form);
+    
+    // Disable button and set loading state
+    isSubmittingAdd = true;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Menyimpan...';
+    
     fetch(form.action, {
       method: 'POST',
       body: formData,
@@ -779,6 +828,12 @@
     .catch(err => {
       console.error(err);
       showNotification('Terjadi kesalahan saat menambahkan admin.', 'error');
+    })
+    .finally(() => {
+      // Re-enable button
+      isSubmittingAdd = false;
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Tambah';
     });
   });
 
@@ -818,8 +873,14 @@
     }, 10);
   }
 
+  let isSubmittingEdit = false;
   document.getElementById("editForm").addEventListener("submit", function(e) {
     e.preventDefault();
+    
+    // Prevent double submit
+    if (isSubmittingEdit) {
+      return;
+    }
     
     const form = this;
     
@@ -847,6 +908,12 @@
       showNotification('Format email tidak valid', 'error');
       return;
     }
+    
+    // Disable button and set loading state
+    const submitBtn = form.querySelector('.btn-save');
+    isSubmittingEdit = true;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Menyimpan...';
     
     // Kirim form dengan AJAX
     const formData = new FormData(form);
@@ -895,6 +962,12 @@
     .catch(error => {
       console.error('Error:', error);
       showNotification('Terjadi kesalahan saat memperbarui admin.', 'error');
+    })
+    .finally(() => {
+      // Re-enable button
+      isSubmittingEdit = false;
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Simpan';
     });
   });
 
@@ -918,47 +991,61 @@
       return;
     }
     
-    const konfirmasi = confirm("Apakah Anda yakin ingin menghapus admin ini?");
-    if (konfirmasi) {
-      // Hapus via AJAX agar tidak redirect ke JSON
-      fetch(`{{ url('/admin') }}/${adminId}`, {
-        method: 'DELETE',
-        headers: {
-          'X-CSRF-TOKEN': csrfToken,
-          'X-Requested-With': 'XMLHttpRequest',
-          'Accept': 'application/json'
-        }
-      })
-      .then(async (response) => {
-        let data = {};
-        try { data = await response.json(); } catch (_) {}
-        if (!response.ok || data.success === false) {
-          throw new Error(data.message || 'Gagal menghapus admin');
-        }
-        // Hapus baris dari tabel
-        const row = document.querySelector(`tr[data-id="${adminId}"]`);
-        if (row) {
-          row.remove();
-          // Re-index sequence numbers
-          const tableBody = document.querySelector('table tbody');
-          const rows = tableBody.querySelectorAll('tr');
-          if (rows.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="7" class="text-center">Tidak ada data admin</td></tr>';
-          } else {
-            let idx = 1;
-            rows.forEach(tr => {
-              const firstCell = tr.querySelector('td');
-              if (firstCell) firstCell.textContent = idx++;
-            });
-          }
-        }
-        showNotification('Admin berhasil dihapus!');
-      })
-      .catch((err) => {
-        console.error(err);
-        showNotification(err.message || 'Terjadi kesalahan saat menghapus admin.', 'error');
-      });
+    // Set ID untuk dihapus dan tampilkan modal
+    deletingAdminId = adminId;
+    const modal = document.getElementById("deleteModal");
+    modal.style.display = "flex";
+    setTimeout(() => {
+      modal.querySelector('.custom-modal').classList.add('show');
+    }, 10);
+  }
+
+  function confirmDelete() {
+    if (!deletingAdminId) {
+      showNotification('ID admin tidak valid.', 'error');
+      return;
     }
+    
+    // Hapus via AJAX agar tidak redirect ke JSON
+    fetch(`{{ url('/admin') }}/${deletingAdminId}`, {
+      method: 'DELETE',
+      headers: {
+        'X-CSRF-TOKEN': csrfToken,
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json'
+      }
+    })
+    .then(async (response) => {
+      let data = {};
+      try { data = await response.json(); } catch (_) {}
+      if (!response.ok || data.success === false) {
+        throw new Error(data.message || 'Gagal menghapus admin');
+      }
+      // Hapus baris dari tabel
+      const row = document.querySelector(`tr[data-id="${deletingAdminId}"]`);
+      if (row) {
+        row.remove();
+        // Re-index sequence numbers
+        const tableBody = document.querySelector('table tbody');
+        const rows = tableBody.querySelectorAll('tr');
+        if (rows.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="7" class="text-center">Tidak ada data admin</td></tr>';
+        } else {
+          let idx = 1;
+          rows.forEach(tr => {
+            const firstCell = tr.querySelector('td');
+            if (firstCell) firstCell.textContent = idx++;
+          });
+        }
+      }
+      showNotification('Admin berhasil dihapus!');
+      closeDeleteModal();
+    })
+    .catch((err) => {
+      console.error(err);
+      showNotification(err.message || 'Terjadi kesalahan saat menghapus admin.', 'error');
+      closeDeleteModal();
+    });
   }
 
   // Fungsi untuk pasang event di baris baru

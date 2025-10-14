@@ -57,6 +57,24 @@ class SuperAdminController extends Controller
                 'message' => 'Admin berhasil ditambahkan!',
                 'admin' => $admin
             ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Illuminate\Support\Facades\Log::error('Validation error creating admin: ' . json_encode($e->errors()));
+            
+            // Get the first error message
+            $errors = $e->errors();
+            $firstError = reset($errors);
+            $errorMessage = is_array($firstError) ? $firstError[0] : $firstError;
+            
+            // Translate specific error messages to Indonesian
+            if (isset($errors['email']) && strpos($errorMessage, 'has already been taken') !== false) {
+                $errorMessage = 'Email sudah digunakan. Silakan gunakan email lain.';
+            }
+            
+            return response()->json([
+                'success' => false,
+                'message' => $errorMessage,
+                'errors' => $errors
+            ], 422);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Error creating admin: ' . $e->getMessage());
             return response()->json([
