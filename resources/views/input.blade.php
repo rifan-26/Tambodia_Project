@@ -1025,6 +1025,108 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  
+  <script>
+    // Track shown messages and timeout
+    const shownMessages = new Set();
+    let toastTimeout;
+    let isProcessing = false;
+
+    function toast(message, type = 'success') {
+      const messageKey = `${message}-${type}`;
+      if (shownMessages.has(messageKey)) return;
+      
+      shownMessages.add(messageKey);
+      if (toastTimeout) {
+        clearTimeout(toastTimeout);
+      }
+
+      Toastify({
+        text: message,
+        duration: 3000,
+        gravity: "top",
+        position: "right",
+        backgroundColor: type === 'success' ? '#1f9e76' : '#dc3545',
+      }).showToast();
+      
+      toastTimeout = setTimeout(() => {
+        shownMessages.delete(messageKey);
+      }, 3000);
+    }
+
+    async function checkFileExists(url) {
+      try {
+        const response = await fetch(url, { method: 'HEAD' });
+        return response.ok;
+      } catch (e) {
+        console.error('File check error:', e);
+        return false;
+      }
+    }
+
+    // Function to clean up missing media files
+    async function cleanupMissingFiles() {
+      if (isProcessing) return;
+      
+      try {
+        isProcessing = true;
+        
+        // Get all media previews
+        const mediaElements = document.querySelectorAll('[data-media-path]');
+        if (!mediaElements.length) return;
+
+        // Process in batches
+        const batchSize = 3;
+        for (let i = 0; i < mediaElements.length; i += batchSize) {
+          const batch = Array.from(mediaElements).slice(i, i + batchSize);
+          
+          await Promise.all(batch.map(async (element) => {
+            const mediaId = element.dataset.mediaId;
+            const mediaPath = element.dataset.mediaPath;
+            if (!mediaId || !mediaPath) return;
+
+            const fileUrl = `${window.location.origin}/storage/${mediaPath}`;
+            const exists = await checkFileExists(fileUrl);
+            
+            if (!exists) {
+              try {
+                const res = await fetch(`/dashboard/media/${mediaId}`, {
+                  method: 'DELETE',
+                  headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                  }
+                });
+
+                if (res.ok) {
+                  // Remove the element from the page
+                  const container = element.closest('.media-item, .preview-item');
+                  if (container) {
+                    container.remove();
+                  }
+                }
+              } catch (e) {
+                console.error('Delete failed:', e);
+              }
+            }
+          }));
+
+          // Add small delay between batches
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      } catch (e) {
+        console.error('Cleanup error:', e);
+      } finally {
+        isProcessing = false;
+      }
+    }
+
+    // Run cleanup when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      cleanupMissingFiles();
+    });
+  </script>
   <script>
     (function() {
       // Helpers (avoid shadowing jQuery $)
@@ -1516,36 +1618,48 @@
       };
       
       // Media delete function
-      window.deleteMedia = function(id, name) {
+      window.deleteMedia = async function(id, name) {
         if(!confirm(`Apakah Anda yakin ingin menghapus media "${name}"?`)) {
           return;
         }
-        
+
         showLoading('Menghapus media...');
-        
-        fetch(`{{ url('/media') }}/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
+
+        try {
+          // Check if file exists first
+          const existsResponse = await fetch(`/api/media/${id}/exists`);
+          const existsData = await existsResponse.json();
+          
+          if (!existsData.exists) {
+            hideLoading();
+            toast('File sudah tidak ada', 'warning');
+            fetchMedia(currentFilter, currentSearch);
+            return;
           }
-        })
-        .then(response => response.json())
-        .then(data => {
+
+          const response = await fetch(`/api/media/${id}`, {
+            method: 'DELETE',
+            headers: {
+              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+              'Accept': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          });
+
+          const data = await response.json();
           hideLoading();
-          if(data.success) {
+
+          if (data.success) {
             toast('Media berhasil dihapus', 'success');
             fetchMedia(currentFilter, currentSearch);
           } else {
             toast(data.message || 'Gagal menghapus media', 'error');
           }
-        })
-        .catch(error => {
+        } catch (error) {
           hideLoading();
           console.error('Error:', error);
           toast('Terjadi kesalahan saat menghapus media', 'error');
-        });
+        }
       };
 
       // Initial setup

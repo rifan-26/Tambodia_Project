@@ -93,6 +93,17 @@ class Media extends Model
     {
         return $this->file_url;
     }
+    
+    /**
+     * Get the URL for the media file
+     * This is an alias of getFileUrlAttribute for backward compatibility
+     * 
+     * @return string
+     */
+    public function getUrl()
+    {
+        return $this->file_url;
+    }
 
     public function isImage()
     {

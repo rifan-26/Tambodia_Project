@@ -7,6 +7,7 @@ use App\Models\Media;
 use App\Models\User;
 use App\Models\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class DashboardController extends Controller
 {
@@ -48,6 +49,36 @@ class DashboardController extends Controller
         $totalPegawai = User::where('role', 'pegawai')->count();
         $totalSuperadmin = User::where('role', 'superadmin')->count();
         $recentLogs = Log::with('user')->latest()->take(10)->get();
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $media = Media::where('id', $id)
+                         ->where('user_id', Auth::id())
+                         ->firstOrFail();
+
+            // Delete the file from storage
+            if (Storage::disk('public')->exists($media->file_path)) {
+                Storage::disk('public')->delete($media->file_path);
+            }
+
+            // Log the deletion
+            Log::createLog(Auth::id(), 'Delete Media', "Deleted {$media->type}: {$media->name}");
+
+            // Delete the database record
+            $media->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Media berhasil dihapus'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Media tidak ditemukan atau tidak memiliki akses'
+            ], 404);
+        }
         $mediaByType = [
             'Gambar' => Media::where('type', 'Gambar')->count(),
             'Video' => Media::where('type', 'Video')->count(),
