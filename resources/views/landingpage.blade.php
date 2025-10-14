@@ -42,6 +42,29 @@
       z-index: 0;
     }
 
+    /* YouTube background video specific styles */
+    .youtube-bg {
+      width: 100vw;
+      height: 56.25vw; /* 16:9 aspect ratio */
+      min-height: 100vh;
+      min-width: 177.77vh; /* 16:9 aspect ratio */
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Video overlay for better text readability */
+    .video-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 1;
+    }
+
     /* Left section with background image and text */
     .left-section {
       position: absolute;
@@ -49,37 +72,10 @@
       left: 0;
       width: 100%;
       height: 100%;
-      @if($backgroundImage && $backgroundImage->type === 'Video')
-        @php
-          $isYouTube = strpos($backgroundImage->file_path, 'youtube.com') !== false || strpos($backgroundImage->file_path, 'youtu.be') !== false;
-        @endphp
-        @if(!$isYouTube)
-          background: none;
-        @else
-          background-image: 
-            linear-gradient(to bottom, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 0.8) 100%),
-            @php
-              preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $backgroundImage->file_path, $matches);
-              $videoId = $matches[1] ?? '';
-            @endphp
-            url('https://img.youtube.com/vi/{{ $videoId }}/maxresdefault.jpg');
-          background-size: cover;
-          background-position: center;
-        @endif
-      @else
-        background-image: 
-          linear-gradient(to bottom, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 0.8) 100%),
-          @if($backgroundImage)
-            url('{{ asset("storage/" . $backgroundImage->file_path) }}')
-          @else
-            url('img/danau toba img1.svg')
-          @endif;
-        background-size: cover;
-        background-position: center;
-      @endif
+      background: none;
+      z-index: 2;
       padding: 60px 80px;
       color: white;
-      z-index: 1; /* biar di bawah gallery */
     }
 
     /* Video overlay */
@@ -162,51 +158,10 @@
 
     .row {
       margin-top: 5px;
-      margin-bottom: 20px;
     }
 
-    .img-potrait-1 {
-      position: relative;
-      border: 4px solid #ffffff;
-      border-radius: 4px;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
-      overflow: hidden;
-      cursor: default;
-      width: 100%;
-      height: 0;
-      padding-bottom: 177.78%; /* 16/9 * 100 = 177.78% → portrait 9:16 */
-    }
-
-    .img-potrait-1 img {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .img-1-1 {
-      position: relative;
-      border: 4px solid #ffffff;
-      border-radius: 4px;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
-      overflow: hidden;
-      cursor: default;
-      width: 100%;
-      height: 50%; 
-      padding-bottom: 100%;
-    }
-
-    .img-1-1 img {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
+    /* ===== LEGACY FALLBACK STYLES (for static layout) ===== */
+    .img-potrait-1,
     .img-potrait-2 {
       position: relative;
       border: 4px solid #ffffff;
@@ -216,20 +171,15 @@
       cursor: default;
       width: 100%;
       height: 0;
-      padding-bottom: 177.78%; /* 16/9 * 100 = 177.78% → portrait 9:16 */
-      margin-top: -140px; /* naik ke atas biar nyelip */
-      z-index: 2;        /* pastikan tampil di atas */
+      padding-bottom: 177.78%; /* portrait 9:16 */
     }
 
-    .img-potrait-2 img {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    .img-potrait-2 {
+      margin-top: -140px;
+      z-index: 2;
     }
 
+    .img-1-1,
     .img-1-1-2 {
       position: relative;
       border: 4px solid #ffffff;
@@ -238,17 +188,8 @@
       overflow: hidden;
       cursor: default;
       width: 100%;
-      height: 50%; 
-      padding-bottom: 100%;
-    }
-
-    .img-1-1-2 img {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+      height: 50%;
+      padding-bottom: 100%; /* square 1:1 */
     }
 
     .img-1-1-3 {
@@ -260,9 +201,14 @@
       cursor: default;
       width: 100%;
       height: 0;
-      padding-bottom: 56.25%; /* 9/16 = 0.5625 */
+      padding-bottom: 56.25%; /* landscape 16:9 */
     }
 
+    /* Common image styling for legacy containers */
+    .img-potrait-1 img,
+    .img-potrait-2 img,
+    .img-1-1 img,
+    .img-1-1-2 img,
     .img-1-1-3 img {
       position: absolute;
       top: 0;
@@ -270,16 +216,13 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-    }
-
-    .right-section img {
       transition: transform 0.4s ease, box-shadow 0.4s ease, filter 0.4s ease;
     }
 
     .right-section img:hover {
-      transform: scale(1.05); /* zoom sedikit */
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* shadow lebih tebal saat hover */
-      filter: brightness(1.05) contrast(1.05); /* sedikit lebih terang & kontras */
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      filter: brightness(1.05) contrast(1.05);
     }
 
     /* ===== LAYOUT GRID SYSTEM ===== */
@@ -293,7 +236,7 @@
 
     /* ===== GRID POSITIONING & ASPECT RATIOS ===== */
     /* Position 1: Top Left - Square (1:1) */
-    .layout-item:nth-child(1) {
+    .layout-item[data-order="1"] {
       grid-column: 1;
       grid-row: 1;
       aspect-ratio: 1/1;
@@ -301,7 +244,7 @@
     }
 
     /* Position 2: Top Right - Portrait (9:16) */
-    .layout-item:nth-child(2) {
+    .layout-item[data-order="2"] {
       grid-column: 2;
       grid-row: 1 / 3;
       aspect-ratio: 9/16;
@@ -309,7 +252,7 @@
     }
 
     /* Position 3: Middle Left - Portrait (9:16) */
-    .layout-item:nth-child(3) {
+    .layout-item[data-order="3"] {
       grid-column: 1;
       grid-row: 2 / 4;
       aspect-ratio: 9/16;
@@ -317,7 +260,7 @@
     }
 
     /* Position 4: Middle Right - Square (1:1) */
-    .layout-item:nth-child(4) {
+    .layout-item[data-order="4"] {
       grid-column: 2;
       grid-row: 3;
       aspect-ratio: 1/1;
@@ -325,7 +268,7 @@
     }
 
     /* Position 5: Bottom Left - Landscape (16:9) */
-    .layout-item:nth-child(5) {
+    .layout-item[data-order="5"] {
       grid-column: 1;
       grid-row: 4;
       aspect-ratio: 16/9;
@@ -333,7 +276,7 @@
     }
 
     /* Position 6: Bottom Right - Landscape (16:9) */
-    .layout-item:nth-child(6) {
+    .layout-item[data-order="6"] {
       grid-column: 2;
       grid-row: 4;
       aspect-ratio: 16/9;
@@ -413,34 +356,34 @@
 
     /* ===== ASPECT RATIO CONTROL ===== */
     /* Square Content (1:1) - Positions 1 & 4 */
-    .layout-item:nth-child(1) img,
-    .layout-item:nth-child(1) video,
-    .layout-item:nth-child(1) .youtube-video,
-    .layout-item:nth-child(4) img,
-    .layout-item:nth-child(4) video,
-    .layout-item:nth-child(4) .youtube-video {
+    .layout-item[data-order="1"] img,
+    .layout-item[data-order="1"] video,
+    .layout-item[data-order="1"] .youtube-video,
+    .layout-item[data-order="4"] img,
+    .layout-item[data-order="4"] video,
+    .layout-item[data-order="4"] .youtube-video {
       aspect-ratio: 1/1;
       object-fit: cover;
     }
 
     /* Portrait Content (9:16) - Positions 2 & 3 */
-    .layout-item:nth-child(2) img,
-    .layout-item:nth-child(2) video,
-    .layout-item:nth-child(2) .youtube-video,
-    .layout-item:nth-child(3) img,
-    .layout-item:nth-child(3) video,
-    .layout-item:nth-child(3) .youtube-video {
+    .layout-item[data-order="2"] img,
+    .layout-item[data-order="2"] video,
+    .layout-item[data-order="2"] .youtube-video,
+    .layout-item[data-order="3"] img,
+    .layout-item[data-order="3"] video,
+    .layout-item[data-order="3"] .youtube-video {
       aspect-ratio: 9/16;
       object-fit: cover;
     }
 
     /* Landscape Content (16:9) - Positions 5 & 6 */
-    .layout-item:nth-child(5) img,
-    .layout-item:nth-child(5) video,
-    .layout-item:nth-child(5) .youtube-video,
-    .layout-item:nth-child(6) img,
-    .layout-item:nth-child(6) video,
-    .layout-item:nth-child(6) .youtube-video {
+    .layout-item[data-order="5"] img,
+    .layout-item[data-order="5"] video,
+    .layout-item[data-order="5"] .youtube-video,
+    .layout-item[data-order="6"] img,
+    .layout-item[data-order="6"] video,
+    .layout-item[data-order="6"] .youtube-video {
       aspect-ratio: 16/9;
       object-fit: cover;
     }
@@ -586,8 +529,23 @@
     @if($backgroundImage && $backgroundImage->type === 'Video')
       @php
         $isYouTube = strpos($backgroundImage->file_path, 'youtube.com') !== false || strpos($backgroundImage->file_path, 'youtu.be') !== false;
+        $videoId = '';
+        if ($isYouTube) {
+          preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $backgroundImage->file_path, $matches);
+          $videoId = $matches[1] ?? '';
+        }
       @endphp
-      @if(!$isYouTube)
+      
+      @if($isYouTube && $videoId)
+        <!-- YouTube background video -->
+        <iframe class="background-video youtube-bg" 
+                src="https://www.youtube.com/embed/{{ $videoId }}?autoplay=1&mute=1&loop=1&playlist={{ $videoId }}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&enablejsapi=1"
+                frameborder="0" 
+                allow="autoplay; encrypted-media" 
+                allowfullscreen>
+        </iframe>
+        <div class="video-overlay"></div>
+      @elseif(!$isYouTube)
         <!-- Background video for local files -->
         <video class="background-video" autoplay muted loop playsinline preload="auto">
           <source src="{{ asset('storage/' . $backgroundImage->file_path) }}" type="video/mp4">
@@ -606,34 +564,46 @@
     </section>
 
     <aside class="right-section" aria-label="Gallery of images representing Sumatera Utara and cultural elements">
-      @if($layoutImages && $layoutImages->count() > 0)
+      @if($media && $media->count() > 0)
         <!-- Dynamic layout grid from layout manager -->
         <div class="layout-grid">
-          @foreach($layoutImages as $media)
-            @php
-              $videoPath = $media->file_path;
-              $isYouTube = str_contains($videoPath, 'youtube.com') || str_contains($videoPath, 'youtu.be');
-              $videoId = '';
-              if ($isYouTube) {
-                preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $videoPath, $matches);
-                $videoId = $matches[1] ?? '';
-              }
-            @endphp
-            <div class="layout-item" 
-                 data-order="{{ $media->layout_order }}"
-                 data-media-type="{{ $media->type }}"
-                 data-media-path="{{ $media->file_path }}"
-                 data-media-name="{{ $media->name }}"
-                 data-youtube-id="{{ $videoId }}"
-                 style="cursor: pointer;">
-              <div class="layout-order">{{ $media->layout_order }}</div>
-              @if($media->type === 'Gambar')
-                <img src="{{ asset('storage/' . $media->file_path) }}" alt="{{ $media->name }}" title="{{ $media->name }}">
-              @elseif($media->type === 'Video')
+          @php
+            // Sort media by layout_order to ensure proper positioning
+            $sortedMedia = $media->sortBy('layout_order');
+            // Create array with proper grid positioning
+            $gridPositions = [];
+            foreach($sortedMedia as $mediaItem) {
+              $gridPositions[$mediaItem->layout_order] = $mediaItem;
+            }
+          @endphp
+          
+          @for($position = 1; $position <= 6; $position++)
+            @if(isset($gridPositions[$position]))
+              @php
+                $mediaItem = $gridPositions[$position];
+                $videoPath = $mediaItem->file_path;
+                $isYouTube = str_contains($videoPath, 'youtube.com') || str_contains($videoPath, 'youtu.be');
+                $videoId = '';
+                if ($isYouTube) {
+                  preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $videoPath, $matches);
+                  $videoId = $matches[1] ?? '';
+                }
+              @endphp
+              <div class="layout-item" 
+                   data-order="{{ $mediaItem->layout_order }}"
+                   data-media-type="{{ $mediaItem->type }}"
+                   data-media-path="{{ $mediaItem->file_path }}"
+                   data-media-name="{{ $mediaItem->name }}"
+                   data-youtube-id="{{ $videoId }}"
+                   style="cursor: pointer; grid-area: auto;">
+                <div class="layout-order">{{ $mediaItem->layout_order }}</div>
+              @if($mediaItem->type === 'Gambar')
+                <img src="{{ asset('storage/' . $mediaItem->file_path) }}" alt="{{ $mediaItem->name }}" title="{{ $mediaItem->name }}">
+              @elseif($mediaItem->type === 'Video')
                 @if($isYouTube && $videoId)
                   <iframe 
                     src="https://www.youtube.com/embed/{{ $videoId }}?autoplay=1&mute=1&loop=1&playlist={{ $videoId }}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1" 
-                    title="{{ $media->name }}"
+                    title="{{ $mediaItem->name }}"
                     frameborder="0" 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                     allowfullscreen
@@ -641,13 +611,17 @@
                   </iframe>
                 @else
                   <video autoplay muted loop>
-                    <source src="{{ asset('storage/' . $media->file_path) }}" type="video/mp4">
+                    <source src="{{ asset('storage/' . $mediaItem->file_path) }}" type="video/mp4">
                     Your browser does not support the video tag.
                   </video>
                 @endif
               @endif
-            </div>
-          @endforeach
+              </div>
+            @else
+              <!-- Empty grid position -->
+              <div class="layout-item" style="opacity: 0; pointer-events: none;"></div>
+            @endif
+          @endfor
         </div>
       @else
         <!-- Fallback static layout when no media is configured -->
@@ -724,8 +698,13 @@
   <script>
     // Schedule management system
     let scheduleCheckInterval;
+    let audioCheckInterval;
     let currentScheduleData = null;
-    let isScheduleActive = {{ $activeSchedule ? 'true' : 'false' }};
+    let currentAudioData = null;
+    let isScheduleActive = {{ $activeSchedules && $activeSchedules->count() > 0 ? 'true' : 'false' }};
+    let currentAudioPlayer = null;
+    let audioPlaylist = [];
+    let currentAudioIndex = 0;
 
     document.addEventListener('DOMContentLoaded', function() {
       const mediaModal = new bootstrap.Modal(document.getElementById('mediaModal'));
@@ -778,7 +757,358 @@
 
       // Initialize schedule checking system
       initScheduleSystem();
+      
+      // Initialize audio scheduling system
+      initAudioSystem();
     });
+
+    // Audio System Functions
+    function initAudioSystem() {
+      console.log('🎵 Initializing audio scheduling system');
+      
+      // Check for audio schedules immediately
+      checkAudioSchedules();
+      
+      // Check every 30 seconds for new audio schedules
+      audioCheckInterval = setInterval(checkAudioSchedules, 30000);
+      
+      // Check when page becomes visible again
+      document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+          checkAudioSchedules();
+        }
+      });
+    }
+
+    // Check for active audio schedules
+    async function checkAudioSchedules() {
+      try {
+        const response = await fetch('/api/public/landing/audio-schedules');
+        const data = await response.json();
+        
+        if (data.success && data.has_active_audio) {
+          console.log('🎵 Active audio schedules found:', data.audio_schedules.length);
+          
+          // Update audio playlist
+          audioPlaylist = data.audio_schedules;
+          
+          // Start playing audio if not already playing
+          if (!currentAudioPlayer || currentAudioPlayer.paused) {
+            playScheduledAudio();
+          }
+        } else {
+          console.log('🔇 No active audio schedules');
+          
+          // Stop current audio if playing
+          if (currentAudioPlayer && !currentAudioPlayer.paused) {
+            stopScheduledAudio();
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error checking audio schedules:', error);
+      }
+    }
+
+    // Play scheduled audio
+    function playScheduledAudio() {
+      if (audioPlaylist.length === 0) return;
+      
+      const audioSchedule = audioPlaylist[currentAudioIndex];
+      console.log('🎵 Playing audio:', audioSchedule.media_name);
+      
+      // Create or update audio player
+      if (currentAudioPlayer) {
+        currentAudioPlayer.pause();
+        currentAudioPlayer.remove();
+      }
+      
+      currentAudioPlayer = new Audio('/storage/' + audioSchedule.media_path);
+      currentAudioPlayer.volume = 0.7; // Set volume to 70%
+      
+      // Handle audio metadata loaded - get duration
+      currentAudioPlayer.addEventListener('loadedmetadata', function() {
+        const duration = currentAudioPlayer.duration;
+        console.log('🎵 Audio duration:', Math.round(duration), 'seconds');
+        
+        // Show audio popup with duration info
+        showAudioPopup(audioSchedule, duration);
+      });
+      
+      // Handle audio end - move to next in playlist
+      currentAudioPlayer.addEventListener('ended', function() {
+        console.log('🎵 Audio ended, moving to next');
+        hideAudioPopup();
+        
+        currentAudioIndex = (currentAudioIndex + 1) % audioPlaylist.length;
+        
+        // If we've played all audio files, wait 5 seconds before restarting
+        if (currentAudioIndex === 0 && audioPlaylist.length > 1) {
+          setTimeout(() => {
+            playScheduledAudio();
+          }, 5000);
+        } else {
+          playScheduledAudio();
+        }
+      });
+      
+      // Handle audio errors
+      currentAudioPlayer.addEventListener('error', function(e) {
+        console.error('❌ Audio playback error:', e);
+        hideAudioPopup();
+        
+        // Try next audio in playlist
+        currentAudioIndex = (currentAudioIndex + 1) % audioPlaylist.length;
+        if (currentAudioIndex !== 0) {
+          setTimeout(() => {
+            playScheduledAudio();
+          }, 2000);
+        }
+      });
+      
+      // Handle audio time updates for progress
+      currentAudioPlayer.addEventListener('timeupdate', function() {
+        updateAudioProgress();
+      });
+      
+      // Start playing
+      currentAudioPlayer.play().catch(function(error) {
+        console.error('❌ Audio autoplay failed:', error);
+        // Show manual play button in popup
+        updateAudioPopupForManualPlay(audioSchedule);
+      });
+    }
+
+    // Stop scheduled audio
+    function stopScheduledAudio() {
+      if (currentAudioPlayer) {
+        currentAudioPlayer.pause();
+        currentAudioPlayer.currentTime = 0;
+      }
+      hideAudioPopup();
+      console.log('🔇 Audio playback stopped');
+    }
+
+    // Show audio popup indicator
+    function showAudioPopup(audioSchedule, duration = null) {
+      // Remove existing popup
+      hideAudioPopup();
+      
+      const durationText = duration ? formatDuration(duration) : 'Loading...';
+      
+      const popup = document.createElement('div');
+      popup.id = 'audioPopup';
+      popup.innerHTML = `
+        <div style="
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: linear-gradient(135deg, #1f9e76 0%, #16a085 100%);
+          color: white;
+          padding: 15px 20px;
+          border-radius: 10px;
+          box-shadow: 0 4px 20px rgba(31, 158, 118, 0.3);
+          z-index: 9999;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          min-width: 300px;
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        ">
+          <div style="
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: audioRotate 2s linear infinite;
+          ">
+            <i class="bi bi-music-note-beamed" style="font-size: 18px;"></i>
+          </div>
+          <div style="flex: 1;">
+            <div style="font-weight: 600; font-size: 14px; margin-bottom: 2px;">
+              🎵 Audio Terjadwal
+            </div>
+            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 4px;">
+              ${audioSchedule.media_name}
+            </div>
+            <div style="font-size: 11px; opacity: 0.8; display: flex; align-items: center; gap: 5px;">
+              <span id="audioCurrentTime">0:00</span>
+              <div style="
+                flex: 1;
+                height: 2px;
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 1px;
+                overflow: hidden;
+              ">
+                <div id="audioProgressBar" style="
+                  height: 100%;
+                  background: rgba(255, 255, 255, 0.8);
+                  width: 0%;
+                  transition: width 0.1s ease;
+                "></div>
+              </div>
+              <span id="audioDuration">${durationText}</span>
+            </div>
+          </div>
+          <button onclick="stopScheduledAudio()" style="
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          ">
+            <i class="bi bi-x" style="font-size: 16px;"></i>
+          </button>
+        </div>
+      `;
+      
+      document.body.appendChild(popup);
+      
+      // Add rotation animation
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes audioRotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes audioPulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    // Update popup for manual play
+    function updateAudioPopupForManualPlay(audioSchedule) {
+      const popup = document.getElementById('audioPopup');
+      if (popup) {
+        popup.innerHTML = `
+          <div style="
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #ffc107 0%, #ff8c00 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(255, 193, 7, 0.3);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 280px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+          ">
+            <button onclick="manualPlayAudio()" style="
+              width: 40px;
+              height: 40px;
+              background: rgba(255, 255, 255, 0.2);
+              border: none;
+              color: white;
+              border-radius: 50%;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            ">
+              <i class="bi bi-play-fill" style="font-size: 18px;"></i>
+            </button>
+            <div style="flex: 1;">
+              <div style="font-weight: 600; font-size: 14px; margin-bottom: 2px;">
+                🎵 Klik untuk Putar Audio
+              </div>
+              <div style="font-size: 12px; opacity: 0.9;">
+                ${audioSchedule.media_name}
+              </div>
+            </div>
+            <button onclick="hideAudioPopup()" style="
+              background: rgba(255, 255, 255, 0.2);
+              border: none;
+              color: white;
+              width: 30px;
+              height: 30px;
+              border-radius: 50%;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            ">
+              <i class="bi bi-x" style="font-size: 16px;"></i>
+            </button>
+          </div>
+        `;
+      }
+    }
+
+    // Manual play audio function
+    function manualPlayAudio() {
+      if (currentAudioPlayer) {
+        currentAudioPlayer.play().then(() => {
+          // Update popup back to playing state
+          const audioSchedule = audioPlaylist[currentAudioIndex];
+          showAudioPopup(audioSchedule);
+        }).catch(error => {
+          console.error('❌ Manual audio play failed:', error);
+        });
+      }
+    }
+
+    // Update audio progress
+    function updateAudioProgress() {
+      if (!currentAudioPlayer) return;
+      
+      const currentTime = currentAudioPlayer.currentTime;
+      const duration = currentAudioPlayer.duration;
+      
+      if (duration && !isNaN(duration)) {
+        const progress = (currentTime / duration) * 100;
+        
+        // Update progress bar
+        const progressBar = document.getElementById('audioProgressBar');
+        if (progressBar) {
+          progressBar.style.width = progress + '%';
+        }
+        
+        // Update current time display
+        const currentTimeEl = document.getElementById('audioCurrentTime');
+        if (currentTimeEl) {
+          currentTimeEl.textContent = formatDuration(currentTime);
+        }
+        
+        // Update duration display
+        const durationEl = document.getElementById('audioDuration');
+        if (durationEl && durationEl.textContent === 'Loading...') {
+          durationEl.textContent = formatDuration(duration);
+        }
+      }
+    }
+
+    // Format duration in MM:SS format
+    function formatDuration(seconds) {
+      if (!seconds || isNaN(seconds)) return '0:00';
+      
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = Math.floor(seconds % 60);
+      return minutes + ':' + (remainingSeconds < 10 ? '0' : '') + remainingSeconds;
+    }
+
+    // Hide audio popup
+    function hideAudioPopup() {
+      const popup = document.getElementById('audioPopup');
+      if (popup) {
+        popup.remove();
+      }
+    }
 
     // Schedule System Functions - DISABLED TO PREVENT REFRESH LOOPS
     function initScheduleSystem() {
@@ -800,52 +1130,17 @@
       return;
     }
 
-    // Auto-rotation system for scheduled media
-    @if($activeSchedule && $layoutConfig['auto_rotate'])
-    let rotationInterval;
-    let currentMediaIndex = 0;
-    const rotationDuration = {{ $layoutConfig['duration'] ?? 10 }} * 1000; // Convert to milliseconds
-
-    function startMediaRotation() {
-      const mediaItems = document.querySelectorAll('.layout-item');
-      if (mediaItems.length <= 1) return; // No need to rotate if only one item
-
-      console.log(`🔄 Starting media rotation every ${rotationDuration/1000} seconds`);
-      
-      rotationInterval = setInterval(() => {
-        // Hide current media
-        mediaItems.forEach(item => item.style.opacity = '0.7');
-        
-        // Show next media
-        currentMediaIndex = (currentMediaIndex + 1) % mediaItems.length;
-        mediaItems[currentMediaIndex].style.opacity = '1';
-        mediaItems[currentMediaIndex].style.transform = 'scale(1.02)';
-        
-        // Reset transform after animation
-        setTimeout(() => {
-          mediaItems[currentMediaIndex].style.transform = 'scale(1)';
-        }, 500);
-        
-      }, rotationDuration);
-    }
-
-    // Start rotation when page loads
-    document.addEventListener('DOMContentLoaded', function() {
-      setTimeout(startMediaRotation, 2000); // Start after 2 seconds
-    });
-
-    // Clean up on page unload
-    window.addEventListener('beforeunload', function() {
-      if (rotationInterval) {
-        clearInterval(rotationInterval);
-      }
-    });
-    @endif
 
     // Clean up intervals when page unloads
     window.addEventListener('beforeunload', function() {
       if (scheduleCheckInterval) {
         clearInterval(scheduleCheckInterval);
+      }
+      if (audioCheckInterval) {
+        clearInterval(audioCheckInterval);
+      }
+      if (currentAudioPlayer) {
+        currentAudioPlayer.pause();
       }
     });
 

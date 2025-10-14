@@ -1,11 +1,16 @@
 <?php
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Media;
 use App\Models\Schedule;
+use App\Models\LayoutSetting;
+use App\Models\ScheduledBackground;
+use App\Models\ScheduleDescription;
 use App\Models\Log;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class ScheduleController extends Controller
 {
@@ -16,7 +21,8 @@ class ScheduleController extends Controller
 
     public function index(Request $request)
     {
-        $query = Media::where('user_id', Auth::id());
+        // Remove user_id filtering to show all media to all admins
+        $query = Media::query();
         
         if ($request->has('search') && $request->search != '') {
             $query->where('name', 'like', '%' . $request->search . '%');
@@ -24,14 +30,45 @@ class ScheduleController extends Controller
         
         $media = $query->with('schedules')->orderBy('created_at', 'desc')->get();
         
-        return view('jadwal', compact('media'));
+        // Get layout settings for the current user
+        $layoutSettings = LayoutSetting::firstOrCreate(
+            ['user_id' => Auth::id()],
+            ['description' => '']
+        );
+        
+        // Load the background media relationship
+        $layoutSettings->load('backgroundMedia');
+        
+        // Get all media that can be used as background (remove user_id filter for cross-admin access)
+        $backgroundMedia = Media::whereIn('type', ['Gambar', 'Video'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        // Get scheduled backgrounds and descriptions
+        $scheduledBackgrounds = ScheduledBackground::with('media')
+            ->where('user_id', Auth::id())
+            ->orderBy('start_date', 'desc')
+            ->get();
+
+        $scheduledDescriptions = ScheduleDescription::where('user_id', Auth::id())
+            ->orderBy('start_date', 'desc')
+            ->get();
+
+        return view('jadwal', compact('media', 'layoutSettings', 'backgroundMedia', 'scheduledBackgrounds', 'scheduledDescriptions'));
     }
 
     public function store(Request $request)
     {
-        // Verify media belongs to user first
+        try {
+            // Debug incoming request
+            \Log::info('Schedule Store Request', [
+                'all_data' => $request->all(),
+                'start_date' => $request->start_date,
+                'media_id' => $request->media_id
+            ]);
+
+        // Get media (remove user_id filter for cross-admin access)
         $media = Media::where('id', $request->media_id)
-                    ->where('user_id', Auth::id())
                     ->firstOrFail();
 
         // Different validation based on media type
@@ -42,28 +79,22 @@ class ScheduleController extends Controller
                 'start_date' => 'required|date',
                 'day_of_week' => 'nullable|in:senin,selasa,rabu,kamis,jumat,sabtu,minggu',
                 'time' => 'nullable|date_format:H:i',
-                'display_duration' => 'required|integer|min:1|max:300', // Required for audio
-                'auto_rotate' => 'nullable|boolean'
+                'layout_position' => 'nullable|integer|min:1|max:6',
             ]);
         } else {
             // Gambar & Video: Requires layout position, no duration
             $request->validate([
                 'media_id' => 'required|exists:media,id',
                 'start_date' => 'required|date',
-                'day_of_week' => 'nullable|in:senin,selasa,rabu,kamis,jumat,sabtu,minggu',
+                'day_of_week' => 'nullable|string',
                 'time' => 'nullable|date_format:H:i',
-                'layout_position' => 'required|integer|min:1|max:6', // Required for visual media
-                'auto_rotate' => 'nullable|boolean'
+                'layout_position' => 'required|integer|between:1,6',
             ]);
         }
 
-        // Create basic schedule with existing columns only
-        $scheduleData = [
-            'media_id' => $request->media_id,
-            'start_date' => $request->start_date,
-            'day_of_week' => $request->day_of_week,
-            'time' => $request->time
-        ];
+        // Prepare data for creation
+        $scheduleData = $request->all();
+        $scheduleData['display_duration'] = $request->display_duration ?? 10;
 
         $schedule = Schedule::create($scheduleData);
 
@@ -82,53 +113,117 @@ class ScheduleController extends Controller
             'media_type' => $media->type,
             'schedule' => $schedule->load('media')
         ]);
+        
+        } catch (\Exception $e) {
+            \Log::error('Schedule creation failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan jadwal: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function update(Request $request, $id)
     {
-        $schedule = Schedule::whereHas('media', function($query) {
-            $query->where('user_id', Auth::id());
-        })->findOrFail($id);
+        try {
+            // Remove user_id filter for cross-admin access
+            $schedule = Schedule::with('media')->findOrFail($id);
+            $media = $schedule->media;
 
-        $request->validate([
-            'start_date' => 'required|date',
-            'day_of_week' => 'nullable|in:senin,selasa,rabu,kamis,jumat,sabtu,minggu',
-            'time' => 'nullable|date_format:H:i'
-        ]);
+            // Flexible validation - only validate fields that are present
+            $rules = [];
+            
+            if ($request->has('start_date')) {
+                $rules['start_date'] = 'date';
+            }
+            if ($request->has('end_date')) {
+                $rules['end_date'] = 'nullable|date';
+            }
+            if ($request->has('day_of_week')) {
+                $rules['day_of_week'] = 'nullable|in:senin,selasa,rabu,kamis,jumat,sabtu,minggu';
+            }
+            if ($request->has('time')) {
+                $rules['time'] = 'nullable|date_format:H:i';
+            }
+            if ($request->has('layout_position') && $media->type !== 'Audio') {
+                $rules['layout_position'] = 'nullable|integer|between:1,6';
+            }
 
-        $updateData = [
-            'start_date' => $request->start_date,
-            'day_of_week' => $request->day_of_week,
-            'time' => $request->time
-        ];
-        
-        $schedule->update($updateData);
+            $request->validate($rules);
 
-        // Log activity
-        Log::createLog(Auth::id(), 'Update Schedule', "Updated schedule for media: {$schedule->media->name}");
+            // Build update data only with provided fields
+            $updateData = [];
+            
+            if ($request->has('start_date')) {
+                $updateData['start_date'] = $request->start_date;
+            }
+            if ($request->has('end_date')) {
+                $updateData['end_date'] = $request->end_date;
+            }
+            if ($request->has('day_of_week')) {
+                $updateData['day_of_week'] = $request->day_of_week;
+            }
+            if ($request->has('time')) {
+                $updateData['time'] = $request->time;
+            }
+            if ($request->has('layout_position')) {
+                $updateData['layout_position'] = $request->layout_position;
+            }
+            
+            $schedule->update($updateData);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Jadwal berhasil diupdate!'
-        ]);
+            // Log activity
+            Log::createLog(Auth::id(), 'Update Schedule', "Updated schedule for media: {$schedule->media->name}");
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Jadwal berhasil diupdate!',
+                'schedule' => $schedule->load('media')
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Schedule update failed', [
+                'error' => $e->getMessage(),
+                'schedule_id' => $id,
+                'request_data' => $request->all()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengupdate jadwal: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function destroy($id)
     {
         try {
-            $schedule = Schedule::whereHas('media', function($query) {
-                $query->where('user_id', Auth::id());
-            })->with('media')->findOrFail($id);
+            $schedule = Schedule::with('media')->findOrFail($id);
 
             $mediaName = $schedule->media->name;
+            $media = $schedule->media;
+            
+            // Remove media from landing page if it's visual media
+            if (in_array($media->type, ['Gambar', 'Video'])) {
+                $media->update([
+                    'show_on_landing' => false,
+                    'layout_order' => null
+                ]);
+            }
+            
             $schedule->delete();
 
             // Log the deletion
-            Log::createLog(Auth::id(), 'Delete Schedule', "Deleted schedule for media: {$mediaName}");
+            Log::createLog(Auth::id(), 'Delete Schedule', "Deleted schedule for media: {$mediaName} and removed from landing page");
 
             return response()->json([
                 'success' => true,
-                'message' => "Jadwal untuk media '{$mediaName}' berhasil dihapus"
+                'message' => "Jadwal untuk media '{$mediaName}' berhasil dihapus dan media dihilangkan dari landing page"
             ]);
 
         } catch (\Exception $e) {
@@ -144,10 +239,7 @@ class ScheduleController extends Controller
     // Get all active schedules for current user
     public function getActiveSchedules()
     {
-        $activeSchedules = Schedule::whereHas('media', function($query) {
-            $query->where('user_id', Auth::id());
-        })
-        ->with(['media'])
+        $activeSchedules = Schedule::with(['media'])
         ->orderBy('created_at', 'desc')
         ->get();
 
@@ -164,17 +256,15 @@ class ScheduleController extends Controller
         $currentDate = $now->toDateString();
         $currentDay = $this->getDayOfWeekInIndonesian($now->dayOfWeek);
 
-        $activeAudioSchedules = Schedule::whereHas('media', function($query) {
-            $query->where('user_id', Auth::id())
-                  ->where('type', 'Audio');
-        })
+        $activeAudioSchedules = Schedule::join('media', 'schedules.media_id', '=', 'media.id')
+            ->where('media.type', 'Audio')
         ->where('start_date', '<=', $currentDate)
         ->where(function($query) use ($currentDay) {
             $query->whereNull('day_of_week')
                   ->orWhere('day_of_week', $currentDay);
         })
-        ->with(['media'])
-        ->orderBy('created_at', 'desc')
+        ->select('schedules.*', 'media.name as media_name', 'media.file_path', 'media.type')
+        ->orderBy('schedules.created_at', 'desc')
         ->get();
 
         return response()->json([
@@ -186,9 +276,7 @@ class ScheduleController extends Controller
     // Get schedule details
     public function show($id)
     {
-        $schedule = Schedule::whereHas('media', function($query) {
-            $query->where('user_id', Auth::id());
-        })->with('media')->findOrFail($id);
+        $schedule = Schedule::with('media')->findOrFail($id);
 
         return response()->json([
             'success' => true,

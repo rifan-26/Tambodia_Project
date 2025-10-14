@@ -529,11 +529,6 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{{ route('layout.index') }}">
-            <i class="bi bi-grid-3x3-gap"></i> <span>Layout Manager</span>
-          </a>
-        </li>
-        <li class="nav-item">
           <a class="nav-link active" href="{{ route('schedule.index') }}">
             <i class="bi bi-calendar3"></i> <span>Penjadwalan</span>
           </a>

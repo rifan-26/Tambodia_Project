@@ -3,11 +3,14 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\MediaController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\LandingController;
-use App\Http\Controllers\SuperAdminController;
+use App\Http\Controllers\MediaController;
 use App\Http\Controllers\LayoutController;
+use App\Http\Controllers\LayoutController_clean;
+use App\Http\Controllers\ScheduledBackgroundController;
+use App\Http\Controllers\ScheduleDescriptionController;
+use App\Http\Controllers\SuperAdminController;
 
 Route::get('/test', function () {
     return 'Middleware works!';
@@ -15,11 +18,16 @@ Route::get('/test', function () {
 
 // ===== PUBLIC ROUTES =====
 Route::get('/', [LandingController::class, 'index'])->name('landing');
+
+// Debug routes
+require __DIR__.'/debug.php';
+require __DIR__.'/test-schedule.php';
 Route::get('/landing', [LandingController::class, 'index']);
 
 // ===== PUBLIC API ROUTES (untuk landing page) =====
 Route::get('/api/public/landing/current-schedule', [LandingController::class, 'getCurrentSchedule'])->name('api.public.landing.schedule');
 Route::get('/api/public/landing/visual-schedules', [LandingController::class, 'getActiveVisualSchedules'])->name('api.public.landing.visual');
+Route::get('/api/public/landing/audio-schedules', [LandingController::class, 'getActiveAudioSchedule'])->name('api.public.landing.audio');
 
 // ===== AUTH ROUTES =====
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -30,22 +38,30 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware(['auth'])->group(function () {
     
     // ===== DASHBOARD ROUTES =====
-    Route::get('/dashboard', [DashboardController::class, 'pegawai'])->name('dashboard.pegawai');
-    
-    // ===== LAYOUT ROUTES =====
-    Route::get('/layout', [LayoutController::class, 'index'])->name('layout.index');
-    
-    // ===== MEDIA ROUTES (Pegawai) =====
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.pegawai');
     Route::get('/input', [MediaController::class, 'index'])->name('media.input');
-    Route::post('/media/store', [MediaController::class, 'store'])->name('media.store');
-    Route::post('/media/toggle-landing', [MediaController::class, 'toggleLanding'])->name('media.toggle-landing');
+    Route::post('/media', [MediaController::class, 'store'])->name('media.store');
     Route::delete('/media/{id}', [MediaController::class, 'destroy'])->name('media.destroy');
-    
-    // ===== SCHEDULE ROUTES (Pegawai) =====
-    Route::get('/jadwal', [ScheduleController::class, 'index'])->name('schedule.index');
-    Route::post('/schedule/store', [ScheduleController::class, 'store'])->name('schedule.store');
+    Route::get('/jadwal', [ScheduleController::class, 'index'])->name('jadwal');
+    Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule.index');
+    Route::post('/schedule', [ScheduleController::class, 'store'])->name('schedule.store');
     Route::put('/schedule/{id}', [ScheduleController::class, 'update'])->name('schedule.update');
+    Route::get('/schedule/{id}', [ScheduleController::class, 'show'])->name('schedule.show');
     Route::delete('/schedule/{id}', [ScheduleController::class, 'destroy'])->name('schedule.destroy');
+    Route::get('/layout', [LayoutController_clean::class, 'index'])->name('layout');
+    Route::post('/layout/update', [LayoutController_clean::class, 'updateLayoutSettings'])->name('layout.update');
+    Route::post('/layout/background', [LayoutController_clean::class, 'updateBackground'])->name('layout.background');
+    Route::post('/layout/description', [LayoutController_clean::class, 'updateDescription'])->name('layout.description');
+    Route::get('/layout/settings', [LayoutController_clean::class, 'getLayoutSettings'])->name('layout.settings');
+    
+    // Schedule Description API routes
+    Route::prefix('api')->group(function () {
+        Route::get('/schedule-descriptions', [ScheduleDescriptionController::class, 'index']);
+        Route::post('/schedule-descriptions', [ScheduleDescriptionController::class, 'store']);
+        Route::put('/schedule-descriptions/{id}', [ScheduleDescriptionController::class, 'update']);
+        Route::delete('/schedule-descriptions/{id}', [ScheduleDescriptionController::class, 'destroy']);
+        Route::get('/schedule-descriptions/active', [ScheduleDescriptionController::class, 'getActiveDescription']);
+    });
     
     // ===== SUPER ADMIN ROUTES =====
     Route::middleware(['role:superadmin'])->group(function () {
@@ -60,9 +76,8 @@ Route::middleware(['auth'])->group(function () {
 
 // ===== API ROUTES (untuk AJAX calls) =====
 Route::middleware('auth')->group(function () {
-    Route::post('/api/layout/update', [LayoutController::class, 'updateLayout'])->name('layout.update');
-    Route::get('/api/layout/background', [LayoutController::class, 'getBackground'])->name('layout.background.get');
-    Route::post('/api/layout/background', [LayoutController::class, 'updateBackground'])->name('layout.background');
+    // Layout status endpoint
+    Route::get('/api/layout/current-status', [LayoutController::class, 'getCurrentLayoutStatus'])->name('layout.current.status');
     
     // Media AJAX endpoints
     Route::get('/api/media/search', [MediaController::class, 'search'])->name('api.media.search');
@@ -77,6 +92,16 @@ Route::middleware('auth')->group(function () {
     // Landing page API endpoints
     Route::get('/api/landing/current-schedule', [LandingController::class, 'getCurrentSchedule'])->name('api.landing.schedule');
     Route::get('/api/landing/visual-schedules', [LandingController::class, 'getActiveVisualSchedules'])->name('api.landing.visual');
+    
+    // Layout settings API endpoints
+    Route::post('/api/layout/update-background', [ScheduleController::class, 'updateBackground'])->name('api.layout.update.background');
+    Route::post('/api/layout/update-description', [ScheduleController::class, 'updateDescription'])->name('api.layout.update.description');
+    
+    // Scheduled backgrounds
+    Route::get('/api/scheduled-backgrounds', [ScheduledBackgroundController::class, 'index'])->name('api.scheduled-backgrounds.index');
+    Route::post('/api/scheduled-backgrounds', [ScheduledBackgroundController::class, 'store'])->name('api.scheduled-backgrounds.store');
+    Route::delete('/api/scheduled-backgrounds/{id}', [ScheduledBackgroundController::class, 'destroy'])->name('api.scheduled-backgrounds.destroy');
+    Route::get('/api/active-background', [ScheduledBackgroundController::class, 'getActiveBackground'])->name('api.active-background');
 });
 
 // ===== MEDIA STREAM ROUTE (avoid symlink issues) =====

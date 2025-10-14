@@ -17,21 +17,22 @@
       min-height: 100vh;
       margin: 0;
       padding: 0;
+      overflow-x: hidden;
     }
 
     .sidebar {
       background: linear-gradient(180deg, #E7FFEA 0%, #ffffff 50%, #dcedff 100%);
       border-right: none;
-      min-height: 100vh;
+      height: 100vh !important;
       width: 250px;
       display: flex;
       flex-direction: column;
-      position: fixed;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      z-index: 1000;
+      position: fixed !important;
+      left: 0 !important;
+      top: 0 !important;
+      z-index: 9999 !important;
       overflow: hidden;
+      transform: translateZ(0);
     }
     
     .sidebar-header {
@@ -109,12 +110,13 @@
     }
     
     main.content-area {
-      margin-left: 240px;
+      margin-left: 250px !important;
       padding: 1.75rem 2rem 2rem 2rem;
       min-height: 100vh;
       background: linear-gradient(90deg, #ffffff, #e9edfa);
       box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
       position: relative;
+      width: calc(100% - 250px) !important;
     }
     
     .header-top {
@@ -461,11 +463,6 @@
         <li class="nav-item">
           <a class="nav-link" href="{{ route('media.input') }}">
             <i class="bi bi-pencil-square"></i> <span>Input Media</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{{ route('layout.index') }}">
-            <i class="bi bi-grid-3x3-gap"></i> <span>Layout Manager</span>
           </a>
         </li>
         <li class="nav-item">
