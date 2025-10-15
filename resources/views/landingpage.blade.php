@@ -3,24 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>BPS Sumatera Utara</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <title>BPS Sumatera Utara - Digital Signage</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display&family=Open+Sans&display=swap');
-
+    /* Override Bootstrap defaults to preserve custom design */
     * {
+      margin: 0;
+      padding: 0;
       box-sizing: border-box;
     }
 
     body, html {
       margin: 0;
       padding: 0;
-      font-family: 'Open Sans', sans-serif;
-      background-color: #0b0b0b;
-      color: white;
+      font-family: 'Roboto', sans-serif;
+      background: #f5f5f5;
+      color: #333;
       height: 100vh;
-      overflow-x: hidden;
+      overflow: hidden;
     }
 
     .container-left {
@@ -28,291 +30,346 @@
       height: 100vh;
       width: 100vw;
       overflow: hidden;
-      background: #0b0b0b;
+      background: url('{{ asset('img/batikmerah.png') }}') center center;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      display: flex;
+      flex-direction: column;
     }
 
-    /* Background video */
-    .background-video {
-      position: absolute;
-      top: 0;
-      left: 0;
+    /* Left Section Wrapper - default untuk portrait */
+    .left-section-wrapper {
+      position: relative;
       width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: 0;
     }
 
-    /* YouTube background video specific styles */
-    .youtube-bg {
-      width: 100vw;
-      height: 56.25vw; /* 16:9 aspect ratio */
-      min-height: 100vh;
-      min-width: 177.77vh; /* 16:9 aspect ratio */
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+    /* Header Wrapper */
+    .header-wrapper {
+      position: relative;
+      overflow: visible;
+      z-index: 5;
     }
 
-    /* Video overlay for better text readability */
-    .video-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.4);
-      z-index: 1;
-    }
-
-    /* Left section with background image and text */
-    .left-section {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 65%;
-      height: 100%;
-      background: none;
-      z-index: 2;
-      padding: 60px 80px;
+    /* Header Section with Blue Gradient */
+    .header {
+      position: relative;
+      background: linear-gradient(to bottom, #092058 45%, #1345BE 100%);
       color: white;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    /* Video overlay */
-    .video-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 0.8) 100%);
-      z-index: 1;
-    }
-
-    .left-section h1 {
-      font-family: 'Playfair Display', serif;
-      font-weight: 450;
-      font-size: clamp(2rem, 4.5vw, 3.5rem);
-      line-height: 1.2;
-      letter-spacing: 1px;
-      margin-top: 0;
-      margin-bottom: 20px;
-      max-width: 100%;
-      color: #fff;
-      text-shadow:
-        0 4px 10px rgba(0, 0, 0, 0.6),
-        0 0 25px rgba(0, 0, 0, 0.4);
-    }
-
-    .left-section p {
-      max-width: 620px;
-      font-size: 1.25rem;
-      line-height: 1.7;
-      letter-spacing: 0.3px;
-      color: #f5f5f5;
-      text-shadow:
-      0 4px 8px rgba(0, 0, 0, 0.7),   /* shadow utama lebih tebal */
-      0 0 12px rgba(0, 0, 0, 0.5),    /* glow sedang */
-      0 0 30px rgba(0, 0, 0, 0.4);    /* glow lebar */
-    }
-
-    /* Highlight for BPS letters */
-    .bps {
-      font-weight: 700;
-      font-family: 'Playfair Display', serif;
-      font-size: 3.5rem;
-      line-height: 1.2;
-    }
-    .bps .b {
-      color: #0c77d2; /* Blue shade */
-    }
-    .bps .p {
-      color: #1cd03d; /* Mustard/Gold shade */
-    }
-    .bps .s {
-      color: #f8bc08; /* Orange shade */
-    }
-
-    /* Right section with images grid */
-    .right-section {
-      position: fixed;
-      top: 0;
-      right: 0;
-      width: 30%;
-      max-width: 500px;
-      min-width: 350px;
-      height: 100vh;
-      padding: 1.5rem 1rem;
-      display: flex;
-      flex-direction: column;
+      text-align: center;
+      padding: 40px 20px;
+      overflow: visible;
       z-index: 2;
-      overflow: hidden;
-      background: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
-      border-left: 1px solid rgba(255,255,255,0.15);
-      box-shadow: -5px 0 20px rgba(0, 0, 0, 0.3);
     }
 
-    .right-section::before {
+    /* Lengkungan bawah header - dihapus */
+    .header::after {
       display: none;
     }
 
-    .row {
-      margin-top: 5px;
-    }
-
-    /* ===== LEGACY FALLBACK STYLES (for static layout) ===== */
-    .img-potrait-1,
-    .img-potrait-2 {
+    .header > * {
       position: relative;
-      border: 4px solid #ffffff;
-      border-radius: 4px;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
-      overflow: hidden;
-      cursor: default;
-      width: 100%;
-      height: 0;
-      padding-bottom: 177.78%; /* portrait 9:16 */
+      z-index: 3;
     }
 
-    .img-potrait-2 {
-      margin-top: -140px;
-      z-index: 2;
+    /* Lengkungan emas - dihapus */
+    .curve-gold {
+      display: none;
     }
 
-    .img-1-1,
-    .img-1-1-2 {
-      position: relative;
-      border: 4px solid #ffffff;
-      border-radius: 4px;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
-      overflow: hidden;
-      cursor: default;
-      width: 100%;
-      height: 50%;
-      padding-bottom: 100%; /* square 1:1 */
-    }
-
-    .img-1-1-3 {
-      position: relative;
-      border: 4px solid #ffffff;
-      border-radius: 4px;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
-      overflow: hidden;
-      cursor: default;
-      width: 100%;
-      height: 0;
-      padding-bottom: 56.25%; /* landscape 16:9 */
-    }
-
-    /* Common image styling for legacy containers */
-    .img-potrait-1 img,
-    .img-potrait-2 img,
-    .img-1-1 img,
-    .img-1-1-2 img,
-    .img-1-1-3 img {
+    .block-gold {
       position: absolute;
-      top: 0;
+      bottom: -15px;
       left: 0;
+      width: 100%;
+      height: 15px;
+      background: #FFC67C;
+      z-index: 1;
+    }
+
+    /* Header content styling */
+    .logos {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+    }
+
+    .logo {
+      width: 70px;
+      height: auto;
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+
+    .title p {
+      margin: 4px 0 0;
+      font-size: 1rem;
+    }
+
+    /* Welcome Section with Staff */
+    .welcome-section {
+      background: url('{{ asset('img/batikbiru.png') }}') center center;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      color: white;
+      padding: 25px 40px;
+      position: relative;
+      overflow: visible;
+      z-index: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 40px;
+      height: 260px;
+    }
+
+    .welcome-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+      background-size: 20px 20px;
+      z-index: 0;
+    }
+
+    .welcome-text {
+      position: relative;
+      z-index: 1;
+      flex: 0 0 auto;
+    }
+
+    .welcome-text h2 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 0;
+      line-height: 1.3;
+      margin: 0 0 0 20px;
+      white-space: nowrap;
+      text-shadow: -1px 3px 1px rgba(0, 0, 0, 0.5);
+    }
+
+    .staff-container {
+      display: flex;
+      justify-content: space-between;
+      gap: 30px;
+      margin: 45px 20px 0 0;
+      position: relative;
+      z-index: 1;
+      flex: 1;
+    }
+
+    .staff-member {
+      text-align: center;
+      position: relative;
+    }
+
+    .staff-photo-wrapper {
+      display: inline-flex;
+      gap: 15px;
+      justify-content: center;
+      margin: 0 auto 5px auto;
+    }
+
+    .staff-photo {
+      width: 80px;
+      height: 100px;
+      background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border: 3px solid white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: #666;
+      overflow: hidden;
+    }
+
+    .staff-photo img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.4s ease, box-shadow 0.4s ease, filter 0.4s ease;
     }
 
-    .right-section img:hover {
-      transform: scale(1.05);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-      filter: brightness(1.05) contrast(1.05);
+    .staff-info-kiri,
+    .staff-info-kanan {
+      display: inline-block;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 5px 10px;
+      font-size: 10px;
+      font-weight: 500;
+      width: 90px;
+      vertical-align: middle;
+      text-align: left;
     }
 
-    /* ===== LAYOUT GRID SYSTEM ===== */
-    .layout-grid {
+    .staff-info-kiri {
+      border-radius: 10px 0 0 10px;
+    }
+
+    .staff-info-kanan {
+      border-radius: 0 10px 10px 0;
+    }
+
+    .staff-info-wrapper {
+      display: inline-flex;
+      gap: 0;
+      justify-content: center;
+      margin: 0 auto 5px auto;
+    }
+
+    .staff-name-kiri,
+    .staff-name-kanan {
+      margin-top: 5px;
+      font-size: 15px;
+      font-weight: 500;
+      text-shadow: 2px 3px 1px rgba(0, 0, 0, 0.5);
+    }
+
+    .staff-name-kiri {
+      margin-right: 30px;
+    }
+
+    .staff-name-wrapper {
+      display: inline-flex;
+      gap: 15px;
+      justify-content: center;
+      margin: 0 auto 5px auto;
+    }
+
+    /* Gallery Section */
+    .gallery {
+      flex: 1;
+      padding: 20px 80px;
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: repeat(4, 1fr);
-      gap: 0.75rem;
-      width: 100%;
-      height: 100%;
-      padding: 0;
-      align-content: stretch;
-    }
-
-    /* ===== GRID POSITIONING & ASPECT RATIOS ===== */
-    /* Position 1: Top Left - Square (1:1) */
-    .layout-item[data-order="1"] {
-      grid-column: 1;
-      grid-row: 1;
-      width: 100%;
-      height: 100%;
-    }
-
-    /* Position 2: Top Right - Portrait (9:16) */
-    .layout-item[data-order="2"] {
-      grid-column: 2;
-      grid-row: 1 / 3;
-      width: 100%;
-      height: 100%;
-      aspect-ratio: 9/16;
-    }
-
-    /* Position 3: Middle Left - Portrait (9:16) */
-    .layout-item[data-order="3"] {
-      grid-column: 1;
-      grid-row: 2 / 4;
-      width: 100%;
-      height: 100%;
-      aspect-ratio: 9/16;
-    }
-
-    /* Position 4: Middle Right - Square (1:1) */
-    .layout-item[data-order="4"] {
-      grid-column: 2;
-      grid-row: 3;
-      width: 100%;
-      height: 100%;
-    }
-
-    /* Position 5: Bottom Left - Landscape (16:9) */
-    .layout-item[data-order="5"] {
-      grid-column: 1;
-      grid-row: 4;
-      width: 100%;
-      height: 100%;
-    }
-
-    /* Position 6: Bottom Right - Landscape (16:9) */
-    .layout-item[data-order="6"] {
-      grid-column: 2;
-      grid-row: 4;
-      width: 100%;
-      height: 100%;
-    }
-
-    /* ===== LAYOUT ITEM STYLING ===== */
-    .layout-item {
-      position: relative;
-      background: #1a1a1a;
-      border: 2px solid #ffffff;
-      border-radius: 6px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(4, minmax(80px, 120px));
+      gap: 15px;
       overflow: hidden;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: block;
-      width: 100%;
-      contain: layout style paint;
+      align-content: center;
+      max-height: 100%;
+      max-width: 80%;
+      margin: 0 auto;
+      position: relative;
     }
 
-    .layout-item:hover {
-      border-color: #1f9e76;
-      box-shadow: 0 4px 16px rgba(31, 158, 118, 0.3);
-      transform: scale(1.02);
-      z-index: 10;
+    .gallery::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: url('{{ asset('img/batikmerah.png') }}') center center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      z-index: -1;
+    }
+
+    .gallery-item {
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .gallery-item:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Grid positioning for 6 items */
+    .gallery-item:nth-child(1) {
+      grid-column: 1 / 3;
+      grid-row: 1 / 3;
+    }
+
+    .gallery-item:nth-child(2) {
+      grid-column: 3 / 5;
+      grid-row: 1 / 2;
+    }
+
+    .gallery-item:nth-child(3) {
+      grid-column: 1 / 2;
+      grid-row: 3 / 4;
+    }
+
+    .gallery-item:nth-child(4) {
+      grid-column: 2 / 3;
+      grid-row: 3 / 4;
+    }
+
+    .gallery-item:nth-child(5) {
+      grid-column: 3 / 5;
+      grid-row: 2 / 5;
+    }
+
+    .gallery-item:nth-child(6) {
+      grid-column: 1 / 3;
+      grid-row: 4 / 5;
+    }
+
+    .gallery-item img,
+    .gallery-item video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .gallery-item iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Gallery item with text overlay */
+    .gallery-item-text {
+      position: relative;
+    }
+
+    .gallery-item-text .text-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      padding: 15px;
+      font-size: 11px;
+      line-height: 1.4;
+      color: #333;
+    }
+
+    .gallery-item-text .text-overlay h3 {
+      font-size: 13px;
+      font-weight: 700;
+      margin: 0 0 8px 0;
+      color: #1a2c5b;
+    }
+
+    .gallery-item-text .text-overlay p {
+      margin: 0;
+      font-size: 10px;
+      line-height: 1.3;
+    }
+
+    .gallery-item-text .text-overlay .logo-bps {
+      position: absolute;
+      bottom: 10px;
+      right: 15px;
+      font-weight: 700;
+      color: #1a2c5b;
+      font-size: 10px;
     }
 
     /* ===== MODAL STYLING ===== */
@@ -552,175 +609,379 @@
         aspect-ratio: 16/9 !important;
       }
     }
+
+    /* ===== LANDSCAPE RESPONSIVE DESIGN ===== */
+    @media (orientation: landscape) and (max-height: 700px) {
+      .container-left {
+        display: flex;
+        flex-direction: row;
+      }
+
+      .left-section-wrapper {
+        flex: 0 0 40%;
+        width: 40%;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .header-wrapper {
+        flex: 0 0 auto;
+        width: 100%;
+        background: url('{{ asset('img/batikmerah.png') }}') center center;
+        background-size: cover;
+      }
+
+      .header {
+        padding: 20px 15px;
+        flex: 0 0 auto;
+      }
+
+      .logo {
+        width: 50px;
+      }
+
+      .title h1 {
+        font-size: 1.3rem;
+      }
+
+      .title p {
+        font-size: 0.85rem;
+      }
+
+      .welcome-section {
+        padding: 15px 30px;
+        height: auto;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: url('{{ asset('img/batikbiru.png') }}') center center;
+        background-size: cover;
+      }
+
+      .welcome-text h2 {
+        font-size: 14px;
+      }
+
+      .staff-container {
+        margin-top: 25px;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .staff-photo {
+        width: 65px;
+        height: 85px;
+      }
+
+      .staff-info-kiri,
+      .staff-info-kanan {
+        font-size: 9px;
+        padding: 4px 8px;
+        width: 75px;
+      }
+
+      .staff-name-kiri,
+      .staff-name-kanan {
+        font-size: 13px;
+      }
+
+      .gallery {
+        width: 60%;
+        height: 100vh;
+        padding: 30px 70px;
+        gap: 20px;
+        grid-template-rows: repeat(4, minmax(120px, 180px));
+        background: url('{{ asset('img/batikmerah.png') }}') center center;
+        background-size: cover;
+      }
+
+      .gallery::before {
+        display: none;
+      }
+
+      .gallery-item-text .text-overlay {
+        padding: 10px;
+        font-size: 9px;
+      }
+
+      .gallery-item-text .text-overlay h3 {
+        font-size: 11px;
+        margin-bottom: 5px;
+      }
+
+      .gallery-item-text .text-overlay p {
+        font-size: 8px;
+      }
+
+      .gallery-item-text .text-overlay .logo-bps {
+        font-size: 8px;
+        bottom: 8px;
+      }
+    }
+
+    /* Extra compact for very small landscape screens */
+    @media (orientation: landscape) and (max-height: 500px) {
+      .container-left {
+        display: flex;
+        flex-direction: row;
+      }
+
+      .left-section-wrapper {
+        flex: 0 0 10%;
+        width: 10%;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .header-wrapper {
+        flex: 0 0 auto;
+        width: 100%;
+        background: url('{{ asset('img/batikmerah.png') }}') center center;
+        background-size: cover;
+      }
+
+      .header {
+        padding: 15px 10px;
+        flex: 0 0 auto;
+      }
+
+      .logo {
+        width: 40px;
+      }
+
+      .logos {
+        gap: 20px;
+      }
+
+      .title h1 {
+        font-size: 1.1rem;
+      }
+
+      .title p {
+        font-size: 0.75rem;
+      }
+
+      .welcome-section {
+        padding: 10px 20px;
+        height: auto;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: url('{{ asset('img/batikbiru.png') }}') center center;
+        background-size: cover;
+      }
+
+      .welcome-text h2 {
+        font-size: 12px;
+        margin: 0 0 0 10px;
+      }
+
+      .staff-container {
+        margin-top: 15px;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .staff-photo {
+        width: 55px;
+        height: 70px;
+      }
+
+      .staff-info-kiri,
+      .staff-info-kanan {
+        font-size: 8px;
+        padding: 3px 6px;
+        width: 65px;
+      }
+
+      .staff-name-kiri,
+      .staff-name-kanan {
+        font-size: 11px;
+      }
+
+      .gallery {
+        width: 90%;
+        height: 100vh;
+        padding: 20px 60px;
+        gap: 18px;
+        grid-template-rows: repeat(4, minmax(90px, 130px));
+        background: url('{{ asset('img/batikmerah.png') }}') center center;
+        background-size: cover;
+      }
+
+      .gallery::before {
+        display: none;
+      }
+
+      .gallery-item-text .text-overlay {
+        padding: 8px;
+        font-size: 7px;
+      }
+
+      .gallery-item-text .text-overlay h3 {
+        font-size: 9px;
+        margin-bottom: 4px;
+      }
+
+      .gallery-item-text .text-overlay p {
+        font-size: 7px;
+        line-height: 1.2;
+      }
+
+      .gallery-item-text .text-overlay .logo-bps {
+        font-size: 7px;
+        bottom: 6px;
+      }
+    }
   </style>
 </head>
 <body>
-  <script>
-    // Force video autoplay on page load
-    document.addEventListener('DOMContentLoaded', function() {
-      const backgroundVideo = document.querySelector('.background-video');
-      if (backgroundVideo) {
-        backgroundVideo.play().catch(function(error) {
-          console.log('Video autoplay failed:', error);
-        });
-      }
-    });
-  </script>
-  <div class="container-left" role="main" aria-label="Welcome page for BPS Sumatera Utara">
+  <div class="container-left" role="main" aria-label="BPS Sumatera Utara Digital Signage">
     
-    @if($backgroundImage)
-      @if($backgroundImage->type === 'Video')
+    <!-- Left Section: Header + Welcome -->
+    <div class="left-section-wrapper">
+      <!-- Header -->
+      <div class="header-wrapper">
+      <div class="header">
+        <div class="curve-gold"></div>  
+        <div class="block-gold"></div> 
+        <div class="logos d-flex align-items-center justify-content-center">
+          <img src="{{ asset('logo-bps.png') }}" alt="Logo BPS" class="logo img-fluid">
+          <div class="title text-center">
+            <h1 class="mb-0">SELAMAT DATANG</h1>
+            <p class="mb-0">Di Kantor BPS Provinsi Sumatera Utara</p>
+          </div>
+          <img src="{{ asset('logo-sumut.png') }}" alt="Logo Sumut" class="logo img-fluid">
+        </div>
+      </div> 
+      </div>
+
+      <!-- Welcome Section -->
+      <div class="welcome-section">
+      <div class="welcome-text">
+        <h2>HARI INI ANDA AKAN<br>DI LAYANI OLEH :</h2>
+      </div>
+      
+      <div class="staff-container">
+        <!-- Staff Member -->
+        <div class="staff-member">
+          <div class="staff-photo-wrapper">
+            <div class="staff-photo">FOTO</div>
+            <div class="staff-photo">FOTO</div>
+          </div>
+          <div class="staff-info-wrapper">
+            <div class="staff-info-kiri">PETUGAS</div>
+            <div class="staff-info-kanan">PETUGAS</div>
+          </div>
+          <div class="staff-name-wrapper">
+            <div class="staff-name-kiri">Nama</div>
+            <div class="staff-name-kanan">Nama</div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <!-- Gallery -->
+    <div class="gallery">
+      @if($media && $media->count() > 0)
         @php
-          $isYouTube = strpos($backgroundImage->file_path, 'youtube.com') !== false || strpos($backgroundImage->file_path, 'youtu.be') !== false;
-          $videoId = '';
-          if ($isYouTube) {
-            preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $backgroundImage->file_path, $matches);
-            $videoId = $matches[1] ?? '';
+          // Sort media by layout_order to ensure proper positioning
+          $sortedMedia = $media->sortBy('layout_order');
+          // Create array with proper grid positioning
+          $gridPositions = [];
+          foreach($sortedMedia as $mediaItem) {
+            $gridPositions[$mediaItem->layout_order] = $mediaItem;
           }
         @endphp
         
-        @if($isYouTube && $videoId)
-          <!-- YouTube background video -->
-          <iframe class="background-video youtube-bg" 
-                  src="https://www.youtube.com/embed/{{ $videoId }}?autoplay=1&mute=1&loop=1&playlist={{ $videoId }}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&enablejsapi=1"
-                  frameborder="0" 
-                  allow="autoplay; encrypted-media" 
-                  allowfullscreen>
-          </iframe>
-          <div class="video-overlay"></div>
-        @else
-          <!-- Background video for local files -->
-          <video class="background-video" autoplay muted loop playsinline preload="auto">
-            <source src="{{ asset('storage/' . $backgroundImage->file_path) }}" type="video/mp4">
-            <source src="{{ asset('storage/' . $backgroundImage->file_path) }}" type="video/webm">
-            <source src="{{ asset('storage/' . $backgroundImage->file_path) }}" type="video/ogg">
-          </video>
-          <div class="video-overlay"></div>
-        @endif
-      @elseif($backgroundImage->type === 'Gambar')
-        <!-- Background image -->
-        <div class="background-image" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;">
-          <img src="{{ asset('storage/' . $backgroundImage->file_path) }}" 
-               alt="Background" 
-               style="width: 100%; height: 100%; object-fit: cover;">
-        </div>
-        <div class="video-overlay"></div>
-      @endif
-    @endif
-
-    <section class="left-section" aria-labelledby="welcome-title" aria-describedby="welcome-description">
-        <h1 id="welcome-title">Selamat Datang Di <span class="bps"><span class="b">B</span><span class="p">P</span><span class="s">S</span></span> Provinsi Sumatera Utara</h1>
-        <p id="welcome-description">
-          {{ $description }}
-        </p>
-    </section>
-
-    <aside class="right-section" aria-label="Gallery of images representing Sumatera Utara and cultural elements">
-      @if($media && $media->count() > 0)
-        <!-- Dynamic layout grid from layout manager -->
-        <div class="layout-grid">
-          @php
-            // Sort media by layout_order to ensure proper positioning
-            $sortedMedia = $media->sortBy('layout_order');
-            // Create array with proper grid positioning
-            $gridPositions = [];
-            foreach($sortedMedia as $mediaItem) {
-              $gridPositions[$mediaItem->layout_order] = $mediaItem;
-            }
-          @endphp
-          
-          @for($position = 1; $position <= 6; $position++)
-            @if(isset($gridPositions[$position]))
-              @php
-                $mediaItem = $gridPositions[$position];
-                $videoPath = $mediaItem->file_path;
-                $isYouTube = str_contains($videoPath, 'youtube.com') || str_contains($videoPath, 'youtu.be');
-                $videoId = '';
-                if ($isYouTube) {
-                  preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $videoPath, $matches);
-                  $videoId = $matches[1] ?? '';
-                }
-              @endphp
-              <div class="layout-item" 
-                   data-order="{{ $mediaItem->layout_order }}"
-                   data-media-type="{{ $mediaItem->type }}"
-                   data-media-path="{{ $mediaItem->file_path }}"
-                   data-media-name="{{ $mediaItem->name }}"
-                   data-youtube-id="{{ $videoId }}">
-                <div class="layout-order">{{ $mediaItem->layout_order }}</div>
-              @if($mediaItem->type === 'Gambar')
-                <img src="{{ asset('storage/' . $mediaItem->file_path) }}" alt="{{ $mediaItem->name }}" title="{{ $mediaItem->name }}">
-              @elseif($mediaItem->type === 'Video')
-                @if($isYouTube && $videoId)
-                  <iframe 
-                    src="https://www.youtube.com/embed/{{ $videoId }}?autoplay=1&mute=1&loop=1&playlist={{ $videoId }}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1" 
-                    title="{{ $mediaItem->name }}"
-                    frameborder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen
-                    class="youtube-video">
-                  </iframe>
-                @else
-                  <video autoplay muted loop>
-                    <source src="{{ asset('storage/' . $mediaItem->file_path) }}" type="video/mp4">
-                    Your browser does not support the video tag.
-                  </video>
-                @endif
+        @for($position = 1; $position <= 6; $position++)
+          @if(isset($gridPositions[$position]))
+            @php
+              $mediaItem = $gridPositions[$position];
+              $videoPath = $mediaItem->file_path;
+              $isYouTube = str_contains($videoPath, 'youtube.com') || str_contains($videoPath, 'youtu.be');
+              $videoId = '';
+              if ($isYouTube) {
+                preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $videoPath, $matches);
+                $videoId = $matches[1] ?? '';
+              }
+            @endphp
+            <div class="gallery-item @if($position == 6) gallery-item-text @endif" 
+                 data-order="{{ $mediaItem->layout_order }}"
+                 data-media-type="{{ $mediaItem->type }}"
+                 data-media-path="{{ $mediaItem->file_path }}"
+                 data-media-name="{{ $mediaItem->name }}"
+                 data-youtube-id="{{ $videoId }}">
+            @if($mediaItem->type === 'Gambar')
+              <img src="{{ asset('storage/' . $mediaItem->file_path) }}" alt="{{ $mediaItem->name }}">
+              @if($position == 6 && $mediaItem->description)
+                <div class="text-overlay">
+                  <h3>{{ $mediaItem->name }}</h3>
+                  <p>{{ $mediaItem->description }}</p>
+                  <span class="logo-bps">bps.go.id</span>
+                </div>
               @endif
-              </div>
-            @else
-              <!-- Empty grid position -->
-              <div class="layout-item empty-slot" data-order="{{ $position }}"></div>
+            @elseif($mediaItem->type === 'Video')
+              @if($isYouTube && $videoId)
+                <iframe 
+                  src="https://www.youtube.com/embed/{{ $videoId }}?autoplay=1&mute=1&loop=1&playlist={{ $videoId }}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1" 
+                  title="{{ $mediaItem->name }}"
+                  frameborder="0" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                  allowfullscreen>
+                </iframe>
+              @else
+                <video autoplay muted loop>
+                  <source src="{{ asset('storage/' . $mediaItem->file_path) }}" type="video/mp4">
+                  Your browser does not support the video tag.
+                </video>
+              @endif
             @endif
-          @endfor
-        </div>
+            </div>
+          @else
+            <!-- Empty grid position -->
+            <div class="gallery-item" data-order="{{ $position }}" style="visibility: hidden;"></div>
+          @endif
+        @endfor
       @else
-        <!-- Fallback static layout when no media is configured -->
-        <div class="container">
-          <div class="row">
-            <div class="col">
-              <div class="img-1-1">
-                <img src="{{ asset('img/img 1.1.svg') }}" alt="Gambar2">
-              </div>
-            </div>
-
-            <div class="col">
-              <div class="img-potrait-1">
-                <img src="{{ asset('img/img potrait.svg') }}" alt="Gambar1">
-              </div>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col">
-              <div class="img-potrait-2">
-                <img src="{{ asset('img/img potrait 2.svg') }}" alt="Gambar2">
-              </div>
-            </div>
-
-            <div class="col">
-              <div class="img-1-1-2">
-                <img src="{{ asset('img/img 1.1 2.svg') }}" alt="Gambar1">
-              </div>
-            </div>
-          </div>
-
-           <div class="row">
-            <div class="col">
-              <div class="img-1-1-3">
-                <img src="{{ asset('img/img 1.1 3.svg') }}" alt="Gambar2">
-              </div>
-            </div>
-
-            <div class="col">
-              <div class="img-1-1-3">
-                <img src="{{ asset('img/img 1.1 4.svg') }}" alt="Gambar1">
-              </div>
-            </div>
+        <!-- Default images when no media configured -->
+        <div class="gallery-item">
+          <img src="{{ asset('img/1.jpg') }}" alt="Kegiatan BPS">
+        </div>
+        
+        <div class="gallery-item">
+          <img src="{{ asset('img/2.jpg') }}" alt="Gedung BPS">
+        </div>
+        
+        <div class="gallery-item">
+          <img src="{{ asset('img/3.jpg') }}" alt="Kegiatan">
+        </div>
+        
+        <div class="gallery-item">
+          <img src="{{ asset('img/4.jpg') }}" alt="Meeting">
+        </div>
+        
+        <div class="gallery-item">
+          <img src="{{ asset('img/5.jpg') }}" alt="Gedung Kantor">
+        </div>
+        
+        <div class="gallery-item gallery-item-text">
+          <img src="{{ asset('img/6.jpg') }}" alt="Berita BPS">
+          <div class="text-overlay">
+            <h3>BPS MELAKUKAN SERAH TERIMA HIBAH DARI PEMERINTAH KABUPATEN BANGGAI LAUT</h3>
+            <p>Kepala BPS RI, Amalia Adininggar Widyasanti, menerima hibah dari Pemerintah Kabupaten Banggai Laut, Sulawesi Tengah. Hibah diberikan dalam rangka Memperingati Hari Statistik Nasional dan Hari Ulang Tahun BPS RI yang Ke-77. Serah terima berlangsung di Kantor BPS RI, Jakarta, Kamis (26/9/2024).</p>
+            <span class="logo-bps">bps.go.id</span>
           </div>
         </div>
       @endif
-    </aside>
+    </div>
   </div>
 
   <!-- ===== MEDIA MODAL ===== -->
@@ -743,7 +1004,8 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+  <!-- Bootstrap 5 JS Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
   
   <!-- ===== MEDIA CLICK HANDLER & SCHEDULE SYSTEM ===== -->
   <script>
@@ -762,8 +1024,8 @@
       const modalContent = document.getElementById('modalMediaContent');
       const modalTitle = document.getElementById('mediaModalLabel');
       
-      // Add click event to all layout items
-      document.querySelectorAll('.layout-item').forEach(function(item) {
+      // Add click event to all gallery items
+      document.querySelectorAll('.gallery-item').forEach(function(item) {
         item.addEventListener('click', function() {
           const mediaType = this.getAttribute('data-media-type');
           const mediaPath = this.getAttribute('data-media-path');
