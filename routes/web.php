@@ -28,6 +28,7 @@ Route::get('/landing', [LandingController::class, 'index']);
 Route::get('/api/public/landing/current-schedule', [LandingController::class, 'getCurrentSchedule'])->name('api.public.landing.schedule');
 Route::get('/api/public/landing/visual-schedules', [LandingController::class, 'getActiveVisualSchedules'])->name('api.public.landing.visual');
 Route::get('/api/public/landing/audio-schedules', [LandingController::class, 'getActiveAudioSchedule'])->name('api.public.landing.audio');
+Route::get('/api/staff', [LayoutController_clean::class, 'getStaff'])->name('api.public.staff');
 
 // ===== AUTH ROUTES =====
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -54,6 +55,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/layout/background', [LayoutController_clean::class, 'updateBackground'])->name('layout.background');
     Route::post('/layout/description', [LayoutController_clean::class, 'updateDescription'])->name('layout.description');
     Route::get('/layout/settings', [LayoutController_clean::class, 'getLayoutSettings'])->name('layout.settings');
+    
+    // Staff routes
+    Route::get('/api/staff', [LayoutController_clean::class, 'getStaff'])->name('api.staff.get');
+    Route::post('/api/staff', [LayoutController_clean::class, 'storeStaff'])->name('api.staff.store');
+    Route::put('/api/staff/{id}', [LayoutController_clean::class, 'updateStaff'])->name('api.staff.update');
+    Route::delete('/api/staff/{id}', [LayoutController_clean::class, 'deleteStaff'])->name('api.staff.delete');
     
     // Schedule Description API routes
     Route::prefix('api')->group(function () {

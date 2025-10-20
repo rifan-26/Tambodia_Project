@@ -474,6 +474,150 @@ class LayoutController_clean extends Controller
      */
     public function index()
     {
-        return view('layout-manager');
+        $staff = \App\Models\Staff::orderBy('position')->get();
+        return view('layout-manager', compact('staff'));
+    }
+
+    /**
+     * Get all staff data
+     */
+    public function getStaff()
+    {
+        $staff = \App\Models\Staff::orderBy('position')->get();
+        return response()->json([
+            'success' => true,
+            'staff' => $staff
+        ]);
+    }
+
+    /**
+     * Store new staff
+     */
+    public function storeStaff(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'position' => 'required|integer|in:1,2'
+        ]);
+
+        try {
+            // Process and optimize image
+            $photoPath = $this->processStaffPhoto($request->file('photo'));
+
+            $staff = \App\Models\Staff::create([
+                'name' => $request->name,
+                'photo_path' => $photoPath,
+                'position' => $request->position,
+                'is_active' => true
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Staff berhasil ditambahkan',
+                'staff' => $staff
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menambahkan staff: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update staff
+     */
+    public function updateStaff(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'position' => 'required|integer|in:1,2'
+        ]);
+
+        try {
+            $staff = \App\Models\Staff::findOrFail($id);
+
+            if ($request->hasFile('photo')) {
+                // Delete old photo
+                if ($staff->photo_path && \Storage::disk('public')->exists($staff->photo_path)) {
+                    \Storage::disk('public')->delete($staff->photo_path);
+                }
+                // Process and optimize new image
+                $staff->photo_path = $this->processStaffPhoto($request->file('photo'));
+            }
+
+            $staff->name = $request->name;
+            $staff->position = $request->position;
+            $staff->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Staff berhasil diupdate',
+                'staff' => $staff
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengupdate staff: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete staff
+     */
+    public function deleteStaff($id)
+    {
+        try {
+            $staff = \App\Models\Staff::findOrFail($id);
+
+            // Delete photo
+            if ($staff->photo_path && \Storage::disk('public')->exists($staff->photo_path)) {
+                \Storage::disk('public')->delete($staff->photo_path);
+            }
+
+            $staff->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Staff berhasil dihapus'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus staff: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Process and optimize staff photo
+     * Resize to max 800x800px and compress to 80% quality
+     * 
+     * @param \Illuminate\Http\UploadedFile $file
+     * @return string Path to stored file
+     */
+    private function processStaffPhoto($file)
+    {
+        // Generate unique filename
+        $filename = 'staff_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        $path = 'staff/' . $filename;
+        
+        // Read and process image with Intervention Image
+        $manager = \Intervention\Image\ImageManager::gd();
+        $image = $manager->read($file);
+        
+        // Resize image to max 800x800px while maintaining aspect ratio
+        $image->scale(width: 800, height: 800);
+        
+        // Encode with 80% quality
+        $encoded = $image->encodeByMediaType($file->getMimeType(), quality: 80);
+        
+        // Save to storage
+        \Storage::disk('public')->put($path, $encoded);
+        
+        return $path;
     }
 }

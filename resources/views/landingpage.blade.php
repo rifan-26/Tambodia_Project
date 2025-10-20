@@ -174,18 +174,17 @@
 
     .staff-photo-wrapper {
       display: inline-flex;
-      gap: 15px;
+      gap: 10px;
       justify-content: center;
       margin: 0 auto 5px auto;
     }
 
     .staff-photo {
-      width: 80px;
-      height: 100px;
+      width: 130px;
+      height: 160px;
       background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
       border-radius: 8px;
       margin-bottom: 8px;
-      border: 3px solid white;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
       display: flex;
       align-items: center;
@@ -206,11 +205,11 @@
       display: inline-block;
       background: rgba(0, 0, 0, 0.3);
       padding: 5px 10px;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 500;
-      width: 90px;
+      width: 120px;
       vertical-align: middle;
-      text-align: left;
+      text-align: center;
     }
 
     .staff-info-kiri {
@@ -231,18 +230,16 @@
     .staff-name-kiri,
     .staff-name-kanan {
       margin-top: 5px;
-      font-size: 15px;
-      font-weight: 500;
+      font-size: 16px;
+      font-weight: 600;
       text-shadow: 2px 3px 1px rgba(0, 0, 0, 0.5);
-    }
-
-    .staff-name-kiri {
-      margin-right: 30px;
+      width: 120px;
+      text-align: center;
     }
 
     .staff-name-wrapper {
       display: inline-flex;
-      gap: 15px;
+      gap: 10px;
       justify-content: center;
       margin: 0 auto 5px auto;
     }
@@ -839,6 +836,455 @@
         bottom: 6px;
       }
     }
+
+    /* ===== PORTRAIT MODE RESPONSIVE - ALL DEVICES ===== */
+    /* Base portrait mode - applies to all portrait orientations */
+    @media (orientation: portrait) {
+      body, html {
+        overflow: auto;
+        height: auto;
+      }
+
+      .container-left {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .left-section-wrapper {
+        width: 100%;
+        flex: 0 0 auto;
+      }
+
+      /* Gallery always full width in portrait */
+      .gallery {
+        width: 100%;
+        height: auto;
+        min-height: 50vh;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: auto;
+      }
+
+      /* Reset grid positioning for portrait - 2 column layout */
+      .gallery-item:nth-child(1) {
+        grid-column: 1 / 2 !important;
+        grid-row: 1 / 2 !important;
+        aspect-ratio: 1/1 !important;
+      }
+
+      .gallery-item:nth-child(2) {
+        grid-column: 2 / 3 !important;
+        grid-row: 1 / 2 !important;
+        aspect-ratio: 1/1 !important;
+      }
+
+      .gallery-item:nth-child(3) {
+        grid-column: 1 / 2 !important;
+        grid-row: 2 / 3 !important;
+        aspect-ratio: 1/1 !important;
+      }
+
+      .gallery-item:nth-child(4) {
+        grid-column: 2 / 3 !important;
+        grid-row: 2 / 3 !important;
+        aspect-ratio: 1/1 !important;
+      }
+
+      .gallery-item:nth-child(5) {
+        grid-column: 1 / 3 !important;
+        grid-row: 3 / 4 !important;
+        aspect-ratio: 16/9 !important;
+      }
+
+      .gallery-item:nth-child(6) {
+        grid-column: 1 / 3 !important;
+        grid-row: 4 / 5 !important;
+        aspect-ratio: 16/9 !important;
+      }
+
+      /* Ensure media fits properly */
+      .gallery-item img,
+      .gallery-item video,
+      .gallery-item iframe {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+      }
+
+      .gallery-item {
+        overflow: hidden;
+        position: relative;
+      }
+    }
+
+    /* Portrait - Large screens (TV, Large monitors) 1920px+ */
+    @media (orientation: portrait) and (min-width: 1920px) {
+      .header {
+        padding: 8vh 4vw;
+      }
+
+      .logo {
+        width: 10vw;
+        max-width: 150px;
+      }
+
+      .logos {
+        gap: 6vw;
+      }
+
+      .title h1 {
+        font-size: 4vw;
+      }
+
+      .title p {
+        font-size: 2vw;
+      }
+
+      .welcome-section {
+        padding: 5vh 6vw;
+        min-height: 25vh;
+      }
+
+      .welcome-text h2 {
+        font-size: 2.5vw;
+        margin-bottom: 3vh;
+      }
+
+      .staff-photo {
+        width: 8vw;
+        height: 10vh;
+      }
+
+      .staff-info-kiri,
+      .staff-info-kanan {
+        font-size: 1.5vw;
+        padding: 1vh 2vw;
+      }
+
+      .staff-name-kiri,
+      .staff-name-kanan {
+        font-size: 2vw;
+      }
+
+      .gallery {
+        padding: 4vh 4vw;
+        gap: 2vw;
+      }
+
+      .gallery-item-text .text-overlay {
+        padding: 2vh 2vw;
+        font-size: 1.5vw;
+      }
+
+      .gallery-item-text .text-overlay h3 {
+        font-size: 2vw;
+        margin-bottom: 1vh;
+      }
+
+      .gallery-item-text .text-overlay p {
+        font-size: 1.3vw;
+      }
+    }
+
+    /* Portrait - Desktop/PC (1200px - 1919px) */
+    @media (orientation: portrait) and (min-width: 1200px) and (max-width: 1919px) {
+      .header {
+        padding: 6vh 3vw;
+      }
+
+      .logo {
+        width: 8vw;
+        max-width: 120px;
+      }
+
+      .logos {
+        gap: 5vw;
+      }
+
+      .title h1 {
+        font-size: 3.5vw;
+      }
+
+      .title p {
+        font-size: 1.8vw;
+      }
+
+      .welcome-section {
+        padding: 4vh 5vw;
+        min-height: 22vh;
+      }
+
+      .welcome-text h2 {
+        font-size: 2.2vw;
+        margin-bottom: 2.5vh;
+      }
+
+      .staff-photo {
+        width: 7vw;
+        height: 9vh;
+      }
+
+      .staff-info-kiri,
+      .staff-info-kanan {
+        font-size: 1.3vw;
+        padding: 0.8vh 1.5vw;
+      }
+
+      .staff-name-kiri,
+      .staff-name-kanan {
+        font-size: 1.8vw;
+      }
+
+      .gallery {
+        padding: 3vh 3vw;
+        gap: 1.5vw;
+      }
+
+      .gallery-item-text .text-overlay {
+        padding: 1.5vh 1.5vw;
+        font-size: 1.3vw;
+      }
+
+      .gallery-item-text .text-overlay h3 {
+        font-size: 1.8vw;
+        margin-bottom: 0.8vh;
+      }
+
+      .gallery-item-text .text-overlay p {
+        font-size: 1.1vw;
+      }
+    }
+
+    /* Portrait - Tablet (768px - 1199px) */
+    @media (orientation: portrait) and (min-width: 768px) and (max-width: 1199px) {
+      .header {
+        padding: 4vh 2.5vw;
+      }
+
+      .logo {
+        width: 10vw;
+        max-width: 90px;
+      }
+
+      .logos {
+        gap: 4vw;
+      }
+
+      .title h1 {
+        font-size: 4vw;
+      }
+
+      .title p {
+        font-size: 2.2vw;
+      }
+
+      .welcome-section {
+        padding: 3vh 4vw;
+        min-height: 20vh;
+      }
+
+      .welcome-text h2 {
+        font-size: 2.8vw;
+        margin-bottom: 2vh;
+      }
+
+      .staff-container {
+        flex-direction: row;
+        justify-content: center;
+        gap: 4vw;
+        flex-wrap: wrap;
+      }
+
+      .staff-photo {
+        width: 12vw;
+        height: 8vh;
+      }
+
+      .staff-info-kiri,
+      .staff-info-kanan {
+        font-size: 1.8vw;
+        padding: 0.6vh 2vw;
+      }
+
+      .staff-name-kiri,
+      .staff-name-kanan {
+        font-size: 2.5vw;
+      }
+
+      .gallery {
+        padding: 2.5vh 2.5vw;
+        gap: 2vw;
+      }
+
+      .gallery-item-text .text-overlay {
+        padding: 1.2vh 1.5vw;
+        font-size: 1.8vw;
+      }
+
+      .gallery-item-text .text-overlay h3 {
+        font-size: 2.3vw;
+        margin-bottom: 0.6vh;
+      }
+
+      .gallery-item-text .text-overlay p {
+        font-size: 1.5vw;
+      }
+    }
+
+    /* Portrait - Mobile (600px - 767px) */
+    @media (orientation: portrait) and (min-width: 600px) and (max-width: 767px) {
+      .header {
+        padding: 3vh 3vw;
+      }
+
+      .logo {
+        width: 12vw;
+        max-width: 70px;
+      }
+
+      .logos {
+        gap: 5vw;
+      }
+
+      .title h1 {
+        font-size: 5vw;
+      }
+
+      .title p {
+        font-size: 3vw;
+      }
+
+      .welcome-section {
+        padding: 2.5vh 4vw;
+        min-height: 18vh;
+      }
+
+      .welcome-text h2 {
+        font-size: 3.5vw;
+        margin-bottom: 1.5vh;
+      }
+
+      .staff-container {
+        flex-direction: row;
+        justify-content: center;
+        gap: 5vw;
+        flex-wrap: wrap;
+      }
+
+      .staff-photo {
+        width: 15vw;
+        height: 7vh;
+      }
+
+      .staff-info-kiri,
+      .staff-info-kanan {
+        font-size: 2.2vw;
+        padding: 0.5vh 2.5vw;
+      }
+
+      .staff-name-kiri,
+      .staff-name-kanan {
+        font-size: 3vw;
+      }
+
+      .gallery {
+        padding: 2vh 3vw;
+        gap: 2.5vw;
+      }
+
+      .gallery-item-text .text-overlay {
+        padding: 1vh 2vw;
+        font-size: 2.2vw;
+      }
+
+      .gallery-item-text .text-overlay h3 {
+        font-size: 2.8vw;
+        margin-bottom: 0.5vh;
+      }
+
+      .gallery-item-text .text-overlay p {
+        font-size: 1.8vw;
+      }
+    }
+
+    /* Portrait - Small Mobile (< 600px) */
+    @media (orientation: portrait) and (max-width: 599px) {
+      .header {
+        padding: 2.5vh 4vw;
+      }
+
+      .logo {
+        width: 15vw;
+        max-width: 60px;
+      }
+
+      .logos {
+        gap: 6vw;
+      }
+
+      .title h1 {
+        font-size: 6vw;
+      }
+
+      .title p {
+        font-size: 3.5vw;
+      }
+
+      .welcome-section {
+        padding: 2vh 5vw;
+        min-height: 16vh;
+      }
+
+      .welcome-text h2 {
+        font-size: 4vw;
+        margin-bottom: 1.5vh;
+      }
+
+      .staff-container {
+        flex-direction: row;
+        justify-content: center;
+        gap: 6vw;
+        flex-wrap: wrap;
+      }
+
+      .staff-photo {
+        width: 18vw;
+        height: 6vh;
+      }
+
+      .staff-info-kiri,
+      .staff-info-kanan {
+        font-size: 2.8vw;
+        padding: 0.4vh 3vw;
+      }
+
+      .staff-name-kiri,
+      .staff-name-kanan {
+        font-size: 3.5vw;
+      }
+
+      .gallery {
+        padding: 1.5vh 4vw;
+        gap: 3vw;
+      }
+
+      .gallery-item-text .text-overlay {
+        padding: 0.8vh 2.5vw;
+        font-size: 2.8vw;
+      }
+
+      .gallery-item-text .text-overlay h3 {
+        font-size: 3.5vw;
+        margin-bottom: 0.4vh;
+      }
+
+      .gallery-item-text .text-overlay p {
+        font-size: 2.3vw;
+      }
+    }
   </style>
 </head>
 <body>
@@ -868,20 +1314,17 @@
         <h2>HARI INI ANDA AKAN<br>DI LAYANI OLEH :</h2>
       </div>
       
-      <div class="staff-container">
+      <div class="staff-container" id="staffContainer">
         <!-- Staff Member -->
         <div class="staff-member">
-          <div class="staff-photo-wrapper">
-            <div class="staff-photo">FOTO</div>
-            <div class="staff-photo">FOTO</div>
+          <div class="staff-photo-wrapper" id="staffPhotoWrapper">
+            <!-- Staff photos will be loaded dynamically -->
           </div>
-          <div class="staff-info-wrapper">
-            <div class="staff-info-kiri">PETUGAS</div>
-            <div class="staff-info-kanan">PETUGAS</div>
+          <div class="staff-info-wrapper" id="staffInfoWrapper">
+            <!-- Staff info labels will be loaded dynamically -->
           </div>
-          <div class="staff-name-wrapper">
-            <div class="staff-name-kiri">Nama</div>
-            <div class="staff-name-kanan">Nama</div>
+          <div class="staff-name-wrapper" id="staffNameWrapper">
+            <!-- Staff names will be loaded dynamically -->
           </div>
         </div>
       </div>
@@ -1073,7 +1516,114 @@
       
       // Initialize audio scheduling system
       initAudioSystem();
+      
+      // Load staff data
+      loadStaffData();
     });
+
+    // Load staff data from API
+    async function loadStaffData() {
+      try {
+        const response = await fetch('/api/staff');
+        const data = await response.json();
+        
+        if (data.success && data.staff && data.staff.length > 0) {
+          renderStaffData(data.staff);
+        } else {
+          // Show default placeholders if no staff data
+          renderDefaultStaff();
+        }
+      } catch (error) {
+        console.error('Error loading staff data:', error);
+        renderDefaultStaff();
+      }
+    }
+
+    // Render staff data to the page
+    function renderStaffData(staffList) {
+      // Filter active staff and sort by position
+      const activeStaff = staffList.filter(s => s.is_active).sort((a, b) => a.position - b.position);
+      
+      if (activeStaff.length === 0) {
+        renderDefaultStaff();
+        return;
+      }
+      
+      const photoWrapper = document.getElementById('staffPhotoWrapper');
+      const infoWrapper = document.getElementById('staffInfoWrapper');
+      const nameWrapper = document.getElementById('staffNameWrapper');
+      
+      // Clear existing content
+      photoWrapper.innerHTML = '';
+      infoWrapper.innerHTML = '';
+      nameWrapper.innerHTML = '';
+      
+      // Render up to 2 staff members (position 1 and 2)
+      activeStaff.slice(0, 2).forEach(staff => {
+        const photoUrl = staff.photo_path ? `/storage/${staff.photo_path}` : '/images/default-avatar.png';
+        const positionClass = staff.position === 1 ? 'kiri' : 'kanan';
+        
+        // Add photo
+        const photoDiv = document.createElement('div');
+        photoDiv.className = 'staff-photo';
+        photoDiv.style.backgroundImage = `url('${photoUrl}')`;
+        photoDiv.style.backgroundSize = 'cover';
+        photoDiv.style.backgroundPosition = 'center';
+        photoWrapper.appendChild(photoDiv);
+        
+        // Add info label
+        const infoDiv = document.createElement('div');
+        infoDiv.className = `staff-info-${positionClass}`;
+        infoDiv.textContent = 'PETUGAS';
+        infoWrapper.appendChild(infoDiv);
+        
+        // Add name
+        const nameDiv = document.createElement('div');
+        nameDiv.className = `staff-name-${positionClass}`;
+        nameDiv.textContent = staff.name;
+        nameWrapper.appendChild(nameDiv);
+      });
+      
+      // If only 1 staff, add placeholder for second position
+      if (activeStaff.length === 1) {
+        const photoDiv = document.createElement('div');
+        photoDiv.className = 'staff-photo';
+        photoDiv.textContent = 'FOTO';
+        photoWrapper.appendChild(photoDiv);
+        
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'staff-info-kanan';
+        infoDiv.textContent = 'PETUGAS';
+        infoWrapper.appendChild(infoDiv);
+        
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'staff-name-kanan';
+        nameDiv.textContent = 'Nama';
+        nameWrapper.appendChild(nameDiv);
+      }
+    }
+
+    // Render default staff placeholders
+    function renderDefaultStaff() {
+      const photoWrapper = document.getElementById('staffPhotoWrapper');
+      const infoWrapper = document.getElementById('staffInfoWrapper');
+      const nameWrapper = document.getElementById('staffNameWrapper');
+      
+      photoWrapper.innerHTML = `
+        <div class="staff-photo">FOTO</div>
+        <div class="staff-photo">FOTO</div>
+      `;
+      
+      infoWrapper.innerHTML = `
+        <div class="staff-info-kiri">PETUGAS</div>
+        <div class="staff-info-kanan">PETUGAS</div>
+      `;
+      
+      nameWrapper.innerHTML = `
+        <div class="staff-name-kiri">Nama</div>
+        <div class="staff-name-kanan">Nama</div>
+      `;
+    }
 
     // Audio System Functions
     function initAudioSystem() {

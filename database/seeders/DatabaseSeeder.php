@@ -9,27 +9,34 @@ class DatabaseSeeder extends Seeder
 {
     public function run()
     {
+        // Create Pegawai Users
+        User::create([
+            'name' => 'Galuh',
+            'email' => 'galuh@tambodia.com',
+            'password' => Hash::make('password'),
+            'role' => 'pegawai'
+        ]);
+
+        User::create([
+            'name' => 'Nadiah',
+            'email' => 'nadiah@tambodia.com',
+            'password' => Hash::make('password'),
+            'role' => 'pegawai'
+        ]);
+
+        User::create([
+            'name' => 'Samuel',
+            'email' => 'samuel@tambodia.com',
+            'password' => Hash::make('password'),
+            'role' => 'pegawai'
+        ]);
+
         // Create Super Admin
         User::create([
-            'name' => 'Super Admin',
-            'email' => 'superadmin@tambodia.com',
-            'password' => Hash::make('superadmin123'),
+            'name' => 'Rifan',
+            'email' => 'rifan@tambodia.com',
+            'password' => Hash::make('password'),
             'role' => 'superadmin'
-        ]);
-
-        // Create Sample Pegawai
-        User::create([
-            'name' => 'Admin1',
-            'email' => 'admin1@tambodia.com',
-            'password' => Hash::make('admin1234'),
-            'role' => 'pegawai'
-        ]);
-
-        User::create([
-            'name' => 'Admin2', 
-            'email' => 'admin2@tambodia.com',
-            'password' => Hash::make('admin1234'),
-            'role' => 'pegawai'
         ]);
     }
 }

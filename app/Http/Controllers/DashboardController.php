@@ -170,7 +170,9 @@ class DashboardController extends Controller
                     'file_path' => $schedule->file_path,
                     'type' => $schedule->type
                 ],
-                'display_duration' => $schedule->display_duration ?? 10,
+                // No duration limit - audio will play for its full length
+                'display_duration' => null,
+                'use_audio_duration' => true, // Flag to indicate using actual audio duration
                 'time' => $schedule->time,
                 'start_date' => $schedule->start_date,
                 'end_date' => $schedule->end_date,
