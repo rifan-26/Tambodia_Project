@@ -18,7 +18,8 @@ class DashboardController extends Controller
 
     public function index(Request $request)
     {
-        $query = Media::where('user_id', Auth::id());
+        // Show all media files for all users instead of just current user's files
+        $query = Media::query();
         
         // Filter berdasarkan jenis media jika ada
         if ($request->has('type') && $request->type != '') {
@@ -100,9 +101,8 @@ class DashboardController extends Controller
     public function destroy($id)
     {
         try {
-            $media = Media::where('id', $id)
-                         ->where('user_id', Auth::id())
-                         ->firstOrFail();
+            // Allow any authenticated user to delete any media file
+            $media = Media::findOrFail($id);
 
             // Delete the file from storage
             if (Storage::disk('public')->exists($media->file_path)) {

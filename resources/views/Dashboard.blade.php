@@ -1079,7 +1079,9 @@
       if (/^(?:https?:)?\/\//i.test(p)) return p; // external URL (e.g., YouTube, CDN)
       p = p.replace(/^\/+/, '');
       p = p.replace(/^public\//, '');
-      return `${window.location.origin}/storage/${p}`;
+      p = p.replace(/^storage\//, '');
+      // Use the Laravel asset helper for proper URL generation
+      return `/storage/${p}`;
     }
 
     function guessMimeFromPath(path, fallback) {
@@ -1287,6 +1289,10 @@
             }
           }
         }
+      } catch (batchError) {
+        console.error('Batch processing error:', batchError);
+      }
+      
       try {
         // Only render if we still have the container
         if (container) {
@@ -1350,7 +1356,7 @@
       const created = (m.created_at || m.date || '').toString().split('T')[0];
       let preview = '';
       if (m.type === 'Gambar') {
-        preview = `<img src="${fileUrl(m.file_path)}" alt="${escapeHtml(m.name)}" class="img-fluid rounded"/>`;
+        preview = `<img src="${fileUrl(m.file_path)}" alt="${escapeHtml(m.name)}" class="img-fluid rounded" onerror="toast('Failed to load image', 'error')"/>`;
       } else if (m.type === 'Video') {
         const src = fileUrl(m.file_path);
         // If YouTube URL, render iframe embed instead of <video>
@@ -1360,7 +1366,7 @@
           preview = `<div class="ratio ratio-16x9"><iframe src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&playsinline=1" title="${escapeHtml(m.name)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="rounded"></iframe></div>`;
         } else {
           const mime = guessMimeFromPath(m.file_path, 'video/mp4');
-          preview = `<video class="w-100 rounded" controls preload="metadata" autoplay muted playsinline>
+          preview = `<video class="w-100 rounded" controls preload="metadata" autoplay muted playsinline onerror="toast('Failed to load video', 'error')">
             <source src="${src}" type="${mime}">
             Browser Anda tidak mendukung pemutar video.
           </video>`;
@@ -1368,7 +1374,7 @@
       } else if (m.type === 'Audio') {
         const src = fileUrl(m.file_path);
         const mime = guessMimeFromPath(m.file_path, 'audio/mpeg');
-        preview = `<div class="audio-player-container"><audio class="js-player" controls preload="metadata" playsinline>
+        preview = `<div class="audio-player-container"><audio class="js-player" controls preload="metadata" playsinline onerror="toast('Failed to load audio', 'error')">
           <source src="${src}" type="${mime}">
           Your browser does not support audio playback.
         </audio></div>`;
@@ -1507,7 +1513,7 @@
           }
         }
         
-        const res = await fetch(`/dashboard/media/${id}`, {
+        const res = await fetch(`/media/${id}`, {
           method: 'DELETE',
           headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -1666,6 +1672,9 @@
         img.style.maxHeight = '500px';
         img.style.width = '100%';
         img.style.objectFit = 'contain';
+        img.onerror = function() {
+          toast('Failed to load image', 'error');
+        };
         modalBody.appendChild(img);
       } else if (type === 'Video') {
         // Check if it's a YouTube URL
@@ -1685,6 +1694,9 @@
           video.controls = true;
           video.className = 'w-100 rounded';
           video.style.maxHeight = '500px';
+          video.onerror = function() {
+            toast('Failed to load video', 'error');
+          };
           modalBody.appendChild(video);
         }
       } else if (type === 'Audio') {
@@ -1692,6 +1704,9 @@
         audio.src = src;
         audio.controls = true;
         audio.className = 'w-100';
+        audio.onerror = function() {
+          toast('Failed to load audio', 'error');
+        };
         modalBody.appendChild(audio);
       }
 

@@ -598,6 +598,36 @@ class MediaController extends Controller
     }
 
     /**
+     * Get media statistics for all users (API endpoint)
+     */
+    public function getStats()
+    {
+        try {
+            $totalMedia = Media::count();
+            $totalImages = Media::where('type', 'Gambar')->count();
+            $totalVideos = Media::where('type', 'Video')->count();
+            $totalAudio = Media::where('type', 'Audio')->count();
+
+            return response()->json([
+                'success' => true,
+                'stats' => [
+                    'total' => $totalMedia,
+                    'images' => $totalImages,
+                    'videos' => $totalVideos,
+                    'audio' => $totalAudio
+                ]
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error getting media stats: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil statistik media.'
+            ], 500);
+        }
+    }
+
+    /**
      * Serve files from the public storage disk without relying on the public/storage symlink.
      * Example: GET /media/media/filename.mp3 will map to storage/app/public/media/filename.mp3
      */
@@ -610,7 +640,7 @@ class MediaController extends Controller
                 return response()->json(['message' => 'File not found'], 404);
             }
             // Let Laravel generate proper streamed response with headers
-            return Storage::disk('public')->response($path);
+            return Storage::download('public/' . $path);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Error serving public file: ' . $e->getMessage());
             return response()->json(['message' => 'Gagal memuat file'], 500);
