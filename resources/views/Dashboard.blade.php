@@ -1073,8 +1073,9 @@
       if (/^(?:https?:)?\/\//i.test(p)) return p; // external URL (e.g., YouTube, CDN)
       p = p.replace(/^\/+/, '');
       p = p.replace(/^public\//, '');
-      // Use the direct media serving route
-      return `${window.location.origin}/media/${p}`;
+      p = p.replace(/^storage\//, '');
+      // Use the Laravel asset helper for proper URL generation
+      return `/storage/${p}`;
     }
 
     function guessMimeFromPath(path, fallback) {
@@ -1282,6 +1283,10 @@
             }
           }
         }
+      } catch (batchError) {
+        console.error('Batch processing error:', batchError);
+      }
+      
       try {
         // Only render if we still have the container
         if (container) {
@@ -1502,7 +1507,7 @@
           }
         }
         
-        const res = await fetch(`/dashboard/media/${id}`, {
+        const res = await fetch(`/media/${id}`, {
           method: 'DELETE',
           headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,

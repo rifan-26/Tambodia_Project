@@ -83,6 +83,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/media/search', [MediaController::class, 'search'])->name('api.media.search');
     Route::get('/api/media/filter', [MediaController::class, 'filter'])->name('api.media.filter');
     Route::get('/api/media/user', [MediaController::class, 'getUserMedia'])->name('api.media.user');
+    Route::get('/api/media/stats', [MediaController::class, 'getStats'])->name('api.media.stats');
     
     // Schedule API endpoints
     Route::get('/api/schedule/active', [ScheduleController::class, 'getActiveSchedules'])->name('api.schedule.active');

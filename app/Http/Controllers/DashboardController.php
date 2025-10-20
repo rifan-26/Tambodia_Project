@@ -18,7 +18,8 @@ class DashboardController extends Controller
 
     public function index(Request $request)
     {
-        $query = Media::where('user_id', Auth::id());
+        // Show all media files for all users instead of just current user's files
+        $query = Media::query();
         
         // Filter berdasarkan jenis media jika ada
         if ($request->has('type') && $request->type != '') {
@@ -49,14 +50,24 @@ class DashboardController extends Controller
         $totalPegawai = User::where('role', 'pegawai')->count();
         $totalSuperadmin = User::where('role', 'superadmin')->count();
         $recentLogs = Log::with('user')->latest()->take(10)->get();
+        
+        $mediaByType = [
+            'Gambar' => Media::where('type', 'Gambar')->count(),
+            'Video' => Media::where('type', 'Video')->count(),
+            'Audio' => Media::where('type', 'Audio')->count(),
+        ];
+        
+        // Get all users for the admin table (both superadmin and pegawai) - oldest first
+        $admins = User::orderBy('created_at', 'asc')->get();
+        
+        return view('superadmin', compact('totalMedia', 'totalPegawai', 'totalSuperadmin', 'recentLogs', 'mediaByType', 'admins'));
     }
 
     public function destroy($id)
     {
         try {
-            $media = Media::where('id', $id)
-                         ->where('user_id', Auth::id())
-                         ->firstOrFail();
+            // Allow any authenticated user to delete any media file
+            $media = Media::findOrFail($id);
 
             // Delete the file from storage
             if (Storage::disk('public')->exists($media->file_path)) {
@@ -79,16 +90,6 @@ class DashboardController extends Controller
                 'message' => 'Media tidak ditemukan atau tidak memiliki akses'
             ], 404);
         }
-        $mediaByType = [
-            'Gambar' => Media::where('type', 'Gambar')->count(),
-            'Video' => Media::where('type', 'Video')->count(),
-            'Audio' => Media::where('type', 'Audio')->count(),
-        ];
-        
-        // Get all users for the admin table (both superadmin and pegawai) - oldest first
-        $admins = User::orderBy('created_at', 'asc')->get();
-        
-        return view('superadmin', compact('totalMedia', 'totalPegawai', 'totalSuperadmin', 'recentLogs', 'mediaByType', 'admins'));
     }
 
     /**

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -79,8 +80,8 @@ class Media extends Model
     // Helper methods
     public function getFileUrlAttribute()
     {
-        // Use the direct media serving route instead of relying on symbolic links
-        return route('media.serve', ['path' => $this->file_path]);
+        // Use Laravel's asset helper to generate the correct URL
+        return asset('storage/' . $this->file_path);
     }
     
     /**
