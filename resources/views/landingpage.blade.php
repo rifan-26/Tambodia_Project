@@ -14,6 +14,7 @@
       padding: 0;
       box-sizing: border-box;
     }
+    
 
     body {
       font-family: 'Roboto', sans-serif !important;
@@ -658,32 +659,284 @@
         margin-right: 6px; /* bisa ubah sesuai selera (contoh: 8px atau 10px) */
       }
     }
+
+    /* ===== LANDSCAPE ORIENTATION LAYOUT ===== */
+    @media (orientation: landscape) and (min-width: 768px) {
+      .main-container {
+        flex-direction: row;
+      }
+
+      /* Left Section: Header + Welcome + No Tip & PST */
+      .left-content {
+        width: 45%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .header {
+        padding: 15px 20px;
+      }
+
+      .header::after {
+        height: 4px;
+      }
+
+      .logo {
+        width: 45px;
+      }
+
+      .logo-left {
+        left: 10px !important;
+      }
+
+      .logo-right {
+        right: 10px !important;
+      }
+
+      .title h1 {
+        font-size: 18px;
+      }
+
+      .title p {
+        font-size: 11px;
+      }
+
+      .welcome-section {
+        flex: 1;
+        height: auto;
+        padding: 15px 20px;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 30px;
+        padding-top: 40px;
+      }
+
+      /* Container untuk tulisan dan No Tip/PST */
+      .welcome-section > div:first-child {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        padding-left: 40px;
+      }
+
+      .welcome-text {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding-top: 20px;
+      }
+
+      .welcome-text h2 {
+        font-size: 20px;
+        margin-left: 0 !important;
+        margin-bottom: 0;
+        text-align: center;
+        writing-mode: horizontal-tb;
+      }
+
+      /* Sembunyikan No Tip & PST dari gallery di landscape */
+      .gallery .row:last-child .col-3:nth-child(1),
+      .gallery .row:last-child .col-3:nth-child(2) {
+        display: none;
+      }
+
+      /* Style untuk No Tip & PST container di welcome section */
+      .notip-pst-container {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 20px;
+      }
+
+      .notip-pst-container .col-3 {
+        width: 100px !important;
+        height: 100px !important;
+      }
+
+      .notip-pst-container .gallery-item {
+        width: 100%;
+        height: 100%;
+      }
+
+      .staff-container {
+        margin: 0;
+        width: auto;
+        justify-content: center;
+        gap: 15px;
+        flex: 1;
+      }
+
+      .staff-photo-wrapper {
+        gap: 25px;
+      }
+
+      .staff-photo {
+        width: 150px;
+        height: 190px;
+      }
+
+      .staff-info-kiri,
+      .staff-info-kanan {
+        width: 160px;
+        font-size: 14px;
+        padding: 8px 12px;
+      }
+
+      .staff-name-kiri,
+      .staff-name-kanan {
+        font-size: 18px;
+      }
+
+      /* Right Section: Gallery */
+      .gallery {
+        width: 55%;
+        height: 100vh;
+        padding: 20px 20px 80px 20px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .gallery .container {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        grid-template-rows: 1.5fr 1fr;
+        gap: 15px;
+        height: 100%;
+        padding: 0;
+      }
+
+      /* Reset row styles for landscape */
+      .gallery .row {
+        display: contents !important;
+      }
+
+      .gallery .row-custom {
+        display: contents !important;
+      }
+
+      /* Sosialisasi - Top, full width dengan padding untuk centered */
+      .gallery .row:first-child .col-9 {
+        grid-column: 1 / 7;
+        grid-row: 1;
+        margin-left: 0;
+        flex: none;
+        max-width: none;
+        padding: 0 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .gallery .row:first-child .col-9 .gallery-item {
+        aspect-ratio: 16/9;
+        height: 100%;
+        width: 100%;
+      }
+
+      /* Kebijakan - Bottom left, spans 2 columns */
+      .gallery .row:first-child .col-3 {
+        position: static;
+        grid-column: 1 / 3;
+        grid-row: 2;
+        width: auto;
+        flex: none;
+        max-width: none;
+      }
+
+      .gallery .row:first-child .col-3 .gallery-item {
+        aspect-ratio: 3/4;
+        height: 100%;
+      }
+
+      /* Gratifikasi - Bottom center, spans 2 columns (sama dengan Kebijakan) */
+      .gallery .row:last-child .col-3:nth-child(3) {
+        grid-column: 3 / 5;
+        grid-row: 2;
+        flex: none;
+        max-width: none;
+        position: static;
+      }
+
+      .gallery .row:last-child .col-3:nth-child(3) .gallery-item {
+        aspect-ratio: 3/4;
+        height: 100%;
+      }
+
+      /* Release - Bottom right, spans 2 columns (sama dengan Kebijakan) */
+      .gallery .row:last-child .col-3:nth-child(4) {
+        grid-column: 5 / 7;
+        grid-row: 2;
+        flex: none;
+        max-width: none;
+        display: block;
+      }
+
+      .gallery .row:last-child .col-3:nth-child(4) .gallery-item {
+        aspect-ratio: 3/4;
+        height: 100%;
+      }
+
+      /* Footer adjustments for landscape */
+      .footer {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        width: 100%;
+        padding: 8px 0;
+      }
+
+      .social-icons {
+        gap: 12px;
+      }
+
+      .social-icons a {
+        font-size: 12px;
+      }
+
+      .social-icons i {
+        width: 26px;
+        height: 26px;
+        font-size: 14px;
+      }
+
+      .social-icons span {
+        font-size: 12px;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="main-container">
-    <!-- Header -->
-    <div class="header-wrapper">
-      <div class="header">
-        <div class="logos position-relative text-center">
-          <!-- Logo kiri -->
-          <img src="{{ asset('img/Group 25.png') }}" alt="Logo BPS" class="logo logo-left position-absolute start-0 top-50 translate-middle-y">
+    <div class="left-content">
+      <!-- Header -->
+      <div class="header-wrapper">
+        <div class="header">
+          <div class="logos position-relative text-center">
+            <!-- Logo kiri -->
+            <img src="{{ asset('img/Group 25.png') }}" alt="Logo BPS" class="logo logo-left position-absolute start-0 top-50 translate-middle-y">
 
-          <!-- Judul tengah -->
-          <div class="title d-inline-block">
-            <h1 class="mb-0">SELAMAT DATANG</h1>
-            <p class="mb-0">Di Kantor BPS Provinsi Sumatera Utara</p>
+            <!-- Judul tengah -->
+            <div class="title d-inline-block">
+              <h1 class="mb-0">SELAMAT DATANG</h1>
+              <p class="mb-0">Di Kantor BPS Provinsi Sumatera Utara</p>
+            </div>
+
+            <!-- Logo kanan -->
+            <img src="{{ asset('img/Group 19.png') }}" alt="Logo Sumut" class="logo logo-right position-absolute end-0 top-50 translate-middle-y">
           </div>
-
-          <!-- Logo kanan -->
-          <img src="{{ asset('img/Group 19.png') }}" alt="Logo Sumut" class="logo logo-right position-absolute end-0 top-50 translate-middle-y">
         </div>
       </div>
-    </div>
-    
+      
 
-    <!-- Welcome Section -->
-    <div class="welcome-section">
+      <!-- Welcome Section -->
+      <div class="welcome-section">
       <div class="welcome-text">
         <h2>HARI INI ANDA AKAN<br>DI LAYANI OLEH :</h2>
       </div>
@@ -719,6 +972,7 @@
           </div>
         </div>
       </div>
+    </div>
     </div>
 
     <!-- Gallery -->
@@ -805,5 +1059,88 @@
 
   <!-- Bootstrap 5 JS Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+  <!-- Script untuk memindahkan No Tip & PST ke welcome section di landscape -->
+  <script>
+    function moveNoTipPSTToWelcome() {
+      const isLandscape = window.matchMedia("(orientation: landscape) and (min-width: 768px)").matches;
+      const noTip = document.querySelector('.gallery .row:last-child .col-3:nth-child(1)');
+      const pst = document.querySelector('.gallery .row:last-child .col-3:nth-child(2)');
+      const welcomeSection = document.querySelector('.welcome-section');
+
+      if (isLandscape && noTip && pst && welcomeSection) {
+        // Cek apakah sudah ada container untuk No Tip & PST
+        let noTipPstContainer = document.querySelector('.notip-pst-container');
+        
+        if (!noTipPstContainer) {
+          // Cari atau buat wrapper untuk welcome-text dan no tip/pst
+          let leftWrapper = welcomeSection.querySelector('.welcome-left-wrapper');
+          
+          if (!leftWrapper) {
+            // Buat wrapper baru untuk welcome-text
+            leftWrapper = document.createElement('div');
+            leftWrapper.className = 'welcome-left-wrapper';
+            leftWrapper.style.display = 'flex';
+            leftWrapper.style.flexDirection = 'column';
+            leftWrapper.style.alignItems = 'center';
+            leftWrapper.style.gap = '20px';
+            leftWrapper.style.paddingLeft = '40px';
+            
+            // Pindahkan welcome-text ke dalam wrapper
+            const welcomeText = welcomeSection.querySelector('.welcome-text');
+            if (welcomeText) {
+              welcomeSection.insertBefore(leftWrapper, welcomeSection.firstChild);
+              leftWrapper.appendChild(welcomeText);
+            }
+          }
+          
+          // Buat container untuk No Tip & PST
+          noTipPstContainer = document.createElement('div');
+          noTipPstContainer.className = 'notip-pst-container';
+          noTipPstContainer.style.display = 'flex';
+          noTipPstContainer.style.gap = '15px';
+          noTipPstContainer.style.justifyContent = 'center';
+          
+          // Clone elemen No Tip & PST
+          const noTipClone = noTip.cloneNode(true);
+          const pstClone = pst.cloneNode(true);
+          
+          noTipClone.style.width = '100px';
+          noTipClone.style.height = '100px';
+          noTipClone.style.display = 'block';
+          pstClone.style.width = '100px';
+          pstClone.style.height = '100px';
+          pstClone.style.display = 'block';
+          
+          noTipPstContainer.appendChild(noTipClone);
+          noTipPstContainer.appendChild(pstClone);
+          
+          // Masukkan ke dalam leftWrapper (di bawah welcome-text)
+          leftWrapper.appendChild(noTipPstContainer);
+        }
+      } else {
+        // Hapus wrapper jika ada (kembali ke portrait)
+        const leftWrapper = document.querySelector('.welcome-left-wrapper');
+        if (leftWrapper) {
+          const welcomeText = leftWrapper.querySelector('.welcome-text');
+          const welcomeSection = document.querySelector('.welcome-section');
+          if (welcomeText && welcomeSection) {
+            welcomeSection.insertBefore(welcomeText, welcomeSection.firstChild);
+          }
+          leftWrapper.remove();
+        }
+      }
+    }
+
+    // Jalankan saat halaman load
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(moveNoTipPSTToWelcome, 100);
+    });
+
+    // Jalankan saat resize/orientasi berubah
+    window.addEventListener('resize', function() {
+      setTimeout(moveNoTipPSTToWelcome, 300);
+    });
+  </script>
 </body>
 </html>
