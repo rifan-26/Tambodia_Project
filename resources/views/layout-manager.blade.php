@@ -926,6 +926,105 @@
       transform: translateY(-2px);
       transition: all 0.2s ease;
     }
+
+    /* Entrance Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Apply animations to elements */
+    .sidebar {
+      animation: slideInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .header-top {
+      animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+    }
+
+    .nav-tabs {
+      animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+    }
+
+    .card {
+      animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;
+    }
+
+    .card:nth-child(2) {
+      animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.4s both;
+    }
+
+    .preview-section {
+      animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.5s both;
+    }
+
+    .grid-item {
+      animation: scaleIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+    }
+
+    .grid-item:nth-child(1) { animation-delay: 0.1s; }
+    .grid-item:nth-child(2) { animation-delay: 0.15s; }
+    .grid-item:nth-child(3) { animation-delay: 0.2s; }
+    .grid-item:nth-child(4) { animation-delay: 0.25s; }
+    .grid-item:nth-child(5) { animation-delay: 0.3s; }
+    .grid-item:nth-child(6) { animation-delay: 0.35s; }
+
+    .user-badge {
+      animation: slideInRight 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+    }
+
+    /* Smooth page load */
+    body {
+      animation: fadeIn 0.3s ease-in;
+    }
   </style>
 </head>
 <body>

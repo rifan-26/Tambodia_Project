@@ -84,7 +84,7 @@ class LandingController extends Controller
             ->where('start_date', '<=', $currentDate)
             ->where(function($query) use ($currentDate) {
                 $query->whereNull('end_date')
-                      ->orWhere('end_date', '>=', $currentDate);
+                      ->orWhere('end_date', '>', $currentDate);
             })
             ->where(function($query) use ($indonesianDay) {
                 $query->whereNull('day_of_week')
@@ -130,7 +130,7 @@ class LandingController extends Controller
             ->where('start_date', '<=', $currentDate)
             ->where(function($query) use ($currentDate) {
                 $query->whereNull('end_date')
-                      ->orWhere('end_date', '>=', $currentDate);
+                      ->orWhere('end_date', '>', $currentDate);
             })
             ->where(function($query) use ($indonesianDay) {
                 $query->whereNull('day_of_week')

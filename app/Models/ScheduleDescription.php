@@ -45,7 +45,7 @@ class ScheduleDescription extends Model
             return false;
         }
         
-        if ($this->end_date && $checkDate > $this->end_date) {
+        if ($this->end_date && $checkDate >= $this->end_date) {
             return false;
         }
         
@@ -60,7 +60,7 @@ class ScheduleDescription extends Model
                     ->where('start_date', '<=', $checkDate)
                     ->where(function($q) use ($checkDate) {
                         $q->whereNull('end_date')
-                          ->orWhere('end_date', '>=', $checkDate);
+                          ->orWhere('end_date', '>', $checkDate);
                     });
     }
 }

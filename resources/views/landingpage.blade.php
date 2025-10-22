@@ -96,8 +96,10 @@
     }
 
     .logo {
-      width: 70px;
-      height: auto;
+      width: 100px !important;
+      height: 100px !important;
+      object-fit: contain;
+      flex-shrink: 0;
     }
 
     .title h1 {
@@ -180,11 +182,11 @@
     }
 
     .staff-photo {
-      width: 130px;
-      height: 160px;
+      width: 200px;
+      height: 250px;
       background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
       border-radius: 8px;
-      margin-bottom: 8px;
+      margin-bottom: 0;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
       display: flex;
       align-items: center;
@@ -207,7 +209,7 @@
       padding: 5px 10px;
       font-size: 11px;
       font-weight: 500;
-      width: 120px;
+      width: 200px;
       vertical-align: middle;
       text-align: center;
     }
@@ -233,7 +235,7 @@
       font-size: 16px;
       font-weight: 600;
       text-shadow: 2px 3px 1px rgba(0, 0, 0, 0.5);
-      width: 120px;
+      width: 200px;
       text-align: center;
     }
 
@@ -637,6 +639,8 @@
 
       .logo {
         width: 50px;
+        height: 50px;
+        object-fit: contain;
       }
 
       .title h1 {
@@ -669,8 +673,9 @@
       }
 
       .staff-photo {
-        width: 65px;
-        height: 85px;
+        width: 100px;
+        height: 140px;
+        margin-bottom: 0;
       }
 
       .staff-info-kiri,
@@ -749,6 +754,8 @@
 
       .logo {
         width: 40px;
+        height: 40px;
+        object-fit: contain;
       }
 
       .logos {
@@ -786,8 +793,9 @@
       }
 
       .staff-photo {
-        width: 55px;
-        height: 70px;
+        width: 90px;
+        height: 120px;
+        margin-bottom: 0;
       }
 
       .staff-info-kiri,
@@ -928,7 +936,10 @@
 
       .logo {
         width: 10vw;
+        height: 10vw;
         max-width: 150px;
+        max-height: 150px;
+        object-fit: contain;
       }
 
       .logos {
@@ -954,8 +965,9 @@
       }
 
       .staff-photo {
-        width: 8vw;
-        height: 10vh;
+        width: 14vw;
+        height: 18vh;
+        margin-bottom: 0;
       }
 
       .staff-info-kiri,
@@ -997,7 +1009,10 @@
 
       .logo {
         width: 8vw;
+        height: 8vw;
         max-width: 120px;
+        max-height: 120px;
+        object-fit: contain;
       }
 
       .logos {
@@ -1023,8 +1038,9 @@
       }
 
       .staff-photo {
-        width: 7vw;
-        height: 9vh;
+        width: 12vw;
+        height: 16vh;
+        margin-bottom: 0;
       }
 
       .staff-info-kiri,
@@ -1066,7 +1082,10 @@
 
       .logo {
         width: 10vw;
+        height: 10vw;
         max-width: 90px;
+        max-height: 90px;
+        object-fit: contain;
       }
 
       .logos {
@@ -1099,8 +1118,9 @@
       }
 
       .staff-photo {
-        width: 12vw;
-        height: 8vh;
+        width: 20vw;
+        height: 14vh;
+        margin-bottom: 0;
       }
 
       .staff-info-kiri,
@@ -1142,7 +1162,10 @@
 
       .logo {
         width: 12vw;
+        height: 12vw;
         max-width: 70px;
+        max-height: 70px;
+        object-fit: contain;
       }
 
       .logos {
@@ -1175,8 +1198,9 @@
       }
 
       .staff-photo {
-        width: 15vw;
-        height: 7vh;
+        width: 24vw;
+        height: 12vh;
+        margin-bottom: 0;
       }
 
       .staff-info-kiri,
@@ -1218,7 +1242,10 @@
 
       .logo {
         width: 15vw;
+        height: 15vw;
         max-width: 60px;
+        max-height: 60px;
+        object-fit: contain;
       }
 
       .logos {
@@ -1251,8 +1278,9 @@
       }
 
       .staff-photo {
-        width: 18vw;
-        height: 6vh;
+        width: 28vw;
+        height: 10vh;
+        margin-bottom: 0;
       }
 
       .staff-info-kiri,
@@ -1298,12 +1326,12 @@
         <div class="curve-gold"></div>  
         <div class="block-gold"></div> 
         <div class="logos d-flex align-items-center justify-content-center">
-          <img src="{{ asset('logo-bps.png') }}" alt="Logo BPS" class="logo img-fluid">
+          <img src="{{ asset('img/Group 22.png') }}" alt="Logo Tambodia" class="logo">
           <div class="title text-center">
             <h1 class="mb-0">SELAMAT DATANG</h1>
             <p class="mb-0">Di Kantor BPS Provinsi Sumatera Utara</p>
           </div>
-          <img src="{{ asset('logo-sumut.png') }}" alt="Logo Sumut" class="logo img-fluid">
+          <img src="{{ asset('img/Group 19.png') }}" alt="Logo BPS" class="logo">
         </div>
       </div> 
       </div>
@@ -1417,11 +1445,6 @@
         
         <div class="gallery-item gallery-item-text">
           <img src="{{ asset('img/6.jpg') }}" alt="Berita BPS">
-          <div class="text-overlay">
-            <h3>BPS MELAKUKAN SERAH TERIMA HIBAH DARI PEMERINTAH KABUPATEN BANGGAI LAUT</h3>
-            <p>Kepala BPS RI, Amalia Adininggar Widyasanti, menerima hibah dari Pemerintah Kabupaten Banggai Laut, Sulawesi Tengah. Hibah diberikan dalam rangka Memperingati Hari Statistik Nasional dan Hari Ulang Tahun BPS RI yang Ke-77. Serah terima berlangsung di Kantor BPS RI, Jakarta, Kamis (26/9/2024).</p>
-            <span class="logo-bps">bps.go.id</span>
-          </div>
         </div>
       @endif
     </div>
@@ -1574,7 +1597,7 @@
         // Add info label
         const infoDiv = document.createElement('div');
         infoDiv.className = `staff-info-${positionClass}`;
-        infoDiv.textContent = 'PETUGAS';
+        infoDiv.textContent = positionClass === 'kiri' ? 'Petugas PST' : 'Petugas PPID';
         infoWrapper.appendChild(infoDiv);
         
         // Add name
@@ -1593,7 +1616,7 @@
         
         const infoDiv = document.createElement('div');
         infoDiv.className = 'staff-info-kanan';
-        infoDiv.textContent = 'PETUGAS';
+        infoDiv.textContent = 'Petugas PPID';
         infoWrapper.appendChild(infoDiv);
         
         const nameDiv = document.createElement('div');
@@ -1615,8 +1638,8 @@
       `;
       
       infoWrapper.innerHTML = `
-        <div class="staff-info-kiri">PETUGAS</div>
-        <div class="staff-info-kanan">PETUGAS</div>
+        <div class="staff-info-kiri">Petugas PST</div>
+        <div class="staff-info-kanan">Petugas PPID</div>
       `;
       
       nameWrapper.innerHTML = `
