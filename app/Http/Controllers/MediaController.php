@@ -7,6 +7,7 @@ use App\Models\Media;
 use App\Models\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log as LogFacade;
 
 class MediaController extends Controller
 {
@@ -72,7 +73,7 @@ class MediaController extends Controller
             
         } catch (\Exception $e) {
             // Log the error
-            \Illuminate\Support\Facades\Log::error('Error fetching media: ' . $e->getMessage());
+            LogFacade::error('Error fetching media: ' . $e->getMessage());
             
             if ($request->ajax()) {
                 return response()->json([
@@ -177,7 +178,7 @@ class MediaController extends Controller
 
             if (!$isVideoLink) {
                 // Log request details for debugging
-                \Log::info('📁 Upload attempt', [
+                LogFacade::info('📁 Upload attempt', [
                     'has_file' => $request->hasFile('file'),
                     'files_count' => count($request->allFiles()),
                     'media_type' => $mediaType,
@@ -199,7 +200,7 @@ class MediaController extends Controller
                     };
                     
                     // Enhanced logging
-                    \Log::error('❌ Upload failed', [
+                    LogFacade::error('❌ Upload failed', [
                         'error_code' => $phpError,
                         'error_message' => $phpErrorMsg,
                         'has_file_object' => !is_null($file),
@@ -231,7 +232,7 @@ class MediaController extends Controller
                     return redirect()->back()->withErrors(['file' => $phpErrorMsg])->withInput();
                 }
                 
-                \Log::info('✅ File validation passed', [
+                LogFacade::info('✅ File validation passed', [
                     'filename' => $file->getClientOriginalName(),
                     'size' => $file->getSize(),
                     'mime' => $file->getMimeType()
@@ -360,7 +361,7 @@ class MediaController extends Controller
                 
         } catch (\Exception $e) {
             // Log the error
-            \Illuminate\Support\Facades\Log::error('Error uploading media: ' . $e->getMessage());
+            LogFacade::error('Error uploading media: ' . $e->getMessage());
             
             // Clean up any uploaded file if it exists
             if (isset($filePath) && Storage::disk('public')->exists($filePath)) {
@@ -427,7 +428,7 @@ class MediaController extends Controller
             
         } catch (\Exception $e) {
             // Log the error
-            \Illuminate\Support\Facades\Log::error('Error toggling landing status: ' . $e->getMessage());
+            LogFacade::error('Error toggling landing status: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
@@ -477,7 +478,7 @@ class MediaController extends Controller
             
         } catch (\Exception $e) {
             // Log the error
-            \Illuminate\Support\Facades\Log::error('Error deleting media: ' . $e->getMessage());
+            LogFacade::error('Error deleting media: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
@@ -537,7 +538,7 @@ class MediaController extends Controller
             // Get all media with necessary fields
             $media = $query->latest()->get(['id', 'name', 'type', 'file_path', 'created_at']);
             
-            \Illuminate\Support\Facades\Log::info('Media search API called', [
+            LogFacade::info('Media search API called', [
                 'total_media' => $media->count(),
                 'has_type_filter' => $request->filled('type'),
                 'has_search' => $request->filled('search')
@@ -549,7 +550,7 @@ class MediaController extends Controller
             ]);
             
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Error searching media: ' . $e->getMessage(), [
+            LogFacade::error('Error searching media: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
             ]);
             
@@ -588,11 +589,11 @@ class MediaController extends Controller
             ]);
             
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Error filtering media: ' . $e->getMessage());
+            LogFacade::error('Error filtering media: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat memfilter media.'
+                'message' => 'Terjadi kesalahan saat memfilter media: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -618,7 +619,7 @@ class MediaController extends Controller
                 ]
             ]);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Error getting media stats: ' . $e->getMessage());
+            LogFacade::error('Error getting media stats: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
@@ -642,7 +643,7 @@ class MediaController extends Controller
             // Let Laravel generate proper streamed response with headers
             return Storage::download('public/' . $path);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Error serving public file: ' . $e->getMessage());
+            LogFacade::error('Error serving public file: ' . $e->getMessage());
             return response()->json(['message' => 'Gagal memuat file'], 500);
         }
     }
