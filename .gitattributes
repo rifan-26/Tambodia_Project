@@ -1,11 +1,17 @@
-* text=auto eol=lf
+# Protect important files from being overwritten during merge
+# Use 'ours' strategy to keep our version during conflicts
 
-*.blade.php diff=html
-*.css diff=css
-*.html diff=html
-*.md diff=markdown
-*.php diff=php
+# Core controllers - keep our version
+app/Http/Controllers/LandingController.php merge=ours
+app/Http/Controllers/LayoutController_clean.php merge=ours
 
-/.github export-ignore
-CHANGELOG.md export-ignore
-.styleci.yml export-ignore
+# Views - keep our version
+resources/views/landingpage.blade.php merge=ours
+resources/views/layout-manager.blade.php merge=ours
+resources/views/jadwal.blade.php merge=ours
+
+# Routes - keep our version
+routes/web.php merge=ours
+
+# Specs - keep our version
+.kiro/specs/staff-management/tasks.md merge=ours
