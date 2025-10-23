@@ -372,15 +372,14 @@
       box-shadow: 0 3px 10px rgba(220, 38, 38, 0.5) !important;
     }
     
-    /* Grid Layout - Rapih & Proporsional */
+    /* Grid Layout - SAMA dengan Landing Page (6 posisi) */
     .grid-container {
       display: grid;
-      grid-template-columns: repeat(2, minmax(300px, 1fr));
-      grid-template-rows: repeat(3, minmax(150px, 1fr));
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: 150px 150px 150px 100px;
+      grid-template-columns: repeat(12, 1fr);
+      grid-template-rows: repeat(2, 1fr);
       gap: 0.75rem;
       max-width: 900px;
+      height: 400px;
       margin: 0 auto;
     }
     
@@ -398,40 +397,28 @@
       min-height: 100px;
     }
 
-    /* Position 1: Top Left - Square */
+    /* Position 1: Kebijakan - Kiri, Panjang ke Bawah (2 rows) */
     .grid-item[data-position="1"] {
-      grid-column: 1 / 2;
-      grid-row: 1 / 2;
+      grid-column: 1 / 4 !important;
+      grid-row: 1 / 3 !important;
     }
 
-    /* Position 2: Top Right - Portrait (2 rows) */
+    /* Position 2: Sosialisasi - Kanan Atas Landscape Besar */
     .grid-item[data-position="2"] {
-      grid-column: 2 / 3;
-      grid-row: 1 / 3;
+      grid-column: 4 / 13 !important;
+      grid-row: 1 / 2 !important;
     }
 
-    /* Position 3: Middle Left - Portrait (2 rows) */
+    /* Position 3: Gratifikasi - Kanan Bawah Kiri */
     .grid-item[data-position="3"] {
-      grid-column: 1 / 2;
-      grid-row: 2 / 4;
+      grid-column: 4 / 8 !important;
+      grid-row: 2 / 3 !important;
     }
 
-    /* Position 4: Middle Right - Square */
+    /* Position 4: Release - Kanan Bawah Kanan */
     .grid-item[data-position="4"] {
-      grid-column: 2 / 3;
-      grid-row: 3 / 4;
-    }
-
-    /* Position 5: Bottom Left - Landscape */
-    .grid-item[data-position="5"] {
-      grid-column: 1 / 2;
-      grid-row: 4 / 5;
-    }
-
-    /* Position 6: Bottom Right - Landscape */
-    .grid-item[data-position="6"] {
-      grid-column: 2 / 3;
-      grid-row: 4 / 5;
+      grid-column: 8 / 13 !important;
+      grid-row: 2 / 3 !important;
     }
     
     .grid-item::after {
@@ -1529,16 +1516,24 @@ $(document).ready(function() {
     });
 });
 
-// Initialize grid with 6 positions
+// Initialize grid with 4 positions (mengikuti landing page)
 function initializeGrid() {
     const gridContainer = $('#gridContainer');
-    for (let i = 1; i <= 6; i++) {
+    const positionLabels = {
+        1: 'Kebijakan (Kiri)',
+        2: 'Sosialisasi (Kanan Atas)',
+        3: 'Gratifikasi (Kanan Bawah Kiri)',
+        4: 'Release (Kanan Bawah Kanan)'
+    };
+    
+    for (let i = 1; i <= 4; i++) {
         const gridItem = $(`
             <div class="grid-item" data-position="${i}" onclick="openGridMediaModal(${i})">
                 <div class="position-badge">${i}</div>
                 <div class="placeholder">
                     <i class="fas fa-plus-circle"></i>
-                    <p>Klik untuk pilih media</p>
+                    <p>${positionLabels[i]}</p>
+                    <small style="font-size: 0.75rem; color: #9ca3af;">Klik untuk pilih media</small>
                 </div>
             </div>
         `);
@@ -1623,20 +1618,35 @@ function loadLayoutSettings() {
                     console.log('📝 Description loaded');
                 }
                 
-                // Load grid media from default_media
+                // Load grid media from default_media - 1:1 mapping
+                // Landing Page Position = Manager Position (SAMA)
+                const reverseMapping = {
+                    1: 1,  // Kebijakan
+                    2: 2,  // Sosialisasi
+                    3: 3,  // Gratifikasi
+                    4: 4   // Release
+                };
+                
                 if (response.default_media && response.default_media.length > 0) {
                     console.log('📊 Loading', response.default_media.length, 'media from database:');
                     response.default_media.forEach((mediaData) => {
-                        // Find full media object from allMedia
-                        const fullMedia = allMedia.find(m => m.id == mediaData.id);
-                        if (fullMedia && mediaData.layout_order) {
-                            setGridMedia(mediaData.layout_order, fullMedia);
-                            console.log(`  ✅ Position ${mediaData.layout_order}: ${fullMedia.name} (${fullMedia.type}, ID: ${fullMedia.id})`);
+                        const landingPagePos = mediaData.layout_order;
+                        const managerPos = reverseMapping[landingPagePos];
+                        
+                        if (managerPos) {
+                            // Find full media object from allMedia
+                            const fullMedia = allMedia.find(m => m.id == mediaData.id);
+                            if (fullMedia) {
+                                setGridMedia(managerPos, fullMedia);
+                                console.log(`  ✅ Landing Position ${landingPagePos} → Manager Position ${managerPos}: ${fullMedia.name} (${fullMedia.type})`);
+                            } else {
+                                console.warn(`  ⚠️ Position ${landingPagePos}: Media ID ${mediaData.id} not found in allMedia`);
+                            }
                         } else {
-                            console.warn(`  ⚠️ Position ${mediaData.layout_order}: Media ID ${mediaData.id} not found in allMedia`);
+                            console.log(`  ⏭️ Skipping landing page position ${landingPagePos} (not mapped to manager)`);
                         }
                     });
-                    console.log('✅ All grid media loaded from database');
+                    console.log('✅ All grid media loaded from database (4 positions mapped)');
                 } else {
                     console.log('📭 No grid media in database - starting with empty grid');
                 }
@@ -2089,10 +2099,17 @@ function clearAllGridMedia() {
 
 // Execute clear all grid media (separated for modal callback)
 function executeClearAllGridMedia(mediaCount) {
-    console.log('🗑️ Clearing all grid media from layout');
+    console.log('🗑️ Clearing all grid media from layout (4 positions)');
     
-    // Clear all grid items
-    for (let i = 1; i <= 6; i++) {
+    const positionLabels = {
+        1: 'Layout 1 (Kiri Atas)',
+        2: 'Layout 2 (Kanan Atas)',
+        3: 'Layout 3 (Kanan Bawah)',
+        4: 'Layout 4 (Bawah)'
+    };
+    
+    // Clear all grid items (4 positions)
+    for (let i = 1; i <= 4; i++) {
         if (layoutData.gridItems[i]) {
             delete layoutData.gridItems[i];
             
@@ -2101,7 +2118,8 @@ function executeClearAllGridMedia(mediaCount) {
                 <div class="position-badge">${i}</div>
                 <div class="placeholder">
                     <i class="fas fa-plus-circle"></i>
-                    <p>Klik untuk pilih media</p>
+                    <p>${positionLabels[i]}</p>
+                    <small style="font-size: 0.75rem; color: #9ca3af;">Klik untuk pilih media</small>
                 </div>
             `).removeClass('has-media');
             gridItem.attr('onclick', `openGridMediaModal(${i})`);
@@ -2165,22 +2183,43 @@ function saveLayout() {
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
     });
     promises.push(bgPromise);
-    const mediaIds = [];
-    for (let i = 1; i <= 6; i++) {
-        if (layoutData.gridItems[i]) {
-            mediaIds.push(layoutData.gridItems[i].id);
+    // Map layout manager positions to landing page positions
+    // Layout Manager → Landing Page mapping:
+    // Position 1 → Landing Page Position 1 (nth-child 1)
+    // Manager Position → Landing Page Position Mapping
+    // Manager Pos 1 → Landing Pos 1 (Kebijakan)
+    // Manager Pos 2 → Landing Pos 2 (Sosialisasi)
+    // Manager Pos 3 → Landing Pos 3 (Gratifikasi)
+    // Manager Pos 4 → Landing Pos 4 (Release)
+    const positionMapping = {
+        1: 1,  // Kebijakan
+        2: 2,  // Sosialisasi
+        3: 3,  // Gratifikasi
+        4: 4   // Release
+    };
+    
+    const mediaIds = new Array(6).fill(null); // Create array with 6 positions
+    
+    for (let managerPos = 1; managerPos <= 4; managerPos++) {
+        if (layoutData.gridItems[managerPos]) {
+            const landingPagePos = positionMapping[managerPos];
+            mediaIds[landingPagePos - 1] = layoutData.gridItems[managerPos].id;
         }
     }
     
-    // IMPORTANT: Always send layout update with media_ids field (even if empty array)
-    console.log('Saving grid with', mediaIds.length, 'media items:', mediaIds);
+    // DON'T filter out nulls - keep positions intact!
+    // Send full array with nulls to preserve position indices
+    console.log('Saving grid with media at positions:', mediaIds);
     
     const layoutPromise = $.ajax({
         url: '/layout/update',
         method: 'POST',
-        data: { media_ids: mediaIds },  // Always send media_ids field
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-        contentType: 'application/x-www-form-urlencoded; charset=UTF-8'
+        data: JSON.stringify({ media_ids: mediaIds }),  // Use JSON to preserve nulls
+        headers: { 
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
     })
     .done(function(response) {
         console.log('✅ Layout update response:', response);

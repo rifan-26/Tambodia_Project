@@ -46,7 +46,12 @@ class LandingController extends Controller
             'settings' => []
         ];
 
-        return view('landingpage', compact('media', 'backgroundImage', 'description', 'activeSchedules', 'layoutConfig'));
+        // Get active staff (position 1 = left, position 2 = right)
+        $staff = \App\Models\Staff::where('is_active', true)
+            ->orderBy('position', 'asc')
+            ->get();
+
+        return view('landingpage', compact('media', 'backgroundImage', 'description', 'activeSchedules', 'layoutConfig', 'staff'));
     }
 
     /**
@@ -84,7 +89,7 @@ class LandingController extends Controller
             ->where('start_date', '<=', $currentDate)
             ->where(function($query) use ($currentDate) {
                 $query->whereNull('end_date')
-                      ->orWhere('end_date', '>', $currentDate);
+                      ->orWhere('end_date', '>=', $currentDate);
             })
             ->where(function($query) use ($indonesianDay) {
                 $query->whereNull('day_of_week')
@@ -92,13 +97,25 @@ class LandingController extends Controller
             })
             ->where(function($query) use ($currentTime) {
                 $query->whereNull('time')
-                      ->orWhere('time', '=', $currentTime)
                       ->orWhere('time', '<=', $currentTime);
             })
             ->orderBy('start_date', 'desc')
             ->orderBy('time', 'desc')
             ->limit(50) // Add limit to prevent loading too many schedules
             ->get();
+
+        \Log::info('🔍 Active schedules query result', [
+            'count' => $activeSchedules->count(),
+            'schedules' => $activeSchedules->map(fn($s) => [
+                'id' => $s->id,
+                'media_id' => $s->media_id,
+                'position' => $s->layout_position,
+                'time' => $s->time,
+                'start_date' => $s->start_date,
+                'end_date' => $s->end_date,
+                'day_of_week' => $s->day_of_week
+            ])->toArray()
+        ]);
 
         return $activeSchedules;
     }
@@ -151,18 +168,41 @@ class LandingController extends Controller
     private function getScheduledMedia($activeSchedules)
     {
         if (!$activeSchedules || $activeSchedules->isEmpty()) {
+            \Log::info('🔍 No active schedules found');
             return collect();
         }
+        
+        \Log::info('📅 Processing active schedules', [
+            'count' => $activeSchedules->count(),
+            'schedules' => $activeSchedules->map(fn($s) => [
+                'id' => $s->id,
+                'media_id' => $s->media_id,
+                'position' => $s->layout_position,
+                'time' => $s->time,
+                'day' => $s->day_of_week
+            ])->toArray()
+        ]);
         
         $mediaCollection = collect();
         $positionMap = []; // Track which position has which schedule
         
         // Process all active schedules and resolve position conflicts
         foreach ($activeSchedules as $schedule) {
+            \Log::info('🔎 Checking schedule', [
+                'id' => $schedule->id,
+                'media_id' => $schedule->media_id,
+                'layout_position' => $schedule->layout_position
+            ]);
+            
             if ($schedule->media_id && $schedule->layout_position) {
                 $mediaItem = Media::find($schedule->media_id);
                 if ($mediaItem) {
                     $position = $schedule->layout_position;
+                    
+                    \Log::info('✅ Valid schedule found', [
+                        'position' => $position,
+                        'media' => $mediaItem->name
+                    ]);
                     
                     // Check if this position is already occupied
                     if (!isset($positionMap[$position])) {
@@ -180,7 +220,15 @@ class LandingController extends Controller
                             $positionMap[$position] = $schedule;
                         }
                     }
+                } else {
+                    \Log::warning('⚠️ Media not found', ['media_id' => $schedule->media_id]);
                 }
+            } else {
+                \Log::warning('⚠️ Schedule missing data', [
+                    'id' => $schedule->id,
+                    'has_media_id' => !empty($schedule->media_id),
+                    'has_position' => !empty($schedule->layout_position)
+                ]);
             }
         }
         
@@ -190,8 +238,17 @@ class LandingController extends Controller
             if ($mediaItem) {
                 $mediaItem->layout_order = $position;
                 $mediaCollection->push($mediaItem);
+                \Log::info('➕ Added scheduled media', [
+                    'position' => $position,
+                    'media' => $mediaItem->name
+                ]);
             }
         }
+        
+        \Log::info('📦 Scheduled media collection', [
+            'count' => $mediaCollection->count(),
+            'media' => $mediaCollection->pluck('name', 'layout_order')->toArray()
+        ]);
         
         return $mediaCollection;
     }

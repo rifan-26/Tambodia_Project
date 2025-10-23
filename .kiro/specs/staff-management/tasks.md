@@ -29,7 +29,7 @@
 
 
 
-  - [ ] 2.3 Tambahkan route PUT untuk update staff
+  - [x] 2.3 Tambahkan route PUT untuk update staff
     - Tambahkan route `PUT /api/staff/{id}` untuk update staff
     - Route harus mengarah ke method `updateStaff` di LayoutController_clean
     - _Persyaratan: 4.1, 4.2, 4.3, 4.4, 4.5_
@@ -38,7 +38,7 @@
 
 
 
-  - [ ] 2.4 Tambahkan route DELETE untuk hapus staff
+  - [x] 2.4 Tambahkan route DELETE untuk hapus staff
     - Tambahkan route `DELETE /api/staff/{id}` untuk delete staff
 
 
@@ -57,7 +57,7 @@
     - Tambahkan styling untuk tab active/inactive
     - _Persyaratan: 1.1, 1.2, 1.3, 1.4_
 
-  - [ ] 3.2 Implementasi JavaScript untuk tab switching
+  - [x] 3.2 Implementasi JavaScript untuk tab switching
     - Buat fungsi untuk handle click event pada tab
 
     - Implementasi show/hide konten berdasarkan tab yang dipilih

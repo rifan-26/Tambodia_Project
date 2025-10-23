@@ -944,11 +944,23 @@
       <div class="container staff-container justify-content-end">
         <!-- Staff Kiri -->
         <div class="staff-member">
+          @php
+            $staffLeft = $staff->where('position', 1)->first();
+            $staffRight = $staff->where('position', 2)->first();
+          @endphp
           <div class="row">
             <div class="col">
               <div class="staff-photo-wrapper">
-                <div class="staff-photo"><img src="{{ asset('img/image 24.png') }}" alt="Staff PST"></div>
-                <div class="staff-photo"><img src="{{ asset('img/image 13.png') }}" alt="Staff PPID"></div>
+                <div class="staff-photo">
+                  @if($staffLeft && $staffLeft->photo_path)
+                    <img src="{{ asset('storage/' . $staffLeft->photo_path) }}" alt="{{ $staffLeft->name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                  @endif
+                </div>
+                <div class="staff-photo">
+                  @if($staffRight && $staffRight->photo_path)
+                    <img src="{{ asset('storage/' . $staffRight->photo_path) }}" alt="{{ $staffRight->name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                  @endif
+                </div>
               </div>
             </div>
           </div>
@@ -956,8 +968,8 @@
           <div class="row">
             <div class="col">
               <div class="staff-info-wrapper">
-                <div class="staff-info-kiri">PETUGAS PST</div>
-                <div class="staff-info-kanan">PETUGAS PPID</div>
+                <div class="staff-info-kiri">{{ $staffLeft ? 'PETUGAS PST' : 'PETUGAS PST' }}</div>
+                <div class="staff-info-kanan">{{ $staffRight ? 'PETUGAS PPID' : 'PETUGAS PPID' }}</div>
               </div>
             </div>
           </div>
@@ -965,8 +977,8 @@
           <div class="row">
             <div class="col">
               <div class="staff-name-wrapper">
-                <div class="staff-name-kiri">Nama</div>
-                <div class="staff-name-kanan">Nama</div>
+                <div class="staff-name-kiri">{{ $staffLeft->name ?? 'Nama' }}</div>
+                <div class="staff-name-kanan">{{ $staffRight->name ?? 'Nama' }}</div>
               </div>
             </div>
           </div>
@@ -980,42 +992,60 @@
       <div class="container">
         <div class="row">
           <div class="col-3">
-            <!-- Item 1: Portrait kiri atas (Kebijakan MUTU) -->
-            <div class="gallery-item">
-              <img src="{{ asset('img/kebijakan.png') }}" alt="Kebijakan MUTU">
-            </div>
+            <!-- Item 1: Portrait kiri atas (Kebijakan MUTU) -->            <div class="gallery-item">              @php $item1 = $media->where('layout_order', 1)->first(); @endphp              @if($item1)                @if($item1->type === 'Gambar')                  <img src="{{ asset('storage/' . $item1->file_path) }}" alt="{{ $item1->name }}" loading="lazy">                @elseif($item1->type === 'Video')                  <video autoplay muted loop playsinline style="width: 100%; height: 100%; object-fit: cover;"><source src="{{ asset('storage/' . $item1->file_path) }}" type="video/mp4"></video>                @endif              @endif            </div>
           </div>
           <div class="col-9">
-            <!-- Item 2: Landscape besar kanan atas (Sosialisasi) -->
+            <!-- Item 2: Landscape besar kanan atas (Sosialisasi) -->        
             <div class="gallery-item">
-              <img src="{{ asset('img/sosialiasi.png') }}" alt="Sosialisasi">
+              @php $item2 = $media->where('layout_order', 2)->first(); @endphp
+              @if($item2)
+                @if($item2->type === 'Gambar')
+                  <img src="{{ asset('storage/' . $item2->file_path) }}" alt="{{ $item2->name }}" loading="lazy">
+                @elseif($item2->type === 'Video')
+                  <video autoplay muted loop playsinline style="width: 100%; height: 100%; object-fit: cover;"><source src="{{ asset('storage/' . $item2->file_path) }}" type="video/mp4"></video>
+                @endif
+              @endif
             </div>
           </div>
         </div>
 
         <div class="row row-custom">
           <div class="col-3 small-item">
-            <!-- Item 3: Square kiri bawah (No Tips) -->
+            <!-- Item 3: Square kiri bawah (No Tips) - STATIC -->
             <div class="gallery-item">
-              <img src="{{ asset('img/no tip.png') }}" alt="No Tips">
+              <!-- Static content for No Tips -->
             </div>
           </div>
           <div class="col-3 small-item">
-            <!-- Item 4: Square tengah (Pelayanan Statistik) -->
+            <!-- Item 4: Square tengah (Pelayanan Statistik) - STATIC -->
             <div class="gallery-item">
-              <img src="{{ asset('img/pst.png') }}" alt="Pelayanan Statistik">
+              <!-- Static content for Pelayanan Statistik -->
             </div>
           </div>
           <div class="col-3 big-item">
-            <!-- Item 5: Square (Release) -->
+            <!-- Item 5: Square (Release) - DYNAMIC Position 3 -->
             <div class="gallery-item">
-              <img src="{{ asset('img/release.png') }}" alt="Release">
+              @php $item5 = $media->where('layout_order', 3)->first(); @endphp
+              @if($item5)
+                @if($item5->type === 'Gambar')
+                  <img src="{{ asset('storage/' . $item5->file_path) }}" alt="{{ $item5->name }}" loading="lazy">
+                @elseif($item5->type === 'Video')
+                  <video autoplay muted loop playsinline style="width: 100%; height: 100%; object-fit: cover;"><source src="{{ asset('storage/' . $item5->file_path) }}" type="video/mp4"></video>
+                @endif
+              @endif
             </div>
           </div>
           <div class="col-3 big-item">
-            <!-- Item 6: Square (Gratifikasi) -->
+            <!-- Item 6: Square (Gratifikasi) - DYNAMIC Position 4 -->
             <div class="gallery-item gallery-item-text">
-              <img src="{{ asset('img/gratifikasi.png') }}" alt="Gratifikasi">
+              @php $item6 = $media->where('layout_order', 4)->first(); @endphp
+              @if($item6)
+                @if($item6->type === 'Gambar')
+                  <img src="{{ asset('storage/' . $item6->file_path) }}" alt="{{ $item6->name }}" loading="lazy">
+                @elseif($item6->type === 'Video')
+                  <video autoplay muted loop playsinline style="width: 100%; height: 100%; object-fit: cover;"><source src="{{ asset('storage/' . $item6->file_path) }}" type="video/mp4"></video>
+                @endif
+              @endif
             </div>
           </div>
         </div>
@@ -1144,3 +1174,4 @@
   </script>
 </body>
 </html>
+

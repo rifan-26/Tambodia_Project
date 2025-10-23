@@ -142,12 +142,13 @@ class LayoutController_clean extends Controller
                 'media_ids.*' => 'nullable|exists:media,id'
             ]);
 
-            // Get media_ids from validated data, default to empty array if not present
-            $mediaIds = isset($validated['media_ids']) ? array_filter($validated['media_ids']) : [];
+            // Get media_ids from validated data, keep nulls to preserve positions!
+            $mediaIds = isset($validated['media_ids']) ? $validated['media_ids'] : [];
             
             Log::info('Updating layout settings', [
                 'media_ids' => $mediaIds,
                 'count' => count($mediaIds),
+                'non_null_count' => count(array_filter($mediaIds)),
                 'user_id' => Auth::id()
             ]);
 
@@ -169,16 +170,20 @@ class LayoutController_clean extends Controller
             ]);
             Log::info('Reset all media show_on_landing status');
 
-            // Set media terpilih untuk ditampilkan di landing page (jika ada)
-            if (count($mediaIds) > 0) {
-                foreach ($mediaIds as $index => $mediaId) {
+            // Set media terpilih untuk ditampilkan di landing page (preserve positions with nulls)
+            $hasMedia = false;
+            foreach ($mediaIds as $index => $mediaId) {
+                if ($mediaId !== null && $mediaId !== '') {
                     Media::where('id', $mediaId)->update([
                         'show_on_landing' => true,
-                        'layout_order'    => $index + 1
+                        'layout_order'    => $index + 1  // Position based on array index
                     ]);
                     Log::info("Set media {$mediaId} to position " . ($index + 1));
+                    $hasMedia = true;
                 }
-            } else {
+            }
+            
+            if (!$hasMedia) {
                 Log::info('No media selected - all media cleared from landing page');
             }
 

@@ -1296,12 +1296,10 @@
                 <label for="layout_position" class="form-label">Posisi di Layout</label>
                 <select class="form-select" id="layout_position" name="layout_position">
                   <option value="">Pilih Posisi Layout</option>
-                  <option value="1">Posisi 1 (Square 1:1)</option>
-                  <option value="2">Posisi 2 (Portrait 9:16)</option>
-                  <option value="3">Posisi 3 (Portrait 9:16)</option>
-                  <option value="4">Posisi 4 (Square 1:1)</option>
-                  <option value="5">Posisi 5 (Landscape 16:9)</option>
-                  <option value="6">Posisi 6 (Landscape 16:9)</option>
+                  <option value="1">Posisi 1 - Kebijakan (Kiri)</option>
+                  <option value="2">Posisi 2 - Sosialisasi (Kanan Atas)</option>
+                  <option value="3">Posisi 3 - Gratifikasi (Kanan Bawah Kiri)</option>
+                  <option value="4">Posisi 4 - Release (Kanan Bawah Kanan)</option>
                 </select>
               </div>
 
@@ -1408,12 +1406,10 @@
               </label>
               <select class="form-select" id="edit_layout_position" name="layout_position">
                 <option value="">Pilih Posisi Layout</option>
-                <option value="1">Posisi 1 - Kiri Atas (Square 1:1)</option>
-                <option value="2">Posisi 2 - Kanan Atas (Portrait 9:16)</option>
-                <option value="3">Posisi 3 - Kiri Tengah (Portrait 9:16)</option>
-                <option value="4">Posisi 4 - Kanan Tengah (Square 1:1)</option>
-                <option value="5">Posisi 5 - Kiri Bawah (Landscape 16:9)</option>
-                <option value="6">Posisi 6 - Kanan Bawah (Landscape 16:9)</option>
+                <option value="1">Posisi 1 - Kebijakan (Kiri)</option>
+                <option value="2">Posisi 2 - Sosialisasi (Kanan Atas)</option>
+                <option value="3">Posisi 3 - Gratifikasi (Kanan Bawah Kiri)</option>
+                <option value="4">Posisi 4 - Release (Kanan Bawah Kanan)</option>
               </select>
             </div>
             
@@ -1813,7 +1809,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Function to update the layout status display
     function updateLayoutStatusDisplay(positionStatus) {
-        for (let i = 1; i <= 6; i++) {
+        for (let i = 1; i <= 4; i++) {
             const statusElement = document.getElementById(`status-${i}`);
             const gridItem = document.querySelector(`[data-position="${i}"]`);
             
