@@ -1107,21 +1107,24 @@
         const rawVal = String(params.type ?? 'all').trim();
         const mapToApi = (v) => {
           const t = (v || '').toLowerCase();
-          if (!t || t === 'all') return 'all';
+          if (!t || t === 'all') return '';
           if (t === 'image') return 'image';
           if (t === 'video') return 'video';
           if (t === 'audio') return 'audio';
-          return 'all'; // fallback to all
+          return ''; // fallback to all
         };
         const apiType = mapToApi(rawVal);
         const q = new URLSearchParams();
-        q.set('type', apiType);
-        const url = API.filter + '?' + q.toString();
+        if (apiType) {
+          q.set('type', apiType);
+        }
+        const url = API.filter + (q.toString() ? '?' + q.toString() : '');
         try { console.debug('[fetchMedia] GET', url); } catch (_) {}
         const res = await fetch(url, {
           headers: {
             'X-CSRF-TOKEN': CSRF_TOKEN,
             'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
           },
           credentials: 'same-origin',
         });
@@ -1151,7 +1154,7 @@
         renderAll();
       } catch (e) {
         console.error(e);
-        toast('Error loading media data', 'error');
+        toast('Error loading media data: ' + e.message, 'error');
       } finally {
         showLoading(false);
       }
@@ -1170,7 +1173,7 @@
       const resetBtn = document.getElementById('resetFilter');
       
       filterBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
           // Update active state
           filterBtns.forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
@@ -1183,22 +1186,23 @@
           updateSelectedCount();
           
           // Fetch filtered media
-          fetchMedia({ type: filterType });
+          await fetchMedia({ type: filterType });
         });
       });
       
       if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
+        resetBtn.addEventListener('click', async () => {
           // Reset to "Semua" filter
           filterBtns.forEach(b => b.classList.remove('active'));
-          document.querySelector('.filter-btn[data-type="all"]').classList.add('active');
+          const allBtn = document.querySelector('.filter-btn[data-type="all"]');
+          if (allBtn) allBtn.classList.add('active');
           
           // Clear selections
           document.querySelectorAll('.media-checkbox').forEach(cb => cb.checked = false);
           updateSelectedCount();
           
           // Fetch all media
-          fetchMedia({ type: 'all' });
+          await fetchMedia({ type: 'all' });
         });
       }
     }
@@ -1253,52 +1257,9 @@
           return;
         }
 
-        // Process items in batches to prevent too many simultaneous requests
-        const batchSize = 3;
-        const validItems = [];
-        const itemsToDelete = [];
-
-        for (let i = 0; i < items.length; i += batchSize) {
-          const batch = items.slice(i, i + batchSize);
-          const checkResults = await Promise.all(
-            batch.map(async (item) => {
-              const fileUrl = `${window.location.origin}/storage/${item.file_path}`;
-              const exists = await checkFileExists(fileUrl);
-              return { item, exists };
-            })
-          );
-
-          checkResults.forEach(({ item, exists }) => {
-            if (exists) {
-              validItems.push(item);
-            } else {
-              itemsToDelete.push(item);
-            }
-          });
-        }
-
-        // Delete invalid items one at a time
-        if (itemsToDelete.length > 0) {
-          console.log(`Found ${itemsToDelete.length} invalid items to remove`);
-          for (const item of itemsToDelete) {
-            try {
-              await deleteMedia(item.id);
-              await new Promise(resolve => setTimeout(resolve, 500)); // Add delay between deletions
-            } catch (e) {
-              console.error('Auto-delete failed:', e);
-            }
-          }
-        }
-      } catch (batchError) {
-        console.error('Batch processing error:', batchError);
-      }
-      
-      try {
-        // Only render if we still have the container
+        // Render all items without file existence checking to preserve state
         if (container) {
-          container.innerHTML = validItems.map(m => mediaCardTemplate(m)).join('');
-          // Update state with only valid items
-          state.media = validItems;
+          container.innerHTML = items.map(m => mediaCardTemplate(m)).join('');
           
           // Ensure the grid is visible after re-render
           container.style.display = 'grid';
@@ -1312,8 +1273,8 @@
           // Trigger animations
           requestAnimationFrame(() => animateCards());
           
-          // Update stats with valid items only
-          updateStats(validItems);
+          // Update stats with all items
+          updateStats(items);
         }
       } catch (e) {
         console.error('Render error:', e);
