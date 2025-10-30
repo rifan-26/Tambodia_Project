@@ -28,7 +28,7 @@ Route::get('/landing', [LandingController::class, 'index']);
 Route::get('/api/public/landing/current-schedule', [LandingController::class, 'getCurrentSchedule'])->name('api.public.landing.schedule');
 Route::get('/api/public/landing/visual-schedules', [LandingController::class, 'getActiveVisualSchedules'])->name('api.public.landing.visual');
 Route::get('/api/public/landing/audio-schedules', [LandingController::class, 'getActiveAudioSchedule'])->name('api.public.landing.audio');
-Route::get('/api/staff', [LayoutController_clean::class, 'getStaff'])->name('api.public.staff');
+Route::get('/api/public/staff', [LayoutController_clean::class, 'getStaff'])->name('api.public.staff');
 
 // ===== AUTH ROUTES =====
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -56,11 +56,21 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/layout/description', [LayoutController_clean::class, 'updateDescription'])->name('layout.description');
     Route::get('/layout/settings', [LayoutController_clean::class, 'getLayoutSettings'])->name('layout.settings');
     
-    // Staff routes
+    // Staff Management Page
+    Route::get('/staff', function () {
+        return view('staff-manager');
+    })->name('staff.index');
+    
+    // Staff API routes
     Route::get('/api/staff', [LayoutController_clean::class, 'getStaff'])->name('api.staff.get');
     Route::post('/api/staff', [LayoutController_clean::class, 'storeStaff'])->name('api.staff.store');
-    Route::put('/api/staff/{id}', [LayoutController_clean::class, 'updateStaff'])->name('api.staff.update');
-    Route::delete('/api/staff/{id}', [LayoutController_clean::class, 'deleteStaff'])->name('api.staff.delete');
+    Route::post('/api/staff/{id}', [LayoutController_clean::class, 'updateStaff'])->name('api.staff.update');
+    Route::post('/api/staff/{id}/delete', [LayoutController_clean::class, 'deleteStaff'])->name('api.staff.delete');
+    
+    // Staff Names API routes
+    Route::get('/api/staff-names', [LayoutController_clean::class, 'getStaffNames'])->name('api.staff-names.get');
+    Route::post('/api/staff-names', [LayoutController_clean::class, 'storeStaffName'])->name('api.staff-names.store');
+    Route::delete('/api/staff-names/{id}', [LayoutController_clean::class, 'deleteStaffName'])->name('api.staff-names.delete');
     
     // Schedule Description API routes
     Route::prefix('api')->group(function () {

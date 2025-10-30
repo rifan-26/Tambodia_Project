@@ -992,14 +992,19 @@
       <div class="container">
         <div class="row">
           <div class="col-3">
-            <!-- Item 1: Portrait kiri atas (Kebijakan MUTU) -->            <div class="gallery-item">              @php $item1 = $media->where('layout_order', 1)->first(); @endphp
-              <x-media-renderer :media="$item1" />            </div>
+            <!-- Item 1: Portrait kiri atas (Kebijakan MUTU) -->            <div class="gallery-item">              @php $item1 = $media->where('layout_order', 1)->first(); @endphp              @if($item1)                @if($item1->type === 'Gambar')                  <img src="{{ asset('storage/' . $item1->file_path) }}" alt="{{ $item1->name }}" loading="lazy">                @elseif($item1->type === 'Video')                  <video autoplay muted loop playsinline style="width: 100%; height: 100%; object-fit: cover;"><source src="{{ asset('storage/' . $item1->file_path) }}" type="video/mp4"></video>                @endif              @endif            </div>
           </div>
           <div class="col-9">
             <!-- Item 2: Landscape besar kanan atas (Sosialisasi) -->        
             <div class="gallery-item">
               @php $item2 = $media->where('layout_order', 2)->first(); @endphp
-                <x-media-renderer :media="$item2" />
+              @if($item2)
+                @if($item2->type === 'Gambar')
+                  <img src="{{ asset('storage/' . $item2->file_path) }}" alt="{{ $item2->name }}" loading="lazy">
+                @elseif($item2->type === 'Video')
+                  <video autoplay muted loop playsinline style="width: 100%; height: 100%; object-fit: cover;"><source src="{{ asset('storage/' . $item2->file_path) }}" type="video/mp4"></video>
+                @endif
+              @endif
             </div>
           </div>
         </div>
@@ -1021,14 +1026,26 @@
             <!-- Item 5: Square (Release) - DYNAMIC Position 3 -->
             <div class="gallery-item">
               @php $item5 = $media->where('layout_order', 3)->first(); @endphp
-                <x-media-renderer :media="$item5" />
+              @if($item5)
+                @if($item5->type === 'Gambar')
+                  <img src="{{ asset('storage/' . $item5->file_path) }}" alt="{{ $item5->name }}" loading="lazy">
+                @elseif($item5->type === 'Video')
+                  <video autoplay muted loop playsinline style="width: 100%; height: 100%; object-fit: cover;"><source src="{{ asset('storage/' . $item5->file_path) }}" type="video/mp4"></video>
+                @endif
+              @endif
             </div>
           </div>
           <div class="col-3 big-item">
             <!-- Item 6: Square (Gratifikasi) - DYNAMIC Position 4 -->
             <div class="gallery-item gallery-item-text">
               @php $item6 = $media->where('layout_order', 4)->first(); @endphp
-                <x-media-renderer :media="$item6" />
+              @if($item6)
+                @if($item6->type === 'Gambar')
+                  <img src="{{ asset('storage/' . $item6->file_path) }}" alt="{{ $item6->name }}" loading="lazy">
+                @elseif($item6->type === 'Video')
+                  <video autoplay muted loop playsinline style="width: 100%; height: 100%; object-fit: cover;"><source src="{{ asset('storage/' . $item6->file_path) }}" type="video/mp4"></video>
+                @endif
+              @endif
             </div>
           </div>
         </div>

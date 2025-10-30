@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="csrf-token" content="{{ csrf_token() }}">
+  @include('components.sweetalert2')
   @include('components.global-audio-system')
+  @include('components.confirm-delete-modal')
   <title>Jadwal Tambodia</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
@@ -21,8 +23,11 @@
       background-color: #f8f9fa;
       overflow-x: hidden;
       height: 100vh;
+      opacity: 0;
+      animation: pageLoad 0.6s ease-out forwards;
     }
 
+    /* Page Load Animation */
     @keyframes pageLoad {
       from {
         opacity: 0;
@@ -31,6 +36,54 @@
       to {
         opacity: 1;
         transform: translateY(0);
+      }
+    }
+
+    /* Fade In Up Animation */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Slide In Left Animation */
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* Slide In Right Animation */
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* Scale In Animation */
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
       }
     }
 
@@ -123,6 +176,7 @@
       z-index: 1000;
       overflow-y: auto;
       overflow-x: hidden;
+      animation: slideInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     .sidebar-header {
@@ -217,6 +271,7 @@
       align-items: center;
       margin-bottom: 1rem;
       user-select: none;
+      animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
     }
     
     .header-top h2 {
@@ -238,6 +293,7 @@
       gap: 0.4rem;
       box-shadow: 0 2px 8px rgb(0 0 0 / 0.15);
       user-select: none;
+      animation: slideInRight 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
     }
     
     .user-badge .status-indicator {
@@ -256,6 +312,7 @@
       padding: 0.75rem;
       overflow: hidden;
       transition: all 0.3s ease;
+      animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;
     }
 
     .content-card:hover {
@@ -1032,7 +1089,12 @@
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{{ route('layout') }}">
-            <i class="bi bi-grid-3x3"></i> <span>Layout Manager</span>
+            <i class="bi bi-grid-3x3"></i> <span>Master Layout</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ route('staff.index') }}">
+            <i class="bi bi-people"></i> <span>Master Profil</span>
           </a>
         </li>
         <li class="nav-item">
@@ -2241,42 +2303,67 @@ function updateSchedule() {
 }
 
 function deleteSchedule(scheduleId, mediaName = '') {
-    const confirmMessage = mediaName ? 
-        `Apakah Anda yakin ingin menghapus jadwal untuk media "${mediaName}"?\n\nMedia ini akan dihilangkan dari landing page.` : 
+    const message = mediaName ? 
+        `Apakah Anda yakin ingin menghapus jadwal untuk media <strong>"${mediaName}"</strong>?` : 
         'Apakah Anda yakin ingin menghapus jadwal ini?';
-        
-    if (confirm(confirmMessage)) {
-        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        
-        fetch(`/schedule/${scheduleId}`, {
-            method: 'DELETE',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': token,
-                'Content-Type': 'application/json'
-            },
-            credentials: 'same-origin'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
+    
+    showConfirmDeleteModal({
+        title: 'Hapus Jadwal',
+        message: message,
+        warnings: [
+            'Media akan dihilangkan dari landing page',
+            'Jadwal akan dihapus permanen dari sistem'
+        ],
+        confirmText: 'Ya, Hapus Jadwal!',
+        onConfirm: function() {
+            executeDeleteSchedule(scheduleId);
+        }
+    });
+}
+
+function executeDeleteSchedule(scheduleId) {
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    
+    fetch(`/schedule/${scheduleId}`, {
+        method: 'DELETE',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': token,
+            'Content-Type': 'application/json'
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (typeof showAlert === 'function') {
+                showAlert(data.message || 'Jadwal berhasil dihapus', 'success');
+            } else {
                 alert(data.message);
-                // Remove row from table
-                const row = document.querySelector(`tr[data-schedule-id="${scheduleId}"]`);
-                if (row) {
-                    row.remove();
-                }
-                // Refresh page to update status
-                window.location.reload();
+            }
+            // Remove row from table
+            const row = document.querySelector(`tr[data-schedule-id="${scheduleId}"]`);
+            if (row) {
+                row.remove();
+            }
+            // Refresh page to update status
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            if (typeof showAlert === 'function') {
+                showAlert(data.message || 'Gagal menghapus jadwal', 'error');
             } else {
                 alert(data.message || 'Gagal menghapus jadwal');
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        if (typeof showAlert === 'function') {
+            showAlert('Terjadi kesalahan saat menghapus jadwal', 'error');
+        } else {
             alert('Terjadi kesalahan saat menghapus jadwal');
-        });
-    }
+        }
+    });
 }
 
 // Page transition and animation functions

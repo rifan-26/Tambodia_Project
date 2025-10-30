@@ -8,7 +8,9 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <meta name="csrf-token" content="{{ csrf_token() }}">
+  @include('components.sweetalert2')
   @include('components.global-audio-system')
+  @include('components.confirm-delete-modal')
 </head>
 
 <style>
@@ -493,6 +495,63 @@
       gap: 0.5rem;
     }
 
+    /* Platform Badge Styles */
+    .platform-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .platform-badge.youtube {
+      background: linear-gradient(135deg, #FF0000, #CC0000);
+      color: white;
+    }
+
+    .platform-badge.tiktok {
+      background: linear-gradient(135deg, #000000, #EE1D52);
+      color: white;
+    }
+
+    .platform-badge.instagram {
+      background: linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45);
+      color: white;
+    }
+
+    .platform-badge.facebook {
+      background: linear-gradient(135deg, #1877F2, #0C63D4);
+      color: white;
+    }
+
+    .platform-badge.twitter {
+      background: linear-gradient(135deg, #1DA1F2, #0C85D0);
+      color: white;
+    }
+
+    .platform-badge.unknown {
+      background: linear-gradient(135deg, #FFC107, #FF9800);
+      color: white;
+    }
+
+    .platform-icon {
+      font-size: 1.2rem;
+    }
+
     /* Enhanced Form Input */
     .form-label-enhanced {
       font-weight: 600;
@@ -708,7 +767,12 @@
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{{ route('layout') }}">
-            <i class="bi bi-grid-3x3"></i> <span>Layout Manager</span>
+            <i class="bi bi-grid-3x3"></i> <span>Master Layout</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ route('staff.index') }}">
+            <i class="bi bi-people"></i> <span>Master Profil</span>
           </a>
         </li>
         <li class="nav-item">
@@ -773,7 +837,7 @@
                   <i class="bi bi-image"></i>
                 </div>
                 <h5 class="media-type-title">Gambar</h5>
-                <p class="media-type-desc">JPG, PNG, GIF, WEBP<br>Max 250MB</p>
+                <p class="media-type-desc">JPG, PNG, GIF, WEBP<br>Max 20MB</p>
               </div>
               
               <div class="media-type-card" data-type="video">
@@ -781,7 +845,7 @@
                   <i class="bi bi-play-circle"></i>
                 </div>
                 <h5 class="media-type-title">Video</h5>
-                <p class="media-type-desc">MP4, MPEG, MOV, WEBM<br>Max 250MB</p>
+                <p class="media-type-desc">LINK URL</p>
               </div>
               
               <div class="media-type-card" data-type="audio">
@@ -789,7 +853,7 @@
                   <i class="bi bi-music-note"></i>
                 </div>
                 <h5 class="media-type-title">Audio</h5>
-                <p class="media-type-desc">MP3, WAV, OGG<br>Max 250MB</p>
+                <p class="media-type-desc">MP3<br>Max 20MB</p>
               </div>
             </div>
           </div>
@@ -814,10 +878,24 @@
             <div id="videoLinkGroup" class="mt-3 d-none">
               <label class="form-label-enhanced" for="videoUrl">
                 <i class="bi bi-link-45deg"></i>
-                Link Video (YouTube atau URL video lain)
+                Link Video (YouTube)
               </label>
-              <input type="url" id="videoUrl" name="video_url" class="form-control form-control-enhanced" placeholder="https://www.youtube.com/watch?v=... atau https://example.com/video.mp4">
-              <div class="form-text">Masukkan URL video. Untuk YouTube, tempelkan link video (kami akan menampilkan embed).</div>
+              
+              <!-- Platform Badge (shows detected platform) -->
+              <div id="platformBadge" class="platform-badge d-none mb-2">
+                <i class="platform-icon"></i>
+                <span class="platform-name"></span>
+              </div>
+              
+              <input type="url" id="videoUrl" name="video_url" class="form-control form-control-enhanced" placeholder="https://www.youtube.com/watch?v=...">
+              
+              <!-- Hidden field for platform -->
+              <input type="hidden" id="videoPlatform" name="video_platform" value="">
+              
+              <div class="form-text">
+                <i class="bi bi-info-circle me-1"></i>
+                Platform yang didukung: <strong>YouTube</strong>
+              </div>
             </div>
             <div id="uploadInlineError" class="alert alert-danger mt-3 d-none" role="alert"></div>
 
@@ -1008,6 +1086,100 @@
       function clearInlineError(){ setInlineError(''); }
       function formatBytes(bytes){ if(bytes===0) return '0 B'; const k=1024, s=['B','KB','MB','GB']; const i=Math.floor(Math.log(bytes)/Math.log(k)); return (bytes/Math.pow(k,i)).toFixed(2)+' '+s[i]; }
       function isValidUrl(str){ try{ const u=new URL(str); return !!u.protocol && !!u.host; } catch(e){ return false; } }
+
+      // Platform Detection for Social Media Links
+      const platformPatterns = {
+        youtube: /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]+)/,
+        tiktok: /tiktok\.com\/@[\w.-]+\/video\/(\d+)|vm\.tiktok\.com\/([a-zA-Z0-9]+)/,
+        instagram: /instagram\.com\/(?:p|reel|tv)\/([a-zA-Z0-9_-]+)/,
+        facebook: /facebook\.com\/(?:watch\/?\?v=|[\w.-]+\/videos\/)(\d+)|fb\.watch\/([a-zA-Z0-9_-]+)/,
+        twitter: /(?:twitter\.com|x\.com)\/[\w]+\/status\/(\d+)/
+      };
+
+      const platformIcons = {
+        youtube: 'bi-youtube',
+        tiktok: 'bi-tiktok',
+        instagram: 'bi-instagram',
+        facebook: 'bi-facebook',
+        twitter: 'bi-twitter'
+      };
+
+      const platformNames = {
+        youtube: 'YouTube',
+        tiktok: 'TikTok',
+        instagram: 'Instagram',
+        facebook: 'Facebook',
+        twitter: 'Twitter'
+      };
+
+      function detectPlatform(url) {
+        if (!url) return null;
+        for (const [platform, pattern] of Object.entries(platformPatterns)) {
+          if (pattern.test(url)) {
+            return platform;
+          }
+        }
+        return null;
+      }
+
+      function showPlatformBadge(platform) {
+        const badge = qs('#platformBadge');
+        const icon = badge.querySelector('.platform-icon');
+        const name = badge.querySelector('.platform-name');
+        
+        if (platform === 'unknown') {
+          badge.className = 'platform-badge unknown';
+          icon.className = 'platform-icon bi bi-question-circle';
+          name.textContent = 'Platform tidak dikenali';
+        } else {
+          badge.className = `platform-badge ${platform}`;
+          icon.className = `platform-icon ${platformIcons[platform]}`;
+          name.textContent = platformNames[platform];
+        }
+        
+        badge.classList.remove('d-none');
+      }
+
+      function hidePlatformBadge() {
+        const badge = qs('#platformBadge');
+        if (badge) {
+          badge.classList.add('d-none');
+        }
+      }
+
+      // Real-time platform detection on video URL input
+      const videoUrlInput = qs('#videoUrl');
+      const videoPlatformInput = qs('#videoPlatform');
+      
+      if (videoUrlInput && videoPlatformInput) {
+        videoUrlInput.addEventListener('input', function() {
+          const url = this.value.trim();
+          
+          if (!url) {
+            hidePlatformBadge();
+            videoPlatformInput.value = '';
+            return;
+          }
+          
+          const platform = detectPlatform(url);
+          
+          if (platform) {
+            showPlatformBadge(platform);
+            videoPlatformInput.value = platform;
+            clearInlineError();
+          } else if (url) {
+            showPlatformBadge('unknown');
+            videoPlatformInput.value = '';
+            // Don't show error yet, just warning
+          } else {
+            hidePlatformBadge();
+            videoPlatformInput.value = '';
+          }
+          
+          // Update next button state
+          nextBtn.disabled = !canProceed();
+        });
+      }
 
       // Wizard state
       const steps = qsa('.wizard-step');
@@ -1486,10 +1658,22 @@
       
       // Media delete function
       window.deleteMedia = function(id, name) {
-        if(!confirm(`Apakah Anda yakin ingin menghapus media "${name}"?`)) {
-          return;
-        }
-        
+        showConfirmDeleteModal({
+          title: 'Hapus Media',
+          message: `Apakah Anda yakin ingin menghapus media <strong>"${name}"</strong>?`,
+          warnings: [
+            'File media akan dihapus dari storage',
+            'Data media akan dihapus permanen dari database',
+            'Media akan hilang dari semua jadwal dan layout'
+          ],
+          confirmText: 'Ya, Hapus Media!',
+          onConfirm: function() {
+            executeDeleteMedia(id);
+          }
+        });
+      };
+      
+      function executeDeleteMedia(id) {
         showLoading('Menghapus media...');
         
         fetch(`{{ url('/media') }}/${id}`, {
@@ -1515,7 +1699,7 @@
           console.error('Error:', error);
           toast('Terjadi kesalahan saat menghapus media', 'error');
         });
-      };
+      }
 
       // Initial setup
       setStep(1);

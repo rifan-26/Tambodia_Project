@@ -127,14 +127,14 @@
         console.log(`🎵 Playing: ${schedule.media.name}`);
         console.log(`🎵 Audio path: /storage/${schedule.media.file_path}`);
         
+        // Get saved volume or default to 70%
+        const savedVolume = localStorage.getItem('audioVolume') || '0.7';
+        
         const audio = document.createElement('audio');
         audio.src = `/storage/${schedule.media.file_path}`;
-        audio.volume = 0.7;
+        audio.volume = parseFloat(savedVolume);
         
         currentAudio = audio;
-        
-        // Show popup notification with play button
-        showAudioPopup(schedule, audio);
         
         // Clean up when done
         audio.addEventListener('ended', () => {
@@ -159,24 +159,50 @@
         
         document.body.appendChild(audio);
         
-        // Try autoplay, if fails show click-to-play button
+        // Try autoplay first
         audio.play().then(() => {
             console.log('🎵 Audio playing automatically');
+            // Show green popup with volume control (playing state)
+            showAudioPopup(schedule, audio, true);
         }).catch(error => {
             console.warn('🎵 Autoplay blocked by browser:', error);
-            // Update popup to show play button
-            showPlayButton(schedule, audio);
+            // Show green popup with play button (waiting state)
+            showAudioPopup(schedule, audio, false);
         });
     }
     
     // Show audio popup notification with volume control
-    function showAudioPopup(schedule, audio) {
+    function showAudioPopup(schedule, audio, isPlaying) {
         // Remove existing popup
         hideAudioPopup();
         
         // Get saved volume or default to 70%
         const savedVolume = localStorage.getItem('audioVolume') || '0.7';
-        audio.volume = parseFloat(savedVolume);
+        
+        // Determine popup content based on playing state
+        const playButtonHtml = !isPlaying ? `
+            <button onclick="manualPlayAudio()" style="
+                background: rgba(255,255,255,0.3);
+                border: none;
+                color: white;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                margin-right: 10px;
+            " title="Klik untuk memutar audio">
+                <i class="bi bi-play-fill" style="font-size: 24px;"></i>
+            </button>
+        ` : '';
+        
+        const statusText = isPlaying ? 'Playing Audio' : 'Klik untuk Putar';
+        const iconHtml = isPlaying 
+            ? '<i class="bi bi-volume-up-fill" style="font-size: 18px; animation: pulse 1.5s infinite;"></i>'
+            : '<i class="bi bi-music-note-beamed" style="font-size: 18px;"></i>';
         
         const popup = document.createElement('div');
         popup.id = 'audioPopup';
@@ -193,13 +219,14 @@
                 z-index: 10000;
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                 font-size: 14px;
-                max-width: 320px;
+                max-width: 350px;
                 animation: slideIn 0.3s ease-out;
             ">
                 <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
-                    <i class="bi bi-volume-up-fill" style="font-size: 18px; animation: pulse 1.5s infinite; margin-top: 2px;"></i>
+                    ${playButtonHtml}
+                    ${iconHtml}
                     <div style="flex: 1;">
-                        <div style="font-weight: bold; margin-bottom: 2px;">🎵 Playing Audio</div>
+                        <div style="font-weight: bold; margin-bottom: 2px;">🎵 ${statusText}</div>
                         <div style="font-size: 12px; opacity: 0.9;">${schedule.media.name}</div>
                     </div>
                     <button onclick="stopAudio()" style="
@@ -214,14 +241,14 @@
                         align-items: center;
                         justify-content: center;
                         flex-shrink: 0;
-                    ">
+                    " title="Tutup">
                         <i class="bi bi-x" style="font-size: 16px;"></i>
                     </button>
                 </div>
                 
                 <!-- Volume Control -->
                 <div style="display: flex; align-items: center; gap: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.2);">
-                    <i class="bi bi-volume-down" style="font-size: 14px; opacity: 0.8;"></i>
+                    <i class="bi bi-volume-down" style="font-size: 14px; opacity: 0.8; flex-shrink: 0;"></i>
                     <input 
                         type="range" 
                         id="audioVolumeSlider" 
@@ -236,10 +263,12 @@
                             outline: none;
                             -webkit-appearance: none;
                             cursor: pointer;
+                            margin: 0;
+                            padding: 0;
                         "
                     >
-                    <i class="bi bi-volume-up" style="font-size: 14px; opacity: 0.8;"></i>
-                    <span id="volumePercentage" style="font-size: 11px; opacity: 0.9; min-width: 35px; text-align: right;">
+                    <i class="bi bi-volume-up" style="font-size: 14px; opacity: 0.8; flex-shrink: 0;"></i>
+                    <span id="volumePercentage" style="font-size: 11px; opacity: 0.9; min-width: 35px; text-align: right; flex-shrink: 0;">
                         ${Math.round(parseFloat(savedVolume) * 100)}%
                     </span>
                 </div>
@@ -264,6 +293,8 @@
                     background: white;
                     cursor: pointer;
                     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                    margin-top: -5px;
+                    position: relative;
                 }
                 
                 #audioVolumeSlider::-moz-range-thumb {
@@ -370,7 +401,7 @@
                     
                     <!-- Volume Control -->
                     <div style="display: flex; align-items: center; gap: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.2);">
-                        <i class="bi bi-volume-down" style="font-size: 14px; opacity: 0.8;"></i>
+                        <i class="bi bi-volume-down" style="font-size: 14px; opacity: 0.8; flex-shrink: 0;"></i>
                         <input 
                             type="range" 
                             id="audioVolumeSlider" 
@@ -385,10 +416,12 @@
                                 outline: none;
                                 -webkit-appearance: none;
                                 cursor: pointer;
+                                margin: 0;
+                                padding: 0;
                             "
                         >
-                        <i class="bi bi-volume-up" style="font-size: 14px; opacity: 0.8;"></i>
-                        <span id="volumePercentage" style="font-size: 11px; opacity: 0.9; min-width: 35px; text-align: right;">
+                        <i class="bi bi-volume-up" style="font-size: 14px; opacity: 0.8; flex-shrink: 0;"></i>
+                        <span id="volumePercentage" style="font-size: 11px; opacity: 0.9; min-width: 35px; text-align: right; flex-shrink: 0;">
                             ${Math.round(parseFloat(savedVolume) * 100)}%
                         </span>
                     </div>
@@ -403,6 +436,8 @@
                         background: white;
                         cursor: pointer;
                         box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                        margin-top: -5px;
+                        position: relative;
                     }
                     
                     #audioVolumeSlider::-moz-range-thumb {
@@ -438,32 +473,27 @@
         if (currentAudio) {
             currentAudio.play().then(() => {
                 console.log('🎵 Audio playing after user interaction');
-                // Update popup back to playing state
+                // Update popup to playing state - hide play button, show playing icon
                 const popup = document.getElementById('audioPopup');
                 if (popup) {
-                    popup.querySelector('button[onclick="manualPlayAudio()"]').parentElement.parentElement.innerHTML = `
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <i class="bi bi-volume-up-fill" style="font-size: 18px; animation: pulse 1.5s infinite;"></i>
-                            <div style="flex: 1;">
-                                <div style="font-weight: bold; margin-bottom: 2px;">🎵 Playing Audio</div>
-                                <div style="font-size: 12px; opacity: 0.9;">Audio sedang diputar</div>
-                            </div>
-                            <button onclick="stopAudio()" style="
-                                background: rgba(255,255,255,0.2);
-                                border: none;
-                                color: white;
-                                width: 30px;
-                                height: 30px;
-                                border-radius: 50%;
-                                cursor: pointer;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                            ">
-                                <i class="bi bi-x" style="font-size: 16px;"></i>
-                            </button>
-                        </div>
-                    `;
+                    // Hide play button
+                    const playButton = popup.querySelector('button[onclick="manualPlayAudio()"]');
+                    if (playButton) {
+                        playButton.style.display = 'none';
+                    }
+                    
+                    // Update icon to playing state
+                    const icon = popup.querySelector('.bi-music-note-beamed');
+                    if (icon) {
+                        icon.className = 'bi bi-volume-up-fill';
+                        icon.style.animation = 'pulse 1.5s infinite';
+                    }
+                    
+                    // Update text
+                    const statusText = popup.querySelector('div[style*="font-weight: bold"]');
+                    if (statusText) {
+                        statusText.textContent = '🎵 Playing Audio';
+                    }
                 }
             }).catch(error => {
                 console.error('🎵 Manual play failed:', error);

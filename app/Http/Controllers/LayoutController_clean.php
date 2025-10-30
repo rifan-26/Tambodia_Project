@@ -625,4 +625,80 @@ class LayoutController_clean extends Controller
         
         return $path;
     }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // STAFF NAMES MANAGEMENT
+    // ═══════════════════════════════════════════════════════════════════════
+
+    /**
+     * Get all staff names
+     */
+    public function getStaffNames()
+    {
+        $names = \App\Models\StaffName::orderBy('is_default', 'desc')
+            ->orderBy('name', 'asc')
+            ->get();
+        
+        return response()->json([
+            'success' => true,
+            'names' => $names
+        ]);
+    }
+
+    /**
+     * Store new staff name
+     */
+    public function storeStaffName(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255|unique:staff_names,name'
+        ]);
+
+        try {
+            $staffName = \App\Models\StaffName::create([
+                'name' => $request->name,
+                'is_default' => false
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Nama berhasil ditambahkan',
+                'name' => $staffName
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menambahkan nama: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete staff name (only custom names, not default)
+     */
+    public function deleteStaffName($id)
+    {
+        try {
+            $staffName = \App\Models\StaffName::findOrFail($id);
+
+            if ($staffName->is_default) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak dapat menghapus nama default'
+                ], 422);
+            }
+
+            $staffName->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Nama berhasil dihapus'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus nama: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

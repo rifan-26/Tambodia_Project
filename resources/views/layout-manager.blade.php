@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Layout Manager - Tambodia</title>
+  <title>Master Layout - Tambodia</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <meta name="csrf-token" content="{{ csrf_token() }}">
+  @include('components.sweetalert2')
   @include('components.global-audio-system')
   <style>
     :root {
@@ -212,60 +213,52 @@
     }
     
     .btn-primary {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      background: linear-gradient(135deg, #1f9e76, #58cbaa);
+      color: white;
       border: none;
-      padding: 0.65rem 1.5rem;
-      font-weight: 600;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(31, 158, 118, 0.25);
-      transition: all 0.3s ease;
-      letter-spacing: 0.3px;
+      transition: all 0.2s ease;
     }
     
     .btn-primary:hover {
-      background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
-      box-shadow: 0 6px 20px rgba(31, 158, 118, 0.35);
       transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(31, 158, 118, 0.3);
     }
     
-    .btn-primary:active {
-      transform: translateY(0);
+    .btn-danger {
+      background: linear-gradient(135deg, #dc3545, #c82333);
+      color: white;
+      border: none;
+      transition: all 0.2s ease;
+    }
+    
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
     }
     
     .btn-success {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      background: linear-gradient(135deg, #1f9e76, #58cbaa);
+      color: white;
       border: none;
-      padding: 0.65rem 1.5rem;
-      font-weight: 600;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
-      transition: all 0.3s ease;
-      letter-spacing: 0.3px;
+      transition: all 0.2s ease;
     }
     
     .btn-success:hover {
-      background: linear-gradient(135deg, #059669 0%, #047857 100%);
-      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
       transform: translateY(-2px);
-    }
-    
-    .btn-success:active {
-      transform: translateY(0);
+      box-shadow: 0 4px 12px rgba(31, 158, 118, 0.3);
     }
     
     .btn-secondary {
-      background: #f3f4f6;
+      background: #6c757d;
+      color: white;
       border: none;
-      color: #6b7280;
-      padding: 0.65rem 1.5rem;
-      font-weight: 600;
-      border-radius: 10px;
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
     }
     
     .btn-secondary:hover {
-      background: #e5e7eb;
-      color: #4b5563;
+      background: #5a6268;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
     }
     
     /* Background Selection Area */
@@ -805,85 +798,6 @@
         grid-template-columns: 1fr;
       }
     }
-    
-    /* Tab Navigation Styling */
-    .nav-tabs {
-      border-bottom: 2px solid #e5e7eb;
-    }
-    
-    .nav-tabs .nav-link {
-      border: none;
-      color: #6b7280;
-      padding: 0.75rem 1.5rem;
-      font-weight: 600;
-      border-radius: 0;
-      border-bottom: 3px solid transparent;
-      transition: all 0.3s ease;
-    }
-    
-    .nav-tabs .nav-link:hover {
-      color: var(--primary);
-      border-bottom-color: var(--primary-light);
-      background: transparent;
-    }
-    
-    .nav-tabs .nav-link.active {
-      color: var(--primary);
-      background: transparent;
-      border-bottom-color: var(--primary);
-    }
-    
-    /* Staff Card Styling */
-    .staff-card {
-      background: white;
-      border-radius: 12px;
-      padding: 1.25rem;
-      border: 2px solid #e5e7eb;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    
-    .staff-card:hover {
-      border-color: var(--primary);
-      box-shadow: 0 4px 12px rgba(31, 158, 118, 0.15);
-      transform: translateY(-2px);
-    }
-    
-    .staff-card img {
-      width: 80px;
-      height: 80px;
-      object-fit: cover;
-      border-radius: 8px;
-      border: 2px solid #e5e7eb;
-    }
-    
-    .staff-card-body {
-      flex: 1;
-    }
-    
-    .staff-card-name {
-      font-weight: 600;
-      font-size: 1.1rem;
-      color: var(--text-dark);
-      margin-bottom: 0.25rem;
-    }
-    
-    .staff-card-position {
-      color: #6b7280;
-      font-size: 0.9rem;
-    }
-    
-    .staff-card-actions {
-      display: flex;
-      gap: 0.5rem;
-    }
-    
-    .staff-card-actions .btn {
-      padding: 0.5rem 1rem;
-      font-size: 0.9rem;
-    }
 
     /* Custom Confirm Modal Styling */
     #confirmModal .modal-dialog {
@@ -901,17 +815,28 @@
       }
     }
     
+    #confirmModal .btn-danger {
+      background: linear-gradient(135deg, #dc3545, #c82333) !important;
+      border: none !important;
+      transition: all 0.2s ease;
+    }
+    
     #confirmModal .btn-danger:hover {
-      background: #c82333 !important;
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4) !important;
+      box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3) !important;
+    }
+    
+    #confirmModal .btn-secondary {
+      background: #6c757d !important;
+      color: white !important;
+      border: none !important;
       transition: all 0.2s ease;
     }
     
     #confirmModal .btn-secondary:hover {
       background: #5a6268 !important;
       transform: translateY(-2px);
-      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3) !important;
     }
 
     /* Entrance Animations */
@@ -977,20 +902,16 @@
       animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
     }
 
-    .nav-tabs {
+    .card {
       animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
     }
 
-    .card {
+    .card:nth-child(2) {
       animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;
     }
 
-    .card:nth-child(2) {
-      animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.4s both;
-    }
-
     .preview-section {
-      animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.5s both;
+      animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.4s both;
     }
 
     .grid-item {
@@ -1045,7 +966,12 @@
         </li>
         <li class="nav-item mb-1">
           <a class="nav-link active" href="{{ route('layout') }}">
-            <i class="bi bi-grid-3x3"></i> Layout Manager
+            <i class="bi bi-grid-3x3"></i> Master Layout
+          </a>
+        </li>
+        <li class="nav-item mb-1">
+          <a class="nav-link" href="{{ route('staff.index') }}">
+            <i class="bi bi-people"></i> Master Profil
           </a>
         </li>
         <li class="nav-item mt-auto">
@@ -1064,28 +990,14 @@
   <main class="content-area">
     <!-- Header -->
     <div class="header-top">
-      <h2>Layout Manager</h2>
+      <h2>Master Layout</h2>
       <div class="user-badge" title="Logged in">
         <span class="status-indicator" aria-label="online status"></span>
         <span>{{ Auth::user()->name ?? 'User' }}</span>
       </div>
     </div>
     
-    <!-- Tab Navigation -->
-    <ul class="nav nav-tabs mb-4" id="layoutTabs" role="tablist">
-      <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="gallery-tab" data-bs-toggle="tab" data-bs-target="#gallery-content" 
-                type="button" role="tab" aria-controls="gallery-content" aria-selected="true">
-          <i class="fas fa-images me-2"></i>Gallery
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="staff-tab" data-bs-toggle="tab" data-bs-target="#staff-content" 
-                type="button" role="tab" aria-controls="staff-content" aria-selected="false">
-          <i class="fas fa-users me-2"></i>Petugas
-        </button>
-      </li>
-    </ul>
+    <!-- Gallery Content (No Tabs Needed) -->
 
     <!-- Success Notification -->
     <div class="success-notification" id="successNotification">
@@ -1093,11 +1005,8 @@
       <button class="close-btn" onclick="hideNotification()">×</button>
     </div>
 
-    <!-- Tab Content -->
-    <div class="tab-content" id="layoutTabContent">
-      <!-- Gallery Tab Content -->
-      <div class="tab-pane fade show active" id="gallery-content" role="tabpanel" aria-labelledby="gallery-tab">
-        <div class="row">
+    <!-- Gallery Content -->
+    <div class="row">
       <!-- Left Column: Background & Preview -->
       <div class="col-lg-7">
         <!-- Background Selector -->
@@ -1199,77 +1108,8 @@
       </div>
     </div>
       </div>
-      <!-- End Gallery Tab Content -->
-
-      <!-- Staff Tab Content -->
-      <div class="tab-pane fade" id="staff-content" role="tabpanel" aria-labelledby="staff-tab">
-        <div class="row">
-          <!-- Staff Management Section -->
-          <div class="col-12">
-            <div class="card">
-              <div class="card-header">
-                <h5>
-                  <i class="fas fa-users me-2"></i>Manajemen Petugas
-                </h5>
-              </div>
-              <div class="card-body">
-                <!-- Add Staff Form -->
-                <div class="mb-4 p-4" style="background: #f8f9fa; border-radius: 12px;">
-                  <h6 class="mb-3"><i class="fas fa-user-plus me-2"></i>Tambah Petugas Baru</h6>
-                  <form id="addStaffForm" enctype="multipart/form-data">
-                    <div class="row g-3">
-                      <div class="col-md-4">
-                        <label class="form-label">Nama Petugas <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="staffName" name="name" required>
-                      </div>
-                      <div class="col-md-4">
-                        <label class="form-label">Foto Petugas <span class="text-danger">*</span></label>
-                        <input type="file" class="form-control" id="staffPhoto" name="photo" accept="image/*" required>
-                        <small class="text-muted">Format: JPG, PNG, GIF. Max: 5MB</small>
-                      </div>
-                      <div class="col-md-2">
-                        <label class="form-label">Posisi <span class="text-danger">*</span></label>
-                        <select class="form-control" id="staffPosition" name="position" required>
-                          <option value="1">1 (Kiri)</option>
-                          <option value="2">2 (Kanan)</option>
-                        </select>
-                      </div>
-                      <div class="col-md-2">
-                        <label class="form-label">&nbsp;</label>
-                        <button type="submit" class="btn btn-primary w-100">
-                          <i class="fas fa-plus me-2"></i>Tambah
-                        </button>
-                      </div>
-                    </div>
-                    <!-- Image Preview -->
-                    <div class="mt-3" id="imagePreviewContainer" style="display: none;">
-                      <label class="form-label">Preview:</label>
-                      <div>
-                        <img id="imagePreview" src="" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #e5e7eb;">
-                      </div>
-                    </div>
-                  </form>
-                </div>
-
-                <!-- Staff List -->
-                <div>
-                  <h6 class="mb-3"><i class="fas fa-list me-2"></i>Daftar Petugas</h6>
-                  <div id="staffList" class="row g-3">
-                    <!-- Staff cards will be loaded here -->
-                  </div>
-                  <div id="emptyStaffState" class="text-center py-5" style="display: none;">
-                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
-                    <p class="text-muted">Belum ada data petugas</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- End Staff Tab Content -->
+      <!-- End Gallery Content -->
     </div>
-    <!-- End Tab Content -->
   </main>
 
 <!-- Custom Confirmation Modal -->
@@ -1286,16 +1126,16 @@
         <div id="confirmModalMessage" style="font-size: 1rem; color: #495057; margin-bottom: 20px;">
           <!-- Message will be inserted here -->
         </div>
-        <div id="confirmModalDetails" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #0d6efd;">
+        <div id="confirmModalDetails" style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
           <!-- Details will be inserted here -->
         </div>
       </div>
       <div class="modal-footer" style="border-top: 1px solid #e9ecef; padding: 15px 25px; gap: 10px;">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="padding: 10px 25px; border-radius: 8px;">
-          <i class="bi bi-x-circle me-1"></i> Tidak
+          <i class="bi bi-x-circle me-1"></i> Batal
         </button>
         <button type="button" class="btn btn-danger" id="confirmModalYes" style="padding: 10px 30px; border-radius: 8px;">
-          <i class="bi bi-check-circle me-1"></i> Ya, Hapus
+          <i class="bi bi-trash me-1"></i> Ya, Hapus!
         </button>
       </div>
     </div>
@@ -1367,87 +1207,6 @@
   </div>
 </div>
 
-<!-- Edit Staff Modal -->
-<div class="modal fade" id="editStaffModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit Petugas</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <form id="editStaffForm" enctype="multipart/form-data">
-        <input type="hidden" id="editStaffId">
-        <div class="modal-body">
-          <div class="mb-3">
-            <label class="form-label">Nama Petugas <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" id="editStaffName" name="name" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Foto Petugas</label>
-            <input type="file" class="form-control" id="editStaffPhoto" name="photo" accept="image/*">
-            <small class="text-muted">Kosongkan jika tidak ingin mengubah foto. Format: JPG, PNG, GIF. Max: 5MB</small>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Posisi <span class="text-danger">*</span></label>
-            <select class="form-control" id="editStaffPosition" name="position" required>
-              <option value="1">1 (Kiri)</option>
-              <option value="2">2 (Kanan)</option>
-            </select>
-          </div>
-          <!-- Current Photo Preview -->
-          <div class="mb-3" id="currentPhotoContainer">
-            <label class="form-label">Foto Saat Ini:</label>
-            <div>
-              <img id="currentPhoto" src="" alt="Current Photo" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #e5e7eb;">
-            </div>
-          </div>
-          <!-- New Photo Preview -->
-          <div class="mb-3" id="editImagePreviewContainer" style="display: none;">
-            <label class="form-label">Preview Foto Baru:</label>
-            <div>
-              <img id="editImagePreview" src="" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #e5e7eb;">
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-          <button type="submit" class="btn btn-primary">
-            <i class="fas fa-save me-2"></i>Simpan Perubahan
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<!-- Delete Staff Confirmation Modal -->
-<div class="modal fade" id="deleteStaffModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Konfirmasi Hapus</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <p>Apakah Anda yakin ingin menghapus petugas ini?</p>
-        <div class="alert alert-warning">
-          <i class="fas fa-info-circle me-2"></i>
-          <strong>Perhatian:</strong> Data yang dihapus tidak dapat dikembalikan.
-        </div>
-        <div id="deleteStaffInfo" class="p-3" style="background: #f8f9fa; border-radius: 8px;">
-          <!-- Staff info will be inserted here -->
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button type="button" class="btn btn-danger" id="confirmDeleteStaff">
-          <i class="fas fa-trash me-2"></i>Ya, Hapus
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- Loading Overlay -->
 <div class="loading-overlay" id="loadingOverlay">
     <div class="text-center">
@@ -1483,36 +1242,6 @@ $(document).ready(function() {
     // Description textarea character counter
     $('#descriptionTextarea').on('input', function() {
         $('#modalCharCount').text($(this).val().length);
-    });
-    
-    // Tab switching with localStorage
-    initializeTabs();
-    
-    // Load staff data when staff tab is shown
-    $('button[data-bs-target="#staff-content"]').on('shown.bs.tab', function() {
-        loadStaffList();
-    });
-    
-    // Image preview for add staff form
-    $('#staffPhoto').on('change', function() {
-        previewImage(this, '#imagePreview', '#imagePreviewContainer');
-    });
-    
-    // Image preview for edit staff form
-    $('#editStaffPhoto').on('change', function() {
-        previewImage(this, '#editImagePreview', '#editImagePreviewContainer');
-    });
-    
-    // Add staff form submit
-    $('#addStaffForm').on('submit', function(e) {
-        e.preventDefault();
-        addStaff();
-    });
-    
-    // Edit staff form submit
-    $('#editStaffForm').on('submit', function(e) {
-        e.preventDefault();
-        updateStaff();
     });
 });
 
@@ -2329,8 +2058,8 @@ function showConfirmModal(title, message, details, onConfirm) {
     if (Array.isArray(details)) {
         detailsHtml = details.map(detail => `
             <div style="display: flex; align-items: flex-start; margin-bottom: 8px;">
-                <i class="bi bi-check-circle-fill me-2" style="color: #0d6efd; font-size: 1.1rem; flex-shrink: 0;"></i>
-                <span>${detail}</span>
+                <i class="bi bi-info-circle-fill me-2" style="color: #856404; font-size: 1.1rem; flex-shrink: 0;"></i>
+                <span style="color: #856404;">${detail}</span>
             </div>
         `).join('');
     } else {
@@ -2356,276 +2085,7 @@ function hideNotification() {
     $('#successNotification').removeClass('show');
 }
 
-// ========================================
-// TAB MANAGEMENT FUNCTIONS
-// ========================================
 
-function initializeTabs() {
-    // Restore last active tab from localStorage
-    const lastTab = localStorage.getItem('layoutManagerActiveTab');
-    if (lastTab) {
-        const tabButton = document.querySelector(`button[data-bs-target="${lastTab}"]`);
-        if (tabButton) {
-            const tab = new bootstrap.Tab(tabButton);
-            tab.show();
-        }
-    }
-    
-    // Save active tab to localStorage when changed
-    document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(button => {
-        button.addEventListener('shown.bs.tab', function(e) {
-            localStorage.setItem('layoutManagerActiveTab', e.target.getAttribute('data-bs-target'));
-        });
-    });
-}
-
-// ========================================
-// STAFF MANAGEMENT FUNCTIONS
-// ========================================
-
-function loadStaffList() {
-    $.ajax({
-        url: '/api/staff',
-        method: 'GET',
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-    })
-    .done(function(response) {
-        if (response.success) {
-            renderStaffList(response.staff);
-        }
-    })
-    .fail(function() {
-        alert('Gagal memuat data petugas');
-    });
-}
-
-function renderStaffList(staffList) {
-    const container = $('#staffList');
-    const emptyState = $('#emptyStaffState');
-    
-    if (staffList.length === 0) {
-        container.empty();
-        emptyState.show();
-        return;
-    }
-    
-    emptyState.hide();
-    container.empty();
-    
-    staffList.forEach(staff => {
-        const photoUrl = staff.photo_path ? `/storage/${staff.photo_path}` : '/images/default-avatar.png';
-        const positionText = staff.position === 1 ? 'Kiri' : 'Kanan';
-        
-        const card = $(`
-            <div class="col-md-6 col-lg-4">
-                <div class="staff-card">
-                    <img src="${photoUrl}" alt="${staff.name}">
-                    <div class="staff-card-body">
-                        <div class="staff-card-name">${staff.name}</div>
-                        <div class="staff-card-position">Posisi: ${positionText}</div>
-                    </div>
-                    <div class="staff-card-actions">
-                        <button class="btn btn-sm btn-primary" onclick="openEditStaffModal(${staff.id})">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger" onclick="openDeleteStaffModal(${staff.id}, '${staff.name}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `);
-        
-        container.append(card);
-    });
-}
-
-// Initialize tabs with localStorage persistence
-function initializeTabs() {
-    // Get saved tab from localStorage
-    const savedTab = localStorage.getItem('activeLayoutTab');
-    
-    if (savedTab) {
-        // Activate saved tab
-        const tabTrigger = document.querySelector(`button[data-bs-target="${savedTab}"]`);
-        if (tabTrigger) {
-            const tab = new bootstrap.Tab(tabTrigger);
-            tab.show();
-        }
-    }
-    
-    // Save tab state when switching
-    const tabButtons = document.querySelectorAll('#layoutTabs button[data-bs-toggle="tab"]');
-    tabButtons.forEach(button => {
-        button.addEventListener('shown.bs.tab', function(event) {
-            const targetTab = event.target.getAttribute('data-bs-target');
-            localStorage.setItem('activeLayoutTab', targetTab);
-        });
-    });
-}
-
-function previewImage(input, previewSelector, containerSelector) {
-    const file = input.files[0];
-    if (file) {
-        // Validate file type
-        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-        if (!validTypes.includes(file.type)) {
-            alert('Format file tidak didukung. Gunakan JPG, PNG, atau GIF');
-            input.value = '';
-            return;
-        }
-        
-        // Validate file size (5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            alert('Ukuran file terlalu besar. Maksimal 5MB');
-            input.value = '';
-            return;
-        }
-        
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            $(previewSelector).attr('src', e.target.result);
-            $(containerSelector).show();
-        };
-        reader.readAsDataURL(file);
-    } else {
-        $(containerSelector).hide();
-    }
-}
-
-function addStaff() {
-    const formData = new FormData($('#addStaffForm')[0]);
-    
-    $('#loadingOverlay').addClass('show');
-    
-    $.ajax({
-        url: '/api/staff',
-        method: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-    })
-    .done(function(response) {
-        $('#loadingOverlay').removeClass('show');
-        if (response.success) {
-            showNotification('Petugas berhasil ditambahkan!');
-            $('#addStaffForm')[0].reset();
-            $('#imagePreviewContainer').hide();
-            loadStaffList();
-        }
-    })
-    .fail(function(xhr) {
-        $('#loadingOverlay').removeClass('show');
-        let errorMsg = 'Gagal menambahkan petugas';
-        if (xhr.responseJSON && xhr.responseJSON.message) {
-            errorMsg = xhr.responseJSON.message;
-        }
-        alert(errorMsg);
-    });
-}
-
-function openEditStaffModal(staffId) {
-    $.ajax({
-        url: '/api/staff',
-        method: 'GET',
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-    })
-    .done(function(response) {
-        if (response.success) {
-            const staff = response.staff.find(s => s.id === staffId);
-            if (staff) {
-                $('#editStaffId').val(staff.id);
-                $('#editStaffName').val(staff.name);
-                $('#editStaffPosition').val(staff.position);
-                
-                const photoUrl = staff.photo_path ? `/storage/${staff.photo_path}` : '/images/default-avatar.png';
-                $('#currentPhoto').attr('src', photoUrl);
-                $('#currentPhotoContainer').show();
-                $('#editImagePreviewContainer').hide();
-                $('#editStaffPhoto').val('');
-                
-                const modal = new bootstrap.Modal(document.getElementById('editStaffModal'));
-                modal.show();
-            }
-        }
-    });
-}
-
-function updateStaff() {
-    const staffId = $('#editStaffId').val();
-    const formData = new FormData($('#editStaffForm')[0]);
-    
-    $('#loadingOverlay').addClass('show');
-    
-    $.ajax({
-        url: `/api/staff/${staffId}`,
-        method: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        headers: { 
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-            'X-HTTP-Method-Override': 'PUT'
-        }
-    })
-    .done(function(response) {
-        $('#loadingOverlay').removeClass('show');
-        if (response.success) {
-            showNotification('Petugas berhasil diupdate!');
-            bootstrap.Modal.getInstance(document.getElementById('editStaffModal')).hide();
-            loadStaffList();
-        }
-    })
-    .fail(function(xhr) {
-        $('#loadingOverlay').removeClass('show');
-        let errorMsg = 'Gagal mengupdate petugas';
-        if (xhr.responseJSON && xhr.responseJSON.message) {
-            errorMsg = xhr.responseJSON.message;
-        }
-        alert(errorMsg);
-    });
-}
-
-function openDeleteStaffModal(staffId, staffName) {
-    $('#deleteStaffInfo').html(`
-        <strong>Nama:</strong> ${staffName}<br>
-        <strong>ID:</strong> ${staffId}
-    `);
-    
-    $('#confirmDeleteStaff').off('click').on('click', function() {
-        deleteStaff(staffId);
-    });
-    
-    const modal = new bootstrap.Modal(document.getElementById('deleteStaffModal'));
-    modal.show();
-}
-
-function deleteStaff(staffId) {
-    $('#loadingOverlay').addClass('show');
-    
-    $.ajax({
-        url: `/api/staff/${staffId}`,
-        method: 'DELETE',
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-    })
-    .done(function(response) {
-        $('#loadingOverlay').removeClass('show');
-        if (response.success) {
-            showNotification('Petugas berhasil dihapus!');
-            bootstrap.Modal.getInstance(document.getElementById('deleteStaffModal')).hide();
-            loadStaffList();
-        }
-    })
-    .fail(function(xhr) {
-        $('#loadingOverlay').removeClass('show');
-        let errorMsg = 'Gagal menghapus petugas';
-        if (xhr.responseJSON && xhr.responseJSON.message) {
-            errorMsg = xhr.responseJSON.message;
-        }
-        alert(errorMsg);
-    });
-}
 </script>
 </body>
 </html>

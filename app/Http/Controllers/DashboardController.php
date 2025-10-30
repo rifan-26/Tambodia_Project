@@ -56,7 +56,7 @@ class DashboardController extends Controller
             ->where('start_date', '<=', $currentDate)
             ->where(function($query) use ($currentDate) {
                 $query->whereNull('end_date')
-                      ->orWhere('end_date', '>', $currentDate);
+                      ->orWhere('end_date', '>=', $currentDate);  // Fixed: >= instead of >
             })
             ->where(function($query) use ($indonesianDay) {
                 $query->whereNull('day_of_week')
@@ -64,8 +64,7 @@ class DashboardController extends Controller
             })
             ->where(function($query) use ($currentTime) {
                 $query->whereNull('time')
-                      ->orWhere('time', '=', $currentTime)
-                      ->orWhere('time', '<=', $currentTime);
+                      ->orWhere('time', '<=', $currentTime);  // Fixed: Removed strict = condition
             })
             ->select('schedules.*')
             ->with('media')
@@ -136,12 +135,19 @@ class DashboardController extends Controller
         $currentTime = now()->format('H:i');
         $indonesianDay = $this->getIndonesianDay();
 
+        // Log current time for debugging
+        \Log::info('🎵 Audio Schedule Query', [
+            'current_date' => $currentDate,
+            'current_time' => $currentTime,
+            'current_day' => $indonesianDay
+        ]);
+
         $audioSchedules = \App\Models\Schedule::join('media', 'schedules.media_id', '=', 'media.id')
             ->where('media.type', 'Audio')
             ->where('start_date', '<=', $currentDate)
             ->where(function($query) use ($currentDate) {
                 $query->whereNull('end_date')
-                      ->orWhere('end_date', '>', $currentDate);
+                      ->orWhere('end_date', '>=', $currentDate);  // Fixed: >= instead of >
             })
             ->where(function($query) use ($indonesianDay) {
                 $query->whereNull('day_of_week')
@@ -149,13 +155,25 @@ class DashboardController extends Controller
             })
             ->where(function($query) use ($currentTime) {
                 $query->whereNull('time')
-                      ->orWhere('time', '=', $currentTime)
-                      ->orWhere('time', '<=', $currentTime);
+                      ->orWhere('time', '<=', $currentTime);  // Fixed: Removed strict = condition
             })
             ->select('schedules.*', 'media.name as media_name', 'media.file_path', 'media.type')
             ->orderBy('schedules.start_date', 'desc')
             ->orderBy('schedules.time', 'desc')
             ->get();
+
+        // Log query results
+        \Log::info('🎵 Audio Schedules Found', [
+            'count' => $audioSchedules->count(),
+            'schedules' => $audioSchedules->map(fn($s) => [
+                'id' => $s->id,
+                'media_name' => $s->media_name,
+                'time' => $s->time,
+                'start_date' => $s->start_date,
+                'end_date' => $s->end_date,
+                'day_of_week' => $s->day_of_week
+            ])->toArray()
+        ]);
 
         // Load media relationships
         $audioSchedules->load('media');

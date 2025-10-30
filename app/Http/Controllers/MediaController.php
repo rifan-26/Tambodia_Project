@@ -137,6 +137,7 @@ class MediaController extends Controller
             ];
             if (strtolower($request->input('jenisMedia')) === 'video') {
                 $rules['video_url'] = 'required|url|max:2048';
+                $rules['video_platform'] = 'nullable|in:youtube,tiktok,instagram,facebook,twitter';
             } else {
                 // Increase max size to 250MB to accommodate videos (and large audio/images)
                 $rules['file'] = 'required|file|max:256000'; // ~250MB
@@ -324,15 +325,22 @@ class MediaController extends Controller
             ];
             
             // Create media record with transaction to ensure data integrity
-            $media = \Illuminate\Support\Facades\DB::transaction(function() use ($request, $typeMap, $filePath, $original) {
-                return Media::create([
+            $media = \Illuminate\Support\Facades\DB::transaction(function() use ($request, $typeMap, $filePath, $original, $isVideoLink) {
+                $data = [
                     'user_id'           => Auth::id(),
                     'name'              => $request->namaFile,
                     'type'              => $typeMap[$request->jenisMedia],
                     'file_path'         => $filePath,
                     'original_filename' => $original,
                     'date'              => now()->toDateString(),
-                ]);
+                ];
+                
+                // Add video_platform for external video links
+                if ($isVideoLink && $request->filled('video_platform')) {
+                    $data['video_platform'] = $request->video_platform;
+                }
+                
+                return Media::create($data);
             });
             
             // Log the successful upload

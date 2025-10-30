@@ -8,7 +8,9 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <meta name="csrf-token" content="{{ csrf_token() }}">
+  @include('components.sweetalert2')
   @include('components.global-audio-system')
+  @include('components.confirm-delete-modal')
 </head>
 
 <style>
@@ -792,7 +794,12 @@
         </li>
         <li class="nav-item mb-1">
           <a class="nav-link" href="{{ route('layout') }}">
-            <i class="bi bi-grid-3x3"></i> Layout Manager
+            <i class="bi bi-grid-3x3"></i> Master Layout
+          </a>
+        </li>
+        <li class="nav-item mb-1">
+          <a class="nav-link" href="{{ route('staff.index') }}">
+            <i class="bi bi-people"></i> Master Profil
           </a>
         </li>
         <li class="nav-item mt-auto">
@@ -911,18 +918,10 @@
                   </audio>
                 </div>
                 
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="form-check form-switch">
-                    <input class="form-check-input auto-play-toggle" type="checkbox" 
-                           data-schedule-id="{{ $schedule->id }}"
-                           {{ $schedule->isCurrentlyActive() ? 'checked' : '' }}>
-                    <label class="form-check-label">
-                      <small>Auto Play</small>
-                    </label>
-                  </div>
+                <div class="d-flex justify-content-end align-items-center">
                   <button class="btn btn-sm btn-success play-scheduled-audio" 
                           data-schedule-id="{{ $schedule->id }}">
-                    <i class="bi bi-play-fill"></i> Play
+                    <i class="bi bi-play-fill"></i> Test Play
                   </button>
                 </div>
               </div>
@@ -968,26 +967,6 @@
       </div>
 
       <!-- Bulk Actions -->
-      <div class="bulk-actions">
-        <div class="bulk-select">
-          <div class="form-check">
-            <input class="form-check-input checkbox-enhanced" type="checkbox" value="" id="selectAll">
-            <label class="form-check-label" for="selectAll">
-              Select All
-            </label>
-          </div>
-          <span class="text-muted" id="selectedCount">0 selected</span>
-        </div>
-        <div class="bulk-buttons">
-          <button type="button" id="btnBulkShow" class="btn-bulk btn-bulk-show" title="Show selected media on landing page">
-            <i class="bi bi-eye"></i> Show
-          </button>
-          <button type="button" id="btnBulkHide" class="btn-bulk btn-bulk-hide" title="Hide selected media from landing page">
-            <i class="bi bi-eye-slash"></i> Hide
-          </button>
-        </div>
-      </div>
-
       <!-- Media Grid -->
       <div class="section-content">
         <div class="media-grid" id="mediaContainer">
@@ -1018,11 +997,7 @@
                     </div>
                   @endif
                 </div>
-                <div class="d-flex align-items-center justify-content-between">
-                  <div class="form-check">
-                    <input class="form-check-input checkbox-enhanced media-checkbox" type="checkbox" value="{{ $item->id }}" data-id="{{ $item->id }}">
-                    <label class="form-check-label">Select</label>
-                  </div>
+                <div class="d-flex align-items-center justify-content-end">
                   <div class="media-actions">
                     <button class="btn-enhanced btn-preview" data-action="preview" data-id="{{ $item->id }}" data-type="{{ $item->type }}" data-src="{{ asset('storage/' . $item->file_path) }}" data-name="{{ $item->name }}">
                       <i class="bi bi-eye"></i> Preview
@@ -1181,9 +1156,7 @@
           // Get filter type
           const filterType = btn.dataset.type;
           
-          // Clear selections when filtering
-          document.querySelectorAll('.media-checkbox').forEach(cb => cb.checked = false);
-          updateSelectedCount();
+          // Checkbox removed - no selections to clear
           
           // Fetch filtered media
           await fetchMedia({ type: filterType });
@@ -1197,9 +1170,7 @@
           const allBtn = document.querySelector('.filter-btn[data-type="all"]');
           if (allBtn) allBtn.classList.add('active');
           
-          // Clear selections
-          document.querySelectorAll('.media-checkbox').forEach(cb => cb.checked = false);
-          updateSelectedCount();
+          // Checkbox removed - no selections to clear
           
           // Fetch all media
           await fetchMedia({ type: 'all' });
@@ -1284,10 +1255,7 @@
         showLoading(false);
       }
       
-      // Bind card controls
-      container.querySelectorAll('.media-checkbox').forEach(cb => {
-        cb.addEventListener('change', updateSelectedCount);
-      });
+      // Checkbox removed - no bulk actions needed
       container.querySelectorAll('[data-action="preview"]').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const button = e.currentTarget;
@@ -1300,14 +1268,27 @@
       container.querySelectorAll('[data-action="delete"]').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           const id = e.currentTarget.dataset.id;
-          if (!confirm('Apakah Anda yakin ingin menghapus media ini?')) return;
+          const mediaItem = state.media.find(m => m.id == id);
+          const mediaName = mediaItem ? mediaItem.name : 'media ini';
           
-          await deleteMedia(id);
-          
-          // Only refresh the entire grid if there are no media items left
-          if (document.querySelectorAll('.media-card').length === 0) {
-            await refreshMedia();
-          }
+          showConfirmDeleteModal({
+            title: 'Hapus Media',
+            message: `Apakah Anda yakin ingin menghapus media <strong>"${mediaName}"</strong>?`,
+            warnings: [
+              'File media akan dihapus dari storage',
+              'Data media akan dihapus permanen dari database',
+              'Media akan hilang dari semua jadwal dan layout'
+            ],
+            confirmText: 'Ya, Hapus Media!',
+            onConfirm: async function() {
+              const success = await deleteMedia(id);
+              
+              // Auto refresh grid after successful delete
+              if (success) {
+                await refreshMedia();
+              }
+            }
+          });
         });
       });
     }
@@ -1320,12 +1301,76 @@
         preview = `<img src="${fileUrl(m.file_path)}" alt="${escapeHtml(m.name)}" class="img-fluid rounded" onerror="toast('Failed to load image', 'error')"/>`;
       } else if (m.type === 'Video') {
         const src = fileUrl(m.file_path);
-        // If YouTube URL, render iframe embed instead of <video>
-        const yt = String(src).match(/^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/i);
-        if (yt) {
-          const vid = yt[1];
-          preview = `<div class="ratio ratio-16x9"><iframe src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&playsinline=1" title="${escapeHtml(m.name)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="rounded"></iframe></div>`;
+        
+        // Check if it's an external video link (has video_platform)
+        if (m.video_platform) {
+          // External video from social media
+          const platform = m.video_platform;
+          
+          if (platform === 'youtube') {
+            // YouTube embed
+            const yt = String(m.file_path).match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]{11})/i);
+            if (yt) {
+              const vid = yt[1];
+              preview = `<div class="ratio ratio-16x9"><iframe src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&playsinline=1" title="${escapeHtml(m.name)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="rounded"></iframe></div>`;
+            } else {
+              preview = `<div class="p-3 text-center text-muted"><i class="bi bi-youtube text-danger" style="font-size: 3rem;"></i><div class="mt-2">YouTube Video</div><small>${escapeHtml(m.name)}</small></div>`;
+            }
+          } else if (platform === 'tiktok') {
+            // TikTok - Show video-like preview with play overlay
+            // Note: TikTok doesn't allow autoplay embed, so we show a preview card
+            preview = `<div class="video-preview-card" style="position: relative; background: #000; border-radius: 8px; overflow: hidden; aspect-ratio: 9/16; max-height: 400px;">
+              <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(238,29,82,0.3)); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;">
+                <i class="bi bi-tiktok" style="font-size: 4rem; margin-bottom: 1rem;"></i>
+                <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 0.5rem;">TikTok Video</div>
+                <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 1rem; padding: 0 20px; text-align: center;">${escapeHtml(m.name)}</div>
+                <div style="background: rgba(255,255,255,0.2); padding: 8px 20px; border-radius: 20px; font-size: 0.85rem;">
+                  <i class="bi bi-play-fill me-1"></i> Klik Preview untuk memutar
+                </div>
+              </div>
+            </div>`;
+          } else if (platform === 'instagram') {
+            // Instagram - Show video-like preview with play overlay
+            preview = `<div class="video-preview-card" style="position: relative; background: #000; border-radius: 8px; overflow: hidden; aspect-ratio: 1/1; max-height: 400px;">
+              <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(131,58,180,0.7), rgba(253,29,29,0.5), rgba(252,175,69,0.3)); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;">
+                <i class="bi bi-instagram" style="font-size: 4rem; margin-bottom: 1rem;"></i>
+                <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 0.5rem;">Instagram Video</div>
+                <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 1rem; padding: 0 20px; text-align: center;">${escapeHtml(m.name)}</div>
+                <div style="background: rgba(255,255,255,0.2); padding: 8px 20px; border-radius: 20px; font-size: 0.85rem;">
+                  <i class="bi bi-play-fill me-1"></i> Klik Preview untuk memutar
+                </div>
+              </div>
+            </div>`;
+          } else if (platform === 'facebook') {
+            // Facebook - Show video-like preview with play overlay
+            preview = `<div class="video-preview-card" style="position: relative; background: #000; border-radius: 8px; overflow: hidden; aspect-ratio: 16/9;">
+              <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(24,119,242,0.7), rgba(12,99,212,0.5)); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;">
+                <i class="bi bi-facebook" style="font-size: 4rem; margin-bottom: 1rem;"></i>
+                <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 0.5rem;">Facebook Video</div>
+                <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 1rem; padding: 0 20px; text-align: center;">${escapeHtml(m.name)}</div>
+                <div style="background: rgba(255,255,255,0.2); padding: 8px 20px; border-radius: 20px; font-size: 0.85rem;">
+                  <i class="bi bi-play-fill me-1"></i> Klik Preview untuk memutar
+                </div>
+              </div>
+            </div>`;
+          } else if (platform === 'twitter') {
+            // Twitter - Show video-like preview with play overlay
+            preview = `<div class="video-preview-card" style="position: relative; background: #000; border-radius: 8px; overflow: hidden; aspect-ratio: 16/9;">
+              <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(29,161,242,0.7), rgba(12,133,208,0.5)); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;">
+                <i class="bi bi-twitter" style="font-size: 4rem; margin-bottom: 1rem;"></i>
+                <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 0.5rem;">Twitter Video</div>
+                <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 1rem; padding: 0 20px; text-align: center;">${escapeHtml(m.name)}</div>
+                <div style="background: rgba(255,255,255,0.2); padding: 8px 20px; border-radius: 20px; font-size: 0.85rem;">
+                  <i class="bi bi-play-fill me-1"></i> Klik Preview untuk memutar
+                </div>
+              </div>
+            </div>`;
+          } else {
+            // Unknown platform
+            preview = `<div class="p-3 text-center text-muted"><i class="bi bi-link-45deg" style="font-size: 3rem;"></i><div class="mt-2">External Video</div><small>${escapeHtml(m.name)}</small></div>`;
+          }
         } else {
+          // Uploaded video file
           const mime = guessMimeFromPath(m.file_path, 'video/mp4');
           preview = `<video class="w-100 rounded" controls preload="metadata" autoplay muted playsinline onerror="toast('Failed to load video', 'error')">
             <source src="${src}" type="${mime}">
@@ -1361,11 +1406,7 @@
           <div class="media-card-body">
             <div class="media-date"><i class="bi bi-calendar3 me-1"></i>${created || '-'}</div>
             <div class="media-preview">${preview}</div>
-            <div class="d-flex align-items-center justify-content-between">
-              <div class="form-check">
-                <input class="form-check-input checkbox-enhanced media-checkbox" type="checkbox" value="${m.id}" data-id="${m.id}">
-                <label class="form-check-label">Select</label>
-              </div>
+            <div class="d-flex align-items-center justify-content-end">
               <div class="media-actions">
                 <button class="btn-enhanced btn-preview" data-action="preview" data-id="${m.id}" data-type="${m.type}" data-src="${fileUrl(m.file_path)}" data-name="${escapeHtml(m.name)}">
                   <i class="bi bi-eye"></i> Preview
@@ -1677,8 +1718,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-      initSelectAllHandlers();
-      initBulkButtons();
+      // Select All and Bulk Actions removed - simplified UI
       initFilterButtons();
       await fetchMedia({});
     });
@@ -1827,7 +1867,7 @@
     let audioScheduleCheckInterval;
     let currentlyPlayingAudio = null;
     let audioQueue = [];
-    let isAutoPlayEnabled = false;
+    // Audio is always auto-play enabled by default
 
     // Initialize audio scheduling system
     function initAudioSchedulingSystem() {
@@ -1989,35 +2029,11 @@
         });
       });
 
-      // Initialize auto-play toggles
-      document.querySelectorAll('.auto-play-toggle').forEach(toggle => {
-        toggle.addEventListener('change', function() {
-          const scheduleId = this.dataset.scheduleId;
-          isAutoPlayEnabled = this.checked;
-          
-          console.log(`🔄 Auto-play ${isAutoPlayEnabled ? 'enabled' : 'disabled'} for schedule ${scheduleId}`);
-          
-          if (isAutoPlayEnabled) {
-            // Start checking for active schedules more frequently
-            if (audioScheduleCheckInterval) {
-              clearInterval(audioScheduleCheckInterval);
-            }
-            audioScheduleCheckInterval = setInterval(checkAudioSchedules, 10000); // Every 10 seconds
-            checkAudioSchedules(); // Check immediately
-          } else {
-            // Stop any currently playing audio
-            if (currentlyPlayingAudio) {
-              currentlyPlayingAudio.element.pause();
-              currentlyPlayingAudio = null;
-            }
-            // Reset to normal checking interval
-            if (audioScheduleCheckInterval) {
-              clearInterval(audioScheduleCheckInterval);
-            }
-            audioScheduleCheckInterval = setInterval(checkAudioSchedules, 30000); // Every 30 seconds
-          }
-        });
-      });
+      // Audio is always auto-play enabled - no toggle needed
+      // Start checking for active schedules automatically
+      console.log('🎵 Audio auto-play is always enabled');
+      audioScheduleCheckInterval = setInterval(checkAudioSchedules, 10000); // Every 10 seconds
+      checkAudioSchedules(); // Check immediately on page load
     }
 
     async function refreshAudioSchedules() {
