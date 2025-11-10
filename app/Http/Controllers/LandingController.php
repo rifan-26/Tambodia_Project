@@ -11,6 +11,36 @@ class LandingController extends Controller
 {
     public function index()
     {
+        // Check if there's an active template
+        $activeTemplate = \App\Models\LayoutTemplate::active()->first();
+        
+        if ($activeTemplate) {
+            // Use template-based rendering
+            return $this->renderWithTemplate($activeTemplate);
+        }
+        
+        // Fallback to default layout
+        return $this->renderDefaultLayout();
+    }
+
+    /**
+     * Render landing page with active template
+     */
+    private function renderWithTemplate($template)
+    {
+        // Get active staff
+        $staff = \App\Models\Staff::where('is_active', true)
+            ->orderBy('position', 'asc')
+            ->get();
+
+        return view('landingpage-template', compact('template', 'staff'));
+    }
+
+    /**
+     * Render default landing page layout
+     */
+    private function renderDefaultLayout()
+    {
         // Get active schedules
         $activeSchedules = $this->getActiveSchedule();
         $scheduledMedia = $this->getScheduledMedia($activeSchedules);

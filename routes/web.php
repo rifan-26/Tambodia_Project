@@ -40,6 +40,28 @@ Route::middleware(['auth'])->group(function () {
     
     // ===== DASHBOARD ROUTES =====
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.pegawai');
+    // Alias untuk backward compatibility
+    Route::redirect('/home', '/dashboard')->name('dashboard');
+    
+    // ===== TEMPLATE MANAGEMENT ROUTES =====
+    Route::prefix('admin/templates')->name('templates.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\TemplateController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\TemplateController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\TemplateController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [\App\Http\Controllers\TemplateController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [\App\Http\Controllers\TemplateController::class, 'update'])->name('update');
+        Route::delete('/{id}', [\App\Http\Controllers\TemplateController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/activate', [\App\Http\Controllers\TemplateController::class, 'activate'])->name('activate');
+        Route::post('/{id}/duplicate', [\App\Http\Controllers\TemplateController::class, 'duplicate'])->name('duplicate');
+    });
+    
+    // Template API routes
+    Route::post('/api/templates/upload-image', [\App\Http\Controllers\TemplateController::class, 'uploadImage'])->name('api.templates.upload-image');
+    
+    // Template Builder Component Route
+    Route::get('/components/template-builder-content', function () {
+        return view('components.template-builder-content');
+    })->name('components.builder');
     Route::get('/input', [MediaController::class, 'index'])->name('media.input');
     Route::post('/media', [MediaController::class, 'store'])->name('media.store');
     Route::delete('/media/{id}', [MediaController::class, 'destroy'])->name('media.destroy');
@@ -50,7 +72,13 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/schedule/{id}', [ScheduleController::class, 'update'])->name('schedule.update');
     Route::get('/schedule/{id}', [ScheduleController::class, 'show'])->name('schedule.show');
     Route::delete('/schedule/{id}', [ScheduleController::class, 'destroy'])->name('schedule.destroy');
-    Route::get('/layout', [LayoutController_clean::class, 'index'])->name('layout');
+    // Master Layout - Dashboard Style
+    Route::get('/layout', function() {
+        return view('master-layout');
+    })->name('layout');
+    
+    // Old layout manager (backup)
+    Route::get('/layout/old', [LayoutController_clean::class, 'index'])->name('layout.old');
     Route::post('/layout/update', [LayoutController_clean::class, 'updateLayoutSettings'])->name('layout.update');
     Route::post('/layout/background', [LayoutController_clean::class, 'updateBackground'])->name('layout.background');
     Route::post('/layout/description', [LayoutController_clean::class, 'updateDescription'])->name('layout.description');
@@ -66,6 +94,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/api/staff', [LayoutController_clean::class, 'storeStaff'])->name('api.staff.store');
     Route::post('/api/staff/{id}', [LayoutController_clean::class, 'updateStaff'])->name('api.staff.update');
     Route::post('/api/staff/{id}/delete', [LayoutController_clean::class, 'deleteStaff'])->name('api.staff.delete');
+    
+    // Template API routes
+    Route::get('/api/layout/templates', [LayoutController_clean::class, 'getTemplates'])->name('api.layout.templates');
+    Route::post('/api/layout/save-template', [LayoutController_clean::class, 'saveAsTemplate'])->name('api.layout.save-template');
+    Route::get('/api/layout/load-template/{id}', [LayoutController_clean::class, 'loadTemplate'])->name('api.layout.load-template');
+    Route::delete('/api/layout/delete-template/{id}', [LayoutController_clean::class, 'deleteTemplate'])->name('api.layout.delete-template');
     
     // Staff Names API routes
     Route::get('/api/staff-names', [LayoutController_clean::class, 'getStaffNames'])->name('api.staff-names.get');

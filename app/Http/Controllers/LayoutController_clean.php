@@ -701,4 +701,114 @@ class LayoutController_clean extends Controller
             ], 500);
         }
     }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // TEMPLATE MANAGEMENT METHODS
+    // ═══════════════════════════════════════════════════════════════════════
+
+    /**
+     * Get all saved templates
+     */
+    public function getTemplates()
+    {
+        $templates = \App\Models\LayoutTemplate::with('creator')
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'templates' => $templates
+        ]);
+    }
+
+    /**
+     * Save current layout as template
+     */
+    public function saveAsTemplate(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'background_media_id' => 'nullable|exists:media,id',
+                'grid_positions' => 'nullable|array',
+                'layout_description' => 'nullable|string'
+            ]);
+
+            $template = new \App\Models\LayoutTemplate();
+            $template->name = $validated['name'];
+            $template->background_media_id = $validated['background_media_id'] ?? null;
+            $template->grid_positions = $validated['grid_positions'] ?? [];
+            $template->layout_description = $validated['layout_description'] ?? null;
+            $template->is_active = false;
+            $template->created_by = Auth::id();
+            $template->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Template berhasil disimpan',
+                'template' => $template
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan template: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Load template by ID
+     */
+    public function loadTemplate($id)
+    {
+        try {
+            $template = \App\Models\LayoutTemplate::with(['backgroundMedia'])->findOrFail($id);
+            
+            // Get grid media
+            $gridMedia = [];
+            if ($template->grid_positions) {
+                foreach ($template->grid_positions as $position => $mediaId) {
+                    if ($mediaId) {
+                        $media = Media::find($mediaId);
+                        if ($media) {
+                            $gridMedia[$position] = $media;
+                        }
+                    }
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'template' => $template,
+                'grid_media' => $gridMedia
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Template tidak ditemukan'
+            ], 404);
+        }
+    }
+
+    /**
+     * Delete template
+     */
+    public function deleteTemplate($id)
+    {
+        try {
+            $template = \App\Models\LayoutTemplate::findOrFail($id);
+            $template->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Template berhasil dihapus'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus template'
+            ], 500);
+        }
+    }
+
 }
