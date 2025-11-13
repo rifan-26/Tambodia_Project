@@ -72,10 +72,9 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/schedule/{id}', [ScheduleController::class, 'update'])->name('schedule.update');
     Route::get('/schedule/{id}', [ScheduleController::class, 'show'])->name('schedule.show');
     Route::delete('/schedule/{id}', [ScheduleController::class, 'destroy'])->name('schedule.destroy');
-    // Master Layout - Dashboard Style
-    Route::get('/layout', function() {
-        return view('master-layout');
-    })->name('layout');
+    // Master Layout
+    Route::get('/layout', [LayoutController_clean::class, 'index'])->name('layout');
+    Route::get('/layout/index', [LayoutController_clean::class, 'index'])->name('layout.index');
     
     // Old layout manager (backup)
     Route::get('/layout/old', [LayoutController_clean::class, 'index'])->name('layout.old');
@@ -93,7 +92,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/staff', [LayoutController_clean::class, 'getStaff'])->name('api.staff.get');
     Route::post('/api/staff', [LayoutController_clean::class, 'storeStaff'])->name('api.staff.store');
     Route::post('/api/staff/{id}', [LayoutController_clean::class, 'updateStaff'])->name('api.staff.update');
+    Route::post('/api/staff/{id}/toggle-status', [LayoutController_clean::class, 'toggleStaffStatus'])->name('api.staff.toggle-status');
     Route::post('/api/staff/{id}/delete', [LayoutController_clean::class, 'deleteStaff'])->name('api.staff.delete');
+    
+    // Staff Names API routes
+    Route::get('/api/staff-names', [LayoutController_clean::class, 'getStaffNames'])->name('api.staff-names.get');
+    Route::post('/api/staff-names', [LayoutController_clean::class, 'storeStaffName'])->name('api.staff-names.store');
+    Route::delete('/api/staff-names', [LayoutController_clean::class, 'deleteStaffName'])->name('api.staff-names.delete');
     
     // Template API routes
     Route::get('/api/layout/templates', [LayoutController_clean::class, 'getTemplates'])->name('api.layout.templates');

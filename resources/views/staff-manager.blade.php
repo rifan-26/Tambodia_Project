@@ -307,6 +307,15 @@
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   }
 
+  .staff-card.inactive-staff {
+    opacity: 0.6;
+    background: #f8f9fa;
+  }
+
+  .staff-card.inactive-staff .staff-photo {
+    filter: grayscale(100%);
+  }
+
   .staff-photo {
     width: 120px;
     height: 160px;
@@ -508,6 +517,19 @@
     color: #1f9e76 !important;
   }
 
+  /* Delete button styling */
+  .btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+    transition: all 0.2s ease;
+  }
+
+  .btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: white;
+    transform: scale(1.05);
+  }
+
   /* Select2 with input-group */
   .input-group .select2-container {
     flex: 1 1 auto;
@@ -607,6 +629,32 @@
     border-color: #1f9e76;
     border-right-color: transparent;
   }
+
+  /* Custom Toggle Switch - Green Theme */
+  .form-check-input.toggle-staff-status {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    transition: all 0.3s ease;
+  }
+
+  .form-check-input.toggle-staff-status:checked {
+    background-color: #1f9e76;
+    border-color: #1f9e76;
+  }
+
+  .form-check-input.toggle-staff-status:focus {
+    border-color: #1f9e76;
+    box-shadow: 0 0 0 0.25rem rgba(31, 158, 118, 0.25);
+  }
+
+  .form-check-input.toggle-staff-status:hover {
+    cursor: pointer;
+  }
+
+  .form-check-input.toggle-staff-status:checked:hover {
+    background-color: #16a085;
+    border-color: #16a085;
+  }
 </style>
 
 <body>
@@ -689,7 +737,7 @@
             <div class="mb-3">
               <label class="form-label">Nama Petugas</label>
               <div class="input-group">
-                <select class="form-control" name="name" id="staffNameSelect" required>
+                <select class="form-control" name="name" id="staffNameSelect" required style="flex: 1;">
                   <option value="">Pilih Nama Petugas</option>
                   <option value="Ahmad Fauzi">Ahmad Fauzi</option>
                   <option value="Budi Santoso">Budi Santoso</option>
@@ -712,11 +760,14 @@
                   <option value="Siti Nurhaliza">Siti Nurhaliza</option>
                   <option value="Taufik Hidayat">Taufik Hidayat</option>
                 </select>
+                <button type="button" class="btn btn-outline-danger" id="btnDeleteName" title="Hapus nama dari daftar" style="display: none;">
+                  <i class="bi bi-trash"></i>
+                </button>
                 <button type="button" class="btn btn-outline-primary" id="btnAddNewName" title="Tambah nama baru ke daftar">
                   <i class="bi bi-plus-lg"></i>
                 </button>
               </div>
-              <small class="text-muted">Pilih dari dropdown atau tambah nama baru</small>
+              <small class="text-muted">Pilih dari dropdown, hapus nama yang tidak diperlukan, atau tambah nama baru</small>
             </div>
           </div>
           <div class="col-md-4">
@@ -797,7 +848,7 @@
             <div class="mb-3">
               <label class="form-label">Nama Petugas</label>
               <div class="input-group">
-                <select class="form-control" name="name" id="editNameSelect" required>
+                <select class="form-control" name="name" id="editNameSelect" required style="flex: 1;">
                   <option value="">Pilih Nama Petugas</option>
                   <option value="Ahmad Fauzi">Ahmad Fauzi</option>
                   <option value="Budi Santoso">Budi Santoso</option>
@@ -820,11 +871,14 @@
                   <option value="Siti Nurhaliza">Siti Nurhaliza</option>
                   <option value="Taufik Hidayat">Taufik Hidayat</option>
                 </select>
+                <button type="button" class="btn btn-outline-danger" id="btnDeleteNameEdit" title="Hapus nama dari daftar" style="display: none;">
+                  <i class="bi bi-trash"></i>
+                </button>
                 <button type="button" class="btn btn-outline-primary" id="btnEditAddNewName" title="Tambah nama baru ke daftar">
                   <i class="bi bi-plus-lg"></i>
                 </button>
               </div>
-              <small class="text-muted">Pilih dari dropdown atau tambah nama baru</small>
+              <small class="text-muted">Pilih dari dropdown, hapus nama yang tidak diperlukan, atau tambah nama baru</small>
             </div>
             <div class="mb-3">
               <label class="form-label">Posisi</label>
@@ -847,7 +901,7 @@
     </div>
   </div>
 
-  <!-- Confirm Delete Modal (Bootstrap Modal seperti di Master Layout) -->
+  <!-- Confirm Delete Staff Modal -->
   <div class="modal fade" id="confirmDeleteModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
@@ -877,6 +931,43 @@
             <i class="bi bi-x-circle me-1"></i> Batal
           </button>
           <button type="button" class="btn btn-danger" id="confirmDeleteYes" style="padding: 10px 30px; border-radius: 8px;">
+            <i class="bi bi-trash me-1"></i> Ya, Hapus!
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Delete Name Modal -->
+  <div class="modal fade" id="confirmDeleteNameModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+        <div class="modal-header" style="border-bottom: 1px solid #e9ecef; padding: 20px 25px;">
+          <h5 class="modal-title" style="font-weight: 600; color: #dc3545;">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Konfirmasi Hapus Nama
+          </h5>
+        </div>
+        <div class="modal-body" style="padding: 25px;">
+          <div id="confirmDeleteNameMessage" style="font-size: 1rem; color: #495057; margin-bottom: 20px;">
+            <!-- Message will be inserted here -->
+          </div>
+          <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+            <div style="display: flex; align-items: flex-start; margin-bottom: 8px;">
+              <i class="bi bi-info-circle-fill me-2" style="color: #856404; font-size: 1.1rem; flex-shrink: 0;"></i>
+              <span style="color: #856404;">Nama akan dihapus dari daftar dropdown</span>
+            </div>
+            <div style="display: flex; align-items: flex-start;">
+              <i class="bi bi-info-circle-fill me-2" style="color: #856404; font-size: 1.1rem; flex-shrink: 0;"></i>
+              <span style="color: #856404;">Data ini tidak dapat dikembalikan</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer" style="border-top: 1px solid #e9ecef; padding: 15px 25px; gap: 10px;">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="padding: 10px 25px; border-radius: 8px;">
+            <i class="bi bi-x-circle me-1"></i> Batal
+          </button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteNameYes" style="padding: 10px 30px; border-radius: 8px;">
             <i class="bi bi-trash me-1"></i> Ya, Hapus!
           </button>
         </div>
@@ -952,6 +1043,49 @@
       });
     }
 
+    // Attach event listeners to toggle switches
+    function attachToggleListeners() {
+      document.querySelectorAll('.toggle-staff-status').forEach(toggle => {
+        toggle.addEventListener('change', async function(e) {
+          const staffId = parseInt(this.getAttribute('data-staff-id'));
+          const isActive = this.checked;
+          
+          console.log('Toggle status for staff ID:', staffId, 'to', isActive);
+          
+          try {
+            showLoading();
+            
+            const response = await fetch(`/api/staff/${staffId}/toggle-status`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+              },
+              body: JSON.stringify({ is_active: isActive })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+              toast(`Petugas berhasil ${isActive ? 'diaktifkan' : 'dinonaktifkan'}`);
+              loadStaff(); // Reload to update UI
+            } else {
+              toast(data.message || 'Gagal mengubah status', 'error');
+              // Revert toggle
+              this.checked = !isActive;
+            }
+          } catch (error) {
+            console.error('Error toggling status:', error);
+            toast('Terjadi kesalahan', 'error');
+            // Revert toggle
+            this.checked = !isActive;
+          } finally {
+            hideLoading();
+          }
+        });
+      });
+    }
+
     // Load staff data
     async function loadStaff() {
       try {
@@ -970,10 +1104,20 @@
             // Escape HTML entities in name
             const safeName = staff.name.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
             return `
-              <div class="staff-card">
+              <div class="staff-card ${staff.is_active ? '' : 'inactive-staff'}">
                 <img src="/storage/${staff.photo_path}" alt="${staff.name}" class="staff-photo" onerror="this.src='/img/placeholder.png'">
                 <div class="staff-name">${staff.name}</div>
                 <div class="staff-position">${staff.position === 1 ? 'Kiri' : 'Kanan'}</div>
+                <div class="staff-status mb-2">
+                  <div class="form-check form-switch d-flex justify-content-center align-items-center">
+                    <input class="form-check-input toggle-staff-status" type="checkbox" role="switch" 
+                           data-staff-id="${staff.id}" ${staff.is_active ? 'checked' : ''} 
+                           style="cursor: pointer; width: 3em; height: 1.5em;">
+                    <label class="form-check-label ms-2" style="font-size: 0.85rem; color: ${staff.is_active ? '#1f9e76' : '#6c757d'};">
+                      ${staff.is_active ? 'Aktif' : 'Nonaktif'}
+                    </label>
+                  </div>
+                </div>
                 <div class="staff-actions">
                   <button class="btn btn-sm btn-primary btn-edit-staff" data-staff-id="${staff.id}" type="button">
                     <i class="bi bi-pencil"></i> Edit
@@ -988,6 +1132,7 @@
           
           // Attach event listeners to buttons using event delegation
           attachStaffButtonListeners();
+          attachToggleListeners();
         }
         
         console.log(`Loaded ${data.staff ? data.staff.length : 0} staff members`);
@@ -1008,23 +1153,29 @@
         const response = await fetch('/api/staff', {
           method: 'POST',
           headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
           },
           body: formData
         });
         
         const data = await response.json();
         
+        console.log('Response status:', response.status);
+        console.log('Response data:', data);
+        
         if (data.success) {
           toast('Petugas berhasil ditambahkan');
           e.target.reset();
+          $('#staffNameSelect').val(null).trigger('change');
           loadStaff();
         } else {
-          toast(data.message || 'Gagal menambahkan petugas', 'error');
+          console.error('Error response:', data);
+          toast(data.message || data.error || 'Gagal menambahkan petugas', 'error');
         }
       } catch (error) {
         console.error('Error adding staff:', error);
-        toast('Terjadi kesalahan', 'error');
+        toast('Terjadi kesalahan: ' + error.message, 'error');
       } finally {
         hideLoading();
       }
@@ -1164,7 +1315,7 @@
       const newNameInput = document.getElementById('newNameInput');
       const btnSaveNewName = document.getElementById('btnSaveNewName');
       
-      // Initialize Select2 with search
+      // Initialize Select2 (simple, no custom template)
       function initializeSelect2() {
         $('#staffNameSelect').select2({
           theme: 'bootstrap-5',
@@ -1194,6 +1345,44 @@
             searching: function() {
               return 'Mencari...';
             }
+          }
+        });
+        
+        // Show/hide delete button based on selection
+        $('#staffNameSelect').on('select2:select', function(e) {
+          const selectedName = e.params.data.text;
+          if (selectedName && selectedName !== '') {
+            $('#btnDeleteName').data('selected-name', selectedName).show();
+          }
+        });
+        
+        $('#staffNameSelect').on('select2:clear select2:unselect', function() {
+          $('#btnDeleteName').hide();
+        });
+        
+        $('#editNameSelect').on('select2:select', function(e) {
+          const selectedName = e.params.data.text;
+          if (selectedName && selectedName !== '') {
+            $('#btnDeleteNameEdit').data('selected-name', selectedName).show();
+          }
+        });
+        
+        $('#editNameSelect').on('select2:clear select2:unselect', function() {
+          $('#btnDeleteNameEdit').hide();
+        });
+        
+        // Handle delete button clicks
+        $('#btnDeleteName').on('click', function() {
+          const name = $(this).data('selected-name');
+          if (name) {
+            deleteStaffName(name);
+          }
+        });
+        
+        $('#btnDeleteNameEdit').on('click', function() {
+          const name = $(this).data('selected-name');
+          if (name) {
+            deleteStaffName(name);
           }
         });
 
@@ -1342,6 +1531,103 @@
         });
       }
     });
+
+    // Delete staff name from dropdown
+    window.deleteStaffName = async function(name) {
+      console.log('Delete name clicked:', name);
+      
+      // Check if name is being used by any staff
+      try {
+        const response = await fetch('/api/staff');
+        const data = await response.json();
+        
+        if (data.success && data.staff) {
+          const isUsed = data.staff.some(staff => staff.name === name);
+          
+          if (isUsed) {
+            toast('Nama ini sedang digunakan oleh petugas. Hapus petugas terlebih dahulu.', 'error');
+            return;
+          }
+        }
+        
+        // Show confirmation modal
+        document.getElementById('confirmDeleteNameMessage').innerHTML = 
+          `Apakah Anda yakin ingin menghapus nama <strong>"${name}"</strong> dari daftar?`;
+        
+        // Remove old event handlers and add new one
+        const confirmBtn = document.getElementById('confirmDeleteNameYes');
+        const newConfirmBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+        
+        newConfirmBtn.addEventListener('click', function() {
+          const modal = bootstrap.Modal.getInstance(document.getElementById('confirmDeleteNameModal'));
+          modal.hide();
+          executeDeleteName(name);
+        });
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('confirmDeleteNameModal'));
+        modal.show();
+      } catch (error) {
+        console.error('Error checking staff:', error);
+        toast('Terjadi kesalahan saat memeriksa data', 'error');
+      }
+    };
+    
+    // Execute delete name
+    async function executeDeleteName(name) {
+      showLoading();
+      
+      try {
+        // Delete from database
+        const deleteResponse = await fetch('/api/staff-names', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+          },
+          body: JSON.stringify({ name: name })
+        });
+        
+        const deleteData = await deleteResponse.json();
+        
+        if (deleteData.success) {
+          toast('Nama berhasil dihapus dari daftar');
+          
+          // Hide delete buttons
+          $('#btnDeleteName').hide();
+          $('#btnDeleteNameEdit').hide();
+          
+          // Reload names from database
+          const loadResponse = await fetch('/api/staff-names');
+          const loadData = await loadResponse.json();
+          
+          if (loadData.success && loadData.names) {
+            // Clear and reload both selects
+            $('#staffNameSelect').empty().append('<option value="">Pilih atau cari nama petugas</option>');
+            $('#editNameSelect').empty().append('<option value="">Pilih atau cari nama petugas</option>');
+            
+            loadData.names.forEach(nameObj => {
+              const option1 = new Option(nameObj.name, nameObj.name, false, false);
+              const option2 = new Option(nameObj.name, nameObj.name, false, false);
+              $('#staffNameSelect').append(option1);
+              $('#editNameSelect').append(option2);
+            });
+            
+            // Trigger Select2 to update
+            $('#staffNameSelect').trigger('change');
+            $('#editNameSelect').trigger('change');
+          }
+        } else {
+          toast(deleteData.message || 'Gagal menghapus nama', 'error');
+        }
+      } catch (error) {
+        console.error('Error deleting name:', error);
+        toast('Terjadi kesalahan saat menghapus nama', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
   </script>
 </body>
 </html>

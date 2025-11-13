@@ -10,7 +10,7 @@
 
 
 
-- [ ] 2. Implement CSS grid system and aspect ratios
+- [-] 2. Implement CSS grid system and aspect ratios
   - [ ] 2.1 Create CSS grid container with 2x2 layout
     - Write CSS Grid properties for the main container
     - Define grid-template-columns and grid-template-rows
@@ -26,7 +26,7 @@
     - Add fallback aspect ratio techniques for older browsers
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
   
-  - [ ] 2.3 Position sections according to specified layout
+  - [x] 2.3 Position sections according to specified layout
     - Place 9:16 section in row 1, column 1 (Layout Section 1)
 
 

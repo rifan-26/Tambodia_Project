@@ -913,53 +913,58 @@
     event.preventDefault();
     const button = this;
     const adminId = button.dataset.id;
+    const adminName = button.closest('tr').querySelector('td:nth-child(3)')?.textContent || 'admin ini';
     
     if (!adminId) {
       showNotification('ID admin tidak valid.', 'error');
       return;
     }
     
-    const konfirmasi = confirm("Apakah Anda yakin ingin menghapus admin ini?");
-    if (konfirmasi) {
-      // Hapus via AJAX agar tidak redirect ke JSON
-      fetch(`{{ url('/admin') }}/${adminId}`, {
-        method: 'DELETE',
-        headers: {
-          'X-CSRF-TOKEN': csrfToken,
-          'X-Requested-With': 'XMLHttpRequest',
-          'Accept': 'application/json'
-        }
-      })
-      .then(async (response) => {
-        let data = {};
-        try { data = await response.json(); } catch (_) {}
-        if (!response.ok || data.success === false) {
-          throw new Error(data.message || 'Gagal menghapus admin');
-        }
-        // Hapus baris dari tabel
-        const row = document.querySelector(`tr[data-id="${adminId}"]`);
-        if (row) {
-          row.remove();
-          // Re-index sequence numbers
-          const tableBody = document.querySelector('table tbody');
-          const rows = tableBody.querySelectorAll('tr');
-          if (rows.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="7" class="text-center">Tidak ada data admin</td></tr>';
-          } else {
-            let idx = 1;
-            rows.forEach(tr => {
-              const firstCell = tr.querySelector('td');
-              if (firstCell) firstCell.textContent = idx++;
-            });
+    // Gunakan modal konfirmasi seperti di Dashboard
+    showConfirmDeleteModal({
+      title: 'Hapus Admin',
+      message: `Apakah Anda yakin ingin menghapus admin <strong>"${adminName}"</strong>?`,
+      onConfirm: function() {
+        // Hapus via AJAX agar tidak redirect ke JSON
+        fetch(`{{ url('/admin') }}/${adminId}`, {
+          method: 'DELETE',
+          headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
           }
-        }
-        showNotification('Admin berhasil dihapus!');
-      })
-      .catch((err) => {
-        console.error(err);
-        showNotification(err.message || 'Terjadi kesalahan saat menghapus admin.', 'error');
-      });
-    }
+        })
+        .then(async (response) => {
+          let data = {};
+          try { data = await response.json(); } catch (_) {}
+          if (!response.ok || data.success === false) {
+            throw new Error(data.message || 'Gagal menghapus admin');
+          }
+          // Hapus baris dari tabel
+          const row = document.querySelector(`tr[data-id="${adminId}"]`);
+          if (row) {
+            row.remove();
+            // Re-index sequence numbers
+            const tableBody = document.querySelector('table tbody');
+            const rows = tableBody.querySelectorAll('tr');
+            if (rows.length === 0) {
+              tableBody.innerHTML = '<tr><td colspan="7" class="text-center">Tidak ada data admin</td></tr>';
+            } else {
+              let idx = 1;
+              rows.forEach(tr => {
+                const firstCell = tr.querySelector('td');
+                if (firstCell) firstCell.textContent = idx++;
+              });
+            }
+          }
+          showNotification('Admin berhasil dihapus!');
+        })
+        .catch((err) => {
+          console.error(err);
+          showNotification(err.message || 'Terjadi kesalahan saat menghapus admin.', 'error');
+        });
+      }
+    });
   }
 
   // Fungsi untuk pasang event di baris baru
@@ -977,5 +982,8 @@
 </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Confirm Delete Modal -->
+  @include('components.confirm-delete-modal')
 </body>
 </html>

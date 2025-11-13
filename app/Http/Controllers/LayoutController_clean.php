@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use App\Models\Media;
 use App\Models\Schedule;
@@ -500,21 +501,83 @@ class LayoutController_clean extends Controller
      */
     public function storeStaff(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
-            'position' => 'required|integer|in:1,2'
+        // Log incoming request
+        \Log::info('Store staff request received', [
+            'name' => $request->input('name'),
+            'position' => $request->input('position'),
+            'has_photo' => $request->hasFile('photo'),
+            'photo_size' => $request->hasFile('photo') ? $request->file('photo')->getSize() : null,
+            'photo_mime' => $request->hasFile('photo') ? $request->file('photo')->getMimeType() : null
         ]);
 
         try {
-            // Process and optimize image
-            $photoPath = $this->processStaffPhoto($request->file('photo'));
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // 2MB max (server limit)
+                'position' => 'required|integer|in:1,2'
+            ], [
+                'photo.required' => 'Foto petugas wajib diisi',
+                'photo.image' => 'File harus berupa gambar',
+                'photo.mimes' => 'Format foto harus: JPEG, PNG, JPG, atau GIF',
+                'photo.max' => 'Ukuran foto maksimal 2MB. Silakan compress foto terlebih dahulu menggunakan tool online seperti tinypng.com'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Staff validation failed', [
+                'errors' => $e->errors(),
+                'request_data' => $request->except('photo'),
+                'has_photo' => $request->hasFile('photo'),
+                'photo_size' => $request->hasFile('photo') ? $request->file('photo')->getSize() : null,
+                'upload_error' => $request->hasFile('photo') ? $request->file('photo')->getError() : 'No file'
+            ]);
+            
+            // Better error message
+            $errorMsg = '';
+            if (isset($e->errors()['photo'])) {
+                $photoError = $e->errors()['photo'][0];
+                if (strpos($photoError, 'failed to upload') !== false) {
+                    $errorMsg = 'Foto gagal diupload. Pastikan ukuran file maksimal 2MB. Untuk foto lebih besar, silakan compress terlebih dahulu di tinypng.com atau compressor.io';
+                } else {
+                    $errorMsg = $photoError;
+                }
+            } else {
+                $errors = [];
+                foreach ($e->errors() as $field => $messages) {
+                    $errors[] = implode(', ', $messages);
+                }
+                $errorMsg = implode('. ', $errors);
+            }
+            
+            return response()->json([
+                'success' => false,
+                'message' => $errorMsg,
+                'errors' => $e->errors()
+            ], 422);
+        }
+
+        try {
+            $file = $request->file('photo');
+            $fileSize = $file->getSize();
+            
+            // If file > 2MB, compress it. Otherwise upload directly
+            if ($fileSize > 2 * 1024 * 1024) {
+                \Log::info('Large file detected, compressing...', ['size' => $fileSize]);
+                $photoPath = $this->processStaffPhoto($file);
+            } else {
+                \Log::info('Small file, direct upload', ['size' => $fileSize]);
+                $filename = 'staff_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $photoPath = $file->storeAs('staff', $filename, 'public');
+            }
+
+            \Log::info('Staff photo uploaded', [
+                'path' => $photoPath,
+                'original_size' => $fileSize
+            ]);
 
             $staff = \App\Models\Staff::create([
                 'name' => $request->name,
                 'photo_path' => $photoPath,
                 'position' => $request->position,
-                'is_active' => true
+                'is_active' => false  // Default nonaktif untuk menghindari tabrakan
             ]);
 
             return response()->json([
@@ -523,9 +586,17 @@ class LayoutController_clean extends Controller
                 'staff' => $staff
             ]);
         } catch (\Exception $e) {
+            \Log::error('Error adding staff: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->except('photo'),
+                'has_photo' => $request->hasFile('photo')
+            ]);
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menambahkan staff: ' . $e->getMessage()
+                'message' => 'Gagal menambahkan staff: ' . $e->getMessage(),
+                'error' => $e->getMessage(),
+                'trace' => config('app.debug') ? $e->getTraceAsString() : null
             ], 500);
         }
     }
@@ -537,8 +608,12 @@ class LayoutController_clean extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // 2MB max (server limit)
             'position' => 'required|integer|in:1,2'
+        ], [
+            'photo.image' => 'File harus berupa gambar',
+            'photo.mimes' => 'Format foto harus: JPEG, PNG, JPG, atau GIF',
+            'photo.max' => 'Ukuran foto maksimal 2MB. Silakan compress foto terlebih dahulu menggunakan tool online seperti tinypng.com'
         ]);
 
         try {
@@ -549,8 +624,19 @@ class LayoutController_clean extends Controller
                 if ($staff->photo_path && \Storage::disk('public')->exists($staff->photo_path)) {
                     \Storage::disk('public')->delete($staff->photo_path);
                 }
-                // Process and optimize new image
-                $staff->photo_path = $this->processStaffPhoto($request->file('photo'));
+                
+                // Process new photo - compress if > 2MB
+                $file = $request->file('photo');
+                $fileSize = $file->getSize();
+                
+                if ($fileSize > 2 * 1024 * 1024) {
+                    \Log::info('Large file detected, compressing...', ['size' => $fileSize]);
+                    $staff->photo_path = $this->processStaffPhoto($file);
+                } else {
+                    \Log::info('Small file, direct upload', ['size' => $fileSize]);
+                    $filename = 'staff_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $staff->photo_path = $file->storeAs('staff', $filename, 'public');
+                }
             }
 
             $staff->name = $request->name;
@@ -598,32 +684,132 @@ class LayoutController_clean extends Controller
     }
 
     /**
-     * Process and optimize staff photo
-     * Resize to max 800x800px and compress to 80% quality
+     * Toggle staff active status
+     */
+    public function toggleStaffStatus(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'is_active' => 'required|boolean'
+            ]);
+
+            $staff = \App\Models\Staff::findOrFail($id);
+            $staff->is_active = $request->is_active;
+            $staff->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Status staff berhasil diubah',
+                'staff' => $staff
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengubah status: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Process and optimize staff photo using native PHP GD
+     * Resize to max 600x600px and compress to 75% quality
      * 
      * @param \Illuminate\Http\UploadedFile $file
      * @return string Path to stored file
      */
     private function processStaffPhoto($file)
     {
-        // Generate unique filename
-        $filename = 'staff_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-        $path = 'staff/' . $filename;
-        
-        // Read and process image with Intervention Image
-        $manager = \Intervention\Image\ImageManager::gd();
-        $image = $manager->read($file);
-        
-        // Resize image to max 800x800px while maintaining aspect ratio
-        $image->scale(width: 800, height: 800);
-        
-        // Encode with 80% quality
-        $encoded = $image->encodeByMediaType($file->getMimeType(), quality: 80);
-        
-        // Save to storage
-        \Storage::disk('public')->put($path, $encoded);
-        
-        return $path;
+        try {
+            // Generate unique filename - force JPG for better compression
+            $filename = 'staff_' . time() . '_' . uniqid() . '.jpg';
+            $storagePath = storage_path('app/public/staff');
+            
+            // Ensure directory exists
+            if (!file_exists($storagePath)) {
+                mkdir($storagePath, 0755, true);
+            }
+            
+            $fullPath = $storagePath . '/' . $filename;
+            
+            // Get image info
+            $imageInfo = \getimagesize($file->getRealPath());
+            $mime = $imageInfo['mime'];
+            
+            // Create image resource based on mime type
+            switch ($mime) {
+                case 'image/jpeg':
+                    $source = \imagecreatefromjpeg($file->getRealPath());
+                    break;
+                case 'image/png':
+                    $source = \imagecreatefrompng($file->getRealPath());
+                    break;
+                case 'image/gif':
+                    $source = \imagecreatefromgif($file->getRealPath());
+                    break;
+                default:
+                    throw new \Exception('Unsupported image type: ' . $mime);
+            }
+            
+            if (!$source) {
+                throw new \Exception('Failed to create image resource');
+            }
+            
+            // Get original dimensions
+            $origWidth = \imagesx($source);
+            $origHeight = \imagesy($source);
+            
+            // Calculate new dimensions (max 600x600, maintain aspect ratio)
+            $maxSize = 600;
+            if ($origWidth > $maxSize || $origHeight > $maxSize) {
+                if ($origWidth > $origHeight) {
+                    $newWidth = $maxSize;
+                    $newHeight = intval($origHeight * ($maxSize / $origWidth));
+                } else {
+                    $newHeight = $maxSize;
+                    $newWidth = intval($origWidth * ($maxSize / $origHeight));
+                }
+            } else {
+                $newWidth = $origWidth;
+                $newHeight = $origHeight;
+            }
+            
+            // Create new image
+            $resized = \imagecreatetruecolor($newWidth, $newHeight);
+            
+            // Preserve transparency for PNG
+            if ($mime === 'image/png') {
+                \imagealphablending($resized, false);
+                \imagesavealpha($resized, true);
+            }
+            
+            // Resize
+            \imagecopyresampled($resized, $source, 0, 0, 0, 0, $newWidth, $newHeight, $origWidth, $origHeight);
+            
+            // Save as JPEG with 75% quality
+            \imagejpeg($resized, $fullPath, 75);
+            
+            // Free memory
+            \imagedestroy($source);
+            \imagedestroy($resized);
+            
+            \Log::info('Staff photo processed successfully', [
+                'filename' => $filename,
+                'original_size' => $file->getSize(),
+                'original_dimensions' => "{$origWidth}x{$origHeight}",
+                'new_dimensions' => "{$newWidth}x{$newHeight}"
+            ]);
+            
+            return 'staff/' . $filename;
+            
+        } catch (\Exception $e) {
+            \Log::error('Image processing failed, using direct upload: ' . $e->getMessage());
+            
+            // Fallback: direct upload without processing
+            $filename = 'staff_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('staff', $filename, 'public');
+            
+            return $path;
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -676,10 +862,21 @@ class LayoutController_clean extends Controller
     /**
      * Delete staff name (only custom names, not default)
      */
-    public function deleteStaffName($id)
+    public function deleteStaffName(Request $request)
     {
+        $request->validate([
+            'name' => 'required|string'
+        ]);
+
         try {
-            $staffName = \App\Models\StaffName::findOrFail($id);
+            $staffName = \App\Models\StaffName::where('name', $request->name)->first();
+
+            if (!$staffName) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Nama tidak ditemukan'
+                ], 404);
+            }
 
             if ($staffName->is_default) {
                 return response()->json([

@@ -67,14 +67,14 @@
 
 - [x] 4. Buat UI untuk staff management di tab Petugas
 
-  - [ ] 4.1 Buat form untuk menambah staff baru
+  - [x] 4.1 Buat form untuk menambah staff baru
     - Tambahkan form dengan field: nama, foto, posisi
     - Implementasi file input dengan preview image
     - Tambahkan tombol submit "Tambah Petugas"
     - _Persyaratan: 2.1, 2.2, 2.3_
 
 
-  - [ ] 4.2 Implementasi staff list display
+  - [x] 4.2 Implementasi staff list display
     - Buat container untuk menampilkan daftar staff
     - Design card/list item untuk setiap staff (foto, nama, posisi)
     - Tambahkan tombol Edit dan Hapus untuk setiap staff
@@ -82,7 +82,7 @@
     - Implementasi empty state "Belum ada data petugas"
     - _Persyaratan: 3.1, 3.2, 3.3, 3.4, 3.5_
 
-  - [ ] 4.3 Buat modal untuk edit staff
+  - [x] 4.3 Buat modal untuk edit staff
     - Buat modal dengan form edit (nama, foto, posisi)
 
     - Pre-fill form dengan data staff yang akan diedit
@@ -96,14 +96,14 @@
     - _Persyaratan: 5.1, 5.2_
 
 - [ ] 5. Implementasi JavaScript untuk operasi CRUD staff
-  - [ ] 5.1 Implementasi fungsi untuk fetch dan display staff list
+  - [x] 5.1 Implementasi fungsi untuk fetch dan display staff list
     - Buat fungsi AJAX GET untuk mengambil data staff dari API
     - Render data staff ke dalam list/card
 
     - Handle loading state dan error state
     - _Persyaratan: 3.1, 3.2, 3.3_
 
-  - [ ] 5.2 Implementasi fungsi untuk add staff
+  - [x] 5.2 Implementasi fungsi untuk add staff
     - Buat fungsi untuk handle form submit add staff
     - Implementasi validasi client-side (nama required, foto required, format file)
 
@@ -123,7 +123,7 @@
     - Handle response sukses dan error
     - _Persyaratan: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-  - [ ] 5.4 Implementasi fungsi untuk delete staff
+  - [x] 5.4 Implementasi fungsi untuk delete staff
     - Buat fungsi untuk show modal konfirmasi delete
     - Handle konfirmasi delete dan kirim request ke API
 

@@ -933,6 +933,8 @@
     body {
       animation: fadeIn 0.3s ease-in;
     }
+    
+
   </style>
 </head>
 <body>
@@ -997,109 +999,10 @@
       </div>
     </div>
     
-    <!-- Gallery Content (No Tabs Needed) -->
-
-    <!-- Template Manager Section -->
-    <div class="row mb-4">
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header">
-            <h5>
-              <i class="fas fa-save me-2"></i>Template Manager
-            </h5>
-          </div>
-          <div class="card-body">
-            <div class="row">
-              <!-- Save Template -->
-              <div class="col-md-6">
-                <h6 class="mb-3"><i class="bi bi-floppy me-2"></i>Simpan Layout Saat Ini</h6>
-                <p class="text-muted small">Simpan konfigurasi layout saat ini (background + grid + deskripsi) sebagai template</p>
-                <button class="btn btn-success w-100" onclick="openSaveTemplateModal()">
-                  <i class="fas fa-save me-2"></i>Simpan sebagai Template
-                </button>
-              </div>
-
-              <!-- Load Template -->
-              <div class="col-md-6">
-                <h6 class="mb-3"><i class="bi bi-folder-open me-2"></i>Load Template Tersimpan</h6>
-                <select class="form-select mb-2" id="templateSelector">
-                  <option value="">-- Pilih Template --</option>
-                </select>
-                <div class="d-flex gap-2">
-                  <button class="btn btn-primary flex-grow-1" onclick="loadSelectedTemplate()">
-                    <i class="fas fa-download me-2"></i>Load Template
-                  </button>
-                  <button class="btn btn-danger" onclick="deleteSelectedTemplate()">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Success Notification -->
-    <div class="success-notification" id="successNotification">
-      <span id="successMessage"></span>
-      <button class="close-btn" onclick="hideNotification()">×</button>
-    </div>
-
     <!-- Gallery Content -->
     <div class="row">
-      <!-- Left Column: Background & Preview -->
-      <div class="col-lg-7">
-        <!-- Background Selector -->
-        <div class="card mb-4">
-          <div class="card-header">
-            <h5>
-              <i class="fas fa-image me-2"></i>Pilih Gambar Background
-            </h5>
-          </div>
-          <div class="card-body">
-            <div class="background-selector" id="backgroundSelector" onclick="openBackgroundModal()">
-              <i class="fas fa-cloud-upload-alt fa-4x text-primary mb-3"></i>
-              <p class="text-dark fw-bold mb-1">Klik area lalu pilih media yang ingin ditampilkan</p>
-              <p class="text-muted small">Untuk menambahkan gambar background</p>
-            </div>
-            <div class="mt-2">
-              <small class="text-success fw-bold">
-                <i class="bi bi-check-circle-fill me-1"></i> 
-                Auto-Save: Hapus background otomatis update landing page
-              </small>
-              <br>
-              <small class="text-muted mt-1 d-block">
-                <i class="bi bi-info-circle me-1"></i> 
-                Klik tombol "✕" pada background untuk menghapus, file tetap tersimpan
-              </small>
-            </div>
-          </div>
-        </div>
-
-        <!-- Preview Section -->
-        <div class="preview-section">
-          <div class="preview-title">
-            Selamat Datang Di <span class="bps">B</span><span style="color: #ff9933;">P</span><span style="color: #00cc66;">S</span> Provinsi
-          </div>
-          <div class="preview-subtitle">Sumatera Utara</div>
-          
-          <div class="description-label">
-            <i class="fas fa-align-left"></i>
-            <strong>Deskripsi Landing Page</strong>
-          </div>
-          <div class="description-content" id="previewDescription">
-            <em class="text-muted">Belum ada deskripsi. Klik tombol edit untuk menambahkan deskripsi.</em>
-          </div>
-          
-          <button class="btn btn-primary mt-3" onclick="openDescriptionModal()">
-            <i class="fas fa-edit me-2"></i>Edit Deskripsi
-          </button>
-        </div>
-      </div>
-
-      <!-- Right Column: Grid Layout -->
-      <div class="col-lg-5">
+      <!-- Grid Layout -->
+      <div class="col-lg-12">
         <div class="card">
           <div class="card-header">
             <h5>
