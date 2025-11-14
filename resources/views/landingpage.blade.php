@@ -84,11 +84,14 @@
     }
 
     .logo {
-      width: 70px;
-      height: auto;
+      width: 70px !important;
+      height: 70px !important;
+      object-fit: contain;
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
+      max-width: 70px !important;
+      max-height: 70px !important;
     }
 
     .logo-left {
@@ -110,7 +113,10 @@
     /* Responsif agar tetap di ujung dan proporsional */
     @media (min-width: 640px) {
       .logo {
-        width: 90px;
+        width: 90px !important;
+        height: 90px !important;
+        max-width: 90px !important;
+        max-height: 90px !important;
       }
 
       .title h1 {
@@ -685,11 +691,14 @@
       }
 
       .logo {
-        width: 45px;
+        width: 45px !important;
+        height: 45px !important;
+        max-width: 45px !important;
+        max-height: 45px !important;
       }
 
       .logo-left {
-        left: 10px !important;
+        left: 20px !important;
       }
 
       .logo-right {
@@ -920,7 +929,7 @@
         <div class="header">
           <div class="logos position-relative text-center">
             <!-- Logo kiri -->
-            <img src="{{ asset('img/Group 25.png') }}" alt="Logo BPS" class="logo logo-left position-absolute start-0 top-50 translate-middle-y">
+            <img src="{{ asset('img/Group 22 (1).png') }}" alt="Logo BPS" class="logo logo-left position-absolute start-0 top-50 translate-middle-y">
 
             <!-- Judul tengah -->
             <div class="title d-inline-block">
